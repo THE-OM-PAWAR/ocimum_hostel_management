@@ -107,16 +107,16 @@ export function LandingHeader() {
          </Button>
           ) : (
             <>
-              <SignInButton mode="modal">
                 <Button variant="outline">
+                <Link href="/sign-in">
                   Sign In
+                  </Link>
                 </Button>
-              </SignInButton>
-              <SignUpButton mode="modal">
                 <Button>
+                <Link href="/sign-up">
                   Get Started
+                </Link>
                 </Button>
-              </SignUpButton>
             </>
           )}
         </div>
