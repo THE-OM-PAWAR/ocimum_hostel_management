@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Home, Building2, Users, CreditCard, HelpCircle, Menu, X } from "lucide-react";
@@ -91,11 +93,18 @@ export function LandingHeader() {
         <div className="hidden md:flex items-center gap-4">
           <ThemeToggle />
           {isSignedIn ? (
-            <Button asChild>
-              <Link href="/dashboard">
-                Go to Dashboard
-              </Link>
-            </Button>
+           <Button asChild className="w-full" variant="outline">
+           <Link href="/dashboard">
+             Go to Dashboard
+             <motion.span
+                 className="ml-2"
+                 whileHover={{ x: 5 }}
+                 transition={{ duration: 0.2 }}
+               >
+                 <ArrowRight className="h-4 w-4" />
+               </motion.span>
+           </Link>
+         </Button>
           ) : (
             <>
               <SignInButton mode="modal">
@@ -147,9 +156,16 @@ export function LandingHeader() {
             </Link>
             <div className="pt-2 border-t border-border flex flex-col gap-2">
               {isSignedIn ? (
-                <Button asChild className="w-full">
+                <Button asChild className="w-full" variant="outline">
                   <Link href="/dashboard">
                     Go to Dashboard
+                    <motion.span
+                        className="ml-2"
+                        whileHover={{ x: 5 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <ArrowRight className="h-4 w-4" />
+                      </motion.span>
                   </Link>
                 </Button>
               ) : (

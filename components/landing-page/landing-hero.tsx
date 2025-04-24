@@ -125,6 +125,7 @@ export function LandingHero() {
                 <Button 
                   size="lg" 
                   className="relative overflow-hidden group" 
+                  variant="outline"
                   asChild
                 >
                   <Link href="/dashboard">
