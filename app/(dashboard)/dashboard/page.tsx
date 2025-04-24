@@ -5,11 +5,13 @@ import { motion } from "framer-motion";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { CreateBlockDialog } from "@/components/create-block-dialog";
+import { useRouter } from "next/navigation";
 
 interface BlockCardProps {
   index: number;
   name: string;
   description?: string;
+  id: string;
 }
 
 interface Block {
@@ -38,13 +40,16 @@ function CreateBlockCard({ onClick }: { onClick: () => void }) {
   );
 }
 
-function BlockCard({ index, name, description }: BlockCardProps) {
+function BlockCard({ index, name, description, id }: BlockCardProps) {
+  const router = useRouter();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
-      className="bg-card p-6 rounded-lg border shadow-sm hover:shadow-md transition-all duration-300 h-[200px] flex flex-col"
+      className="bg-card p-6 rounded-lg border shadow-sm hover:shadow-md transition-all duration-300 h-[200px] flex flex-col cursor-pointer"
+      onClick={() => router.push(`/blocks/${id}`)}
     >
       <h3 className="font-medium">{name}</h3>
       <div className="flex-1 mt-2">
@@ -122,6 +127,7 @@ export default function DashboardPage() {
             index={i}
             name={block.name}
             description={block.description}
+            id={block._id}
           />
         ))}
       </div>
