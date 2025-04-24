@@ -50,7 +50,7 @@ interface Block {
 
 export default function BlockDetailsPage() {
   const params = useParams();
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const [block, setBlock] = useState<Block | null>(null);
   const [selectedTenants, setSelectedTenants] = useState<string[]>([]);
   const [selectedRooms, setSelectedRooms] = useState<string[]>([]);
@@ -109,12 +109,13 @@ export default function BlockDetailsPage() {
 
   useEffect(() => {
     const fetchBlockDetails = async () => {
+      if (!isLoaded || !user || !params.blockId) return;
       try {
         if (!user) {
           console.error("User is not available.");
           return;
         }
-        const response = await fetch(`/api/users/${user.id}/block/${params.id}`,
+        const response = await fetch(`/api/users/${user.id}/block/${params.blockId}`,
           {
             method: "GET",
             headers: {
@@ -123,7 +124,6 @@ export default function BlockDetailsPage() {
           }
         );
         const data = await response.json();
-        console.log("Block data:", data);
         setBlock(data);
       } catch (error) {
         console.error("Error fetching block details:", error);
@@ -133,7 +133,7 @@ export default function BlockDetailsPage() {
     if (params.blockId) {
       fetchBlockDetails();
     }
-  }, [params.blockId, params.userId]);
+  }, [params.blockId, user?.id, isLoaded]);
 
   const filteredTenants = tenants.filter(tenant => {
     if (statusFilter && tenant.paymentStatus !== statusFilter) return false;
