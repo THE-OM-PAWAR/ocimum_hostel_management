@@ -13,7 +13,8 @@ import {
   Bell,
   BarChart3,
   Menu,
-  X, User
+  X,
+  User
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -43,19 +44,9 @@ const navigationItems = [
     href: "/tenants",
   },
   {
-    title: "Rooms",
-    icon: <Home className="h-5 w-5" />,
-    href: "/rooms",
-  },
-  {
     title: "Payments",
     icon: <CreditCard className="h-5 w-5" />,
     href: "/payments",
-  },
-  {
-    title: "Analytics",
-    icon: <BarChart3 className="h-5 w-5" />,
-    href: "/analytics",
   },
   {
     title: "Settings",
@@ -127,17 +118,16 @@ export default function DashboardLayout({
   // Only show first 5 items in mobile navigation
   const mobileNavItems = navigationItems.slice(0, 5);
 
-
   return (
     <div className="flex min-h-screen">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex h-screen w-[240px] border-r bg-card">
+      <aside className="hidden md:flex fixed h-screen w-[240px] border-r bg-card">
         <div className="flex w-full flex-col">
           {/* Logo */}
           <div className="flex h-16 items-center border-b px-4">
             <div className="flex items-center gap-2">
               <Building2 className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold">HostelHub</span>
+              <span className="text-xl font-bold">Ocimum</span>
             </div>
           </div>
 
@@ -196,9 +186,11 @@ export default function DashboardLayout({
       </Sheet>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto bg-background pb-16 md:pb-0">
-        <div className="container py-8 px-4 md:px-8">
-          {children}
+      <div className="flex-1 md:ml-[240px]">
+        <div className="min-h-screen overflow-y-auto">
+          <div className="container py-8 px-4 md:px-8">
+            {children}
+          </div>
         </div>
       </div>
 

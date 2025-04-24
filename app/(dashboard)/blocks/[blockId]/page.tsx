@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useUser } from "@clerk/nextjs";
 import { useParams } from "next/navigation";
-import { Plus, Pencil, Trash2, RefreshCw } from "lucide-react";
+import { Plus, Pencil, Trash2, RefreshCw, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -16,6 +17,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 interface Tenant {
   id: string;
@@ -34,10 +42,20 @@ interface Room {
   numberOfRooms: number;
 }
 
+interface Block {
+  _id: string;
+  name: string;
+  description?: string;
+}
+
 export default function BlockDetailsPage() {
   const params = useParams();
+  const { user } = useUser();
+  const [block, setBlock] = useState<Block | null>(null);
   const [selectedTenants, setSelectedTenants] = useState<string[]>([]);
   const [selectedRooms, setSelectedRooms] = useState<string[]>([]);
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [roomTypeFilter, setRoomTypeFilter] = useState<string | null>(null);
   const [tenants, setTenants] = useState<Tenant[]>([
     {
       id: "1",
@@ -89,6 +107,40 @@ export default function BlockDetailsPage() {
     },
   ]);
 
+  useEffect(() => {
+    const fetchBlockDetails = async () => {
+      try {
+        if (!user) {
+          console.error("User is not available.");
+          return;
+        }
+        const response = await fetch(`/api/users/${user.id}/block/${params.id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const data = await response.json();
+        console.log("Block data:", data);
+        setBlock(data);
+      } catch (error) {
+        console.error("Error fetching block details:", error);
+      }
+    };
+
+    if (params.blockId) {
+      fetchBlockDetails();
+    }
+  }, [params.blockId, params.userId]);
+
+  const filteredTenants = tenants.filter(tenant => {
+    if (statusFilter && tenant.paymentStatus !== statusFilter) return false;
+    if (roomTypeFilter && tenant.roomType !== roomTypeFilter) return false;
+    return true;
+  });
+
   const getPaymentStatusBadge = (status: string) => {
     switch (status) {
       case "paid":
@@ -116,7 +168,7 @@ export default function BlockDetailsPage() {
 
   const handleSelectAllTenants = (checked: boolean) => {
     if (checked) {
-      setSelectedTenants(tenants.map(tenant => tenant.id));
+      setSelectedTenants(filteredTenants.map(tenant => tenant.id));
     } else {
       setSelectedTenants([]);
     }
@@ -135,20 +187,17 @@ export default function BlockDetailsPage() {
     console.log("Refreshing data...");
   };
 
+  const handleDeleteSelected = () => {
+    // Implement delete logic here
+    console.log("Deleting selected items...");
+  };
+
+  const isFiltersActive = statusFilter !== null || roomTypeFilter !== null;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Block Details</h1>
-        <div className="flex gap-3">
-          <Button className="shadow-sm hover:shadow-md transition-all">
-            <Plus className="h-4 w-4 mr-2" />
-            Create Tenant
-          </Button>
-          <Button className="shadow-sm hover:shadow-md transition-all">
-            <Plus className="h-4 w-4 mr-2" />
-            Create Room
-          </Button>
-        </div>
+        <h1 className="text-3xl font-bold">{block?.name || "Loading..."}</h1>
       </div>
 
       <Tabs defaultValue="tenants" className="w-full">
@@ -160,14 +209,94 @@ export default function BlockDetailsPage() {
         <TabsContent value="tenants" className="mt-6">
           <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
             <div className="p-4 border-b flex justify-between items-center">
-              <Button variant="ghost" size="icon" onClick={refreshData}>
-                <RefreshCw className="h-4 w-4" />
-              </Button>
-              
-              <div className="text-sm text-muted-foreground">
-                {selectedTenants.length} selected
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" onClick={refreshData}>
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+                {selectedTenants.length > 0 && (
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="text-destructive hover:text-destructive"
+                    onClick={handleDeleteSelected}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      className={cn(
+                        "relative",
+                        isFiltersActive && "bg-primary/10 text-primary hover:bg-primary/20"
+                      )}
+                    >
+                      <Filter className="h-4 w-4" />
+                      {isFiltersActive && (
+                        <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-primary" />
+                      )}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-48">
+                    <DropdownMenuItem 
+                      onClick={() => setStatusFilter(null)}
+                      className={cn(statusFilter === null && "bg-primary/10")}
+                    >
+                      All Payment Status
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => setStatusFilter("paid")}
+                      className={cn(statusFilter === "paid" && "bg-primary/10")}
+                    >
+                      Paid Only
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => setStatusFilter("pending")}
+                      className={cn(statusFilter === "pending" && "bg-primary/10")}
+                    >
+                      Pending Only
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => setStatusFilter("overdue")}
+                      className={cn(statusFilter === "overdue" && "bg-primary/10")}
+                    >
+                      Overdue Only
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      className={cn("border-t", roomTypeFilter === null && "bg-primary/10")} 
+                      onClick={() => setRoomTypeFilter(null)}
+                    >
+                      All Room Types
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => setRoomTypeFilter("Single")}
+                      className={cn(roomTypeFilter === "Single" && "bg-primary/10")}
+                    >
+                      Single Rooms
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => setRoomTypeFilter("Double")}
+                      className={cn(roomTypeFilter === "Double" && "bg-primary/10")}
+                    >
+                      Double Rooms
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
               
+              <div className="flex items-center gap-4">
+                {selectedTenants.length > 0 && (
+                  <span className="text-sm text-muted-foreground">
+                    {selectedTenants.length} selected
+                  </span>
+                )}
+                <Button className="shadow-sm hover:shadow-md transition-all">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Tenant
+                </Button>
+              </div>
             </div>
             <div className="overflow-x-auto">
               <Table>
@@ -175,7 +304,7 @@ export default function BlockDetailsPage() {
                   <TableRow className="bg-muted/50 hover:bg-muted/50">
                     <TableHead className="w-12">
                       <Checkbox 
-                        checked={selectedTenants.length === tenants.length}
+                        checked={selectedTenants.length === filteredTenants.length && filteredTenants.length > 0}
                         onCheckedChange={handleSelectAllTenants}
                       />
                     </TableHead>
@@ -189,7 +318,7 @@ export default function BlockDetailsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {tenants.map((tenant) => (
+                  {filteredTenants.map((tenant) => (
                     <TableRow 
                       key={tenant.id}
                       className="hover:bg-muted/50 transition-colors"
@@ -247,11 +376,31 @@ export default function BlockDetailsPage() {
         <TabsContent value="rooms" className="mt-6">
           <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
             <div className="p-4 border-b flex justify-between items-center">
-              <Button variant="ghost" size="icon" onClick={refreshData}>
-                <RefreshCw className="h-4 w-4" />
-              </Button>
-              <div className="text-sm text-muted-foreground">
-                {selectedRooms.length} selected
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" onClick={refreshData}>
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+                {selectedRooms.length > 0 && (
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="text-destructive hover:text-destructive"
+                    onClick={handleDeleteSelected}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+              <div className="flex items-center gap-4">
+                {selectedRooms.length > 0 && (
+                  <span className="text-sm text-muted-foreground">
+                    {selectedRooms.length} selected
+                  </span>
+                )}
+                <Button className="shadow-sm hover:shadow-md transition-all">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Room
+                </Button>
               </div>
             </div>
             <div className="overflow-x-auto">
@@ -260,7 +409,7 @@ export default function BlockDetailsPage() {
                   <TableRow className="bg-muted/50 hover:bg-muted/50">
                     <TableHead className="w-12">
                       <Checkbox 
-                        checked={selectedRooms.length === rooms.length}
+                        checked={selectedRooms.length === rooms.length && rooms.length > 0}
                         onCheckedChange={handleSelectAllRooms}
                       />
                     </TableHead>
