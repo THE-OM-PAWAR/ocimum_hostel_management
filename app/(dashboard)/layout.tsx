@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Sheet,
   SheetContent,
@@ -121,7 +121,15 @@ export default function DashboardLayout({
 }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [userName, setUserName] = useState("");
   const pathname = usePathname();
+  const { user } = useClerk();
+
+  useEffect(() => {
+    if (user) {
+      setUserName(user.fullName || "User");
+    }
+  }, [user]);
 
   // Only show first 5 items in mobile navigation
   const mobileNavItems = navigationItems.slice(0, 5);
@@ -202,7 +210,7 @@ export default function DashboardLayout({
                       },
                     }}
                   />
-                  <span className="text-sm font-medium">Profile</span>
+                  <span className="text-sm font-medium">{userName}</span>
                 </div>
                 <Settings className="h-4 w-4" />
               </Button>
@@ -268,7 +276,7 @@ export default function DashboardLayout({
                       },
                     }}
                   />
-                  <span className="text-sm font-medium">Profile</span>
+                  <span className="text-sm font-medium">{userName}</span>
                 </div>
                 <Settings className="h-4 w-4" />
               </Button>

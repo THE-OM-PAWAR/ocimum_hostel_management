@@ -62,7 +62,7 @@ export function OnboardingDialog() {
     setIsSubmitting(true);
     try {
 
-      const response = await fetch(`/api/users/onboard`, {
+      const response = await fetch(`/api/users/${user?.id}/on-board`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
