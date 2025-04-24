@@ -1,6 +1,6 @@
 "use client";
 
-import { useClerk, UserButton } from "@clerk/nextjs";
+import { useUser, UserButton } from "@clerk/nextjs";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import {
@@ -13,7 +13,7 @@ import {
   Bell,
   BarChart3,
   Menu,
-  X,
+  X, User
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -115,16 +115,18 @@ export default function DashboardLayout({
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [userName, setUserName] = useState("");
   const pathname = usePathname();
-  const { user } = useClerk();
+  const { user } = useUser();
+  const router = useRouter();
 
   useEffect(() => {
     if (user) {
-      setUserName(user.fullName || "User");
+      setUserName(user.fullName || "User Profile");
     }
   }, [user]);
 
   // Only show first 5 items in mobile navigation
   const mobileNavItems = navigationItems.slice(0, 5);
+
 
   return (
     <div className="flex min-h-screen">
@@ -153,23 +155,12 @@ export default function DashboardLayout({
           {/* User */}
           <div className="border-t p-4">
             <Button
+              onClick={() => user && router.push(`/profile/${user.id}`)}
               variant="outline"
-              className="w-full flex justify-between items-center gap-2"
+              className="w-full flex items-center gap-2"
             >
-              <div className="flex items-center gap-2">
-                <UserButton
-                  afterSignOutUrl="/"
-                  appearance={{
-                    elements: {
-                      rootBox: "w-fit",
-                      userButtonBox: "w-fit",
-                      userButtonTrigger: "w-fit",
-                    },
-                  }}
-                />
-                <span className="text-sm font-medium">{userName}</span>
-              </div>
-              <Settings className="h-4 w-4" />
+              <User className="h-4 w-4" />
+              {userName}
             </Button>
           </div>
         </div>
@@ -195,24 +186,9 @@ export default function DashboardLayout({
               ))}
             </nav>
             <div className="border-t p-4">
-              <Button
-                variant="outline"
-                className="w-full flex justify-between items-center gap-2"
-              >
-                <div className="flex items-center gap-2">
-                  <UserButton
-                    afterSignOutUrl="/"
-                    appearance={{
-                      elements: {
-                        rootBox: "w-fit",
-                        userButtonBox: "w-fit",
-                        userButtonTrigger: "w-fit",
-                      },
-                    }}
-                  />
-                  <span className="text-sm font-medium">{userName}</span>
-                </div>
-                <Settings className="h-4 w-4" />
+              <Button onClick={() => user && router.push(`/profile/${user.id}`)} variant="outline" className="w-full flex items-center gap-2">
+                <User className="h-4 w-4" />
+                {userName}
               </Button>
             </div>
           </div>
