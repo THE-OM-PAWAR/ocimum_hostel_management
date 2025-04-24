@@ -38,12 +38,15 @@ export function OnboardingDialog() {
         try {
           const response = await fetch(`/api/users/${user.id}/onboarding-status`, {
             method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
           });
-          
-          console.log("Onboarding status response:", response);
-          // if (!response.data.isOnboarded) {
-          //   setOpen(true);
-          // }
+          const data = await response.json();
+          console.log("Onboarding status response:", data);
+          if (!data.isOnboarded) {
+            setOpen(true);
+          }
         } catch (error) {
           console.error("Error checking onboarding status:", error);
           setOpen(true); // Show dialog on error as fallback
@@ -58,11 +61,19 @@ export function OnboardingDialog() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await api.post("/api/users/onboard", {
-        ...formData,
-        userId: user?.id,
-      });
 
+      const response = await fetch(`/api/users/onboard`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body : JSON.stringify({
+          ...formData,
+          userId: user?.id,
+        }),
+      });
+      const data = await response.json();
+      console.log("Onboarding response:", data);
       toast({
         title: "Success!",
         description: "Your hostel has been set up successfully.",

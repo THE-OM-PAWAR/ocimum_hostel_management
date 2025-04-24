@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { User } from "@/lib/mongoose/models/user.model";
-import clientPromise from "@/lib/mongodb/client";
 import connectDB from "@/lib/mongodb/client";
 
 export async function GET(
@@ -8,13 +7,17 @@ export async function GET(
   { params }: { params: { userId: string } }
 ) {
   try {
-    await connectDB; // Ensure MongoDB connection
+    await connectDB();
+    console.log('Checking onboarding status for user:', params.userId);
 
     const user = await User.findOne({ userId: params.userId });
+    console.log('User found:', user);
 
-    return NextResponse.json({
-      isOnboarded: user?.isOnboarded || false,
-    });
+    if (!user) {
+      return NextResponse.json({ isOnboarded: false, message: 'User not found' });
+    }
+    
+    return NextResponse.json({ isOnboarded: user.isOnboarded });
   } catch (error) {
     console.error("Error checking onboarding status:", error);
     return NextResponse.json(
