@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Home, Building2, Users, CreditCard, HelpCircle, Menu, X } from "lucide-react";
-import { SignInButton, SignUpButton } from "@clerk/nextjs";
+import { SignInButton, SignUpButton, useAuth } from "@clerk/nextjs";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 export function LandingHeader() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { isSignedIn } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -89,16 +90,26 @@ export function LandingHeader() {
 
         <div className="hidden md:flex items-center gap-4">
           <ThemeToggle />
-          <SignInButton mode="modal">
-            <Button variant="outline">
-              Sign In
+          {isSignedIn ? (
+            <Button asChild>
+              <Link href="/dashboard">
+                Go to Dashboard
+              </Link>
             </Button>
-          </SignInButton>
-          <SignUpButton mode="modal">
-            <Button>
-              Get Started
-            </Button>
-          </SignUpButton>
+          ) : (
+            <>
+              <SignInButton mode="modal">
+                <Button variant="outline">
+                  Sign In
+                </Button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <Button>
+                  Get Started
+                </Button>
+              </SignUpButton>
+            </>
+          )}
         </div>
 
         <div className="flex md:hidden items-center gap-4">
@@ -135,16 +146,26 @@ export function LandingHeader() {
               About Us
             </Link>
             <div className="pt-2 border-t border-border flex flex-col gap-2">
-              <SignInButton mode="modal">
-                <Button variant="outline" className="w-full">
-                  Sign In
+              {isSignedIn ? (
+                <Button asChild className="w-full">
+                  <Link href="/dashboard">
+                    Go to Dashboard
+                  </Link>
                 </Button>
-              </SignInButton>
-              <SignUpButton mode="modal">
-                <Button className="w-full">
-                  Get Started
-                </Button>
-              </SignUpButton>
+              ) : (
+                <>
+                  <SignInButton mode="modal">
+                    <Button variant="outline" className="w-full">
+                      Sign In
+                    </Button>
+                  </SignInButton>
+                  <SignUpButton mode="modal">
+                    <Button className="w-full">
+                      Get Started
+                    </Button>
+                  </SignUpButton>
+                </>
+              )}
             </div>
           </div>
         </div>

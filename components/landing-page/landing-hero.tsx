@@ -5,10 +5,12 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Building2 } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { SignInButton, SignUpButton, useAuth } from "@clerk/nextjs";
 
 export function LandingHero() {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
+  const { isSignedIn } = useAuth();
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -119,46 +121,75 @@ export function LandingHero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.8 }}
             >
-              <Button 
-                size="lg" 
-                className="relative overflow-hidden group" 
-                asChild
-              >
-                <Link href="/register">
-                  <motion.span
-                    className="absolute inset-0 bg-primary/20"
-                    initial={{ x: "-100%" }}
-                    whileHover={{ x: "100%" }}
-                    transition={{ duration: 0.8, ease: "easeInOut" }}
-                  />
-                  <span className="relative z-10 flex items-center">
-                    Get Started
+              {isSignedIn ? (
+                <Button 
+                  size="lg" 
+                  className="relative overflow-hidden group" 
+                  asChild
+                >
+                  <Link href="/dashboard">
                     <motion.span
-                      className="ml-2"
-                      whileHover={{ x: 5 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <ArrowRight className="h-4 w-4" />
-                    </motion.span>
-                  </span>
-                </Link>
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="relative overflow-hidden group"
-                asChild
-              >
-                <Link href="/login">
-                  <motion.span
-                    className="absolute inset-0 bg-accent/20"
-                    initial={{ x: "-100%" }}
-                    whileHover={{ x: "100%" }}
-                    transition={{ duration: 0.8, ease: "easeInOut" }}
-                  />
-                  <span className="relative z-10">Sign In</span>
-                </Link>
-              </Button>
+                      className="absolute inset-0 bg-primary/20"
+                      initial={{ x: "-100%" }}
+                      whileHover={{ x: "100%" }}
+                      transition={{ duration: 0.8, ease: "easeInOut" }}
+                    />
+                    <span className="relative z-10 flex items-center">
+                      Go to Dashboard
+                      <motion.span
+                        className="ml-2"
+                        whileHover={{ x: 5 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <ArrowRight className="h-4 w-4" />
+                      </motion.span>
+                    </span>
+                  </Link>
+                </Button>
+              ) : (
+                <>
+                  <Button 
+                    size="lg" 
+                    className="relative overflow-hidden group" 
+                    asChild
+                  >
+                    <Link href="/register">
+                      <motion.span
+                        className="absolute inset-0 bg-primary/20"
+                        initial={{ x: "-100%" }}
+                        whileHover={{ x: "100%" }}
+                        transition={{ duration: 0.8, ease: "easeInOut" }}
+                      />
+                      <span className="relative z-10 flex items-center">
+                        Get Started
+                        <motion.span
+                          className="ml-2"
+                          whileHover={{ x: 5 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <ArrowRight className="h-4 w-4" />
+                        </motion.span>
+                      </span>
+                    </Link>
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    className="relative overflow-hidden group"
+                    asChild
+                  >
+                    <Link href="/login">
+                      <motion.span
+                        className="absolute inset-0 bg-accent/20"
+                        initial={{ x: "-100%" }}
+                        whileHover={{ x: "100%" }}
+                        transition={{ duration: 0.8, ease: "easeInOut" }}
+                      />
+                      <span className="relative z-10">Sign In</span>
+                    </Link>
+                  </Button>
+                </>
+              )}
             </motion.div>
             
             <motion.div 

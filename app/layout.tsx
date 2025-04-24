@@ -4,7 +4,8 @@ import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
 import { ReduxProvider } from '@/lib/redux/provider';
 import { Toaster } from '@/components/ui/toaster';
-import { AuthProvider } from '@/components/providers/clerk-provider';
+import { ClerkProvider } from "@clerk/nextjs";
+import { Clerk } from '@clerk/nextjs/server';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -21,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <AuthProvider>
+        <ClerkProvider>
           <ThemeProvider
             attribute="class"
             defaultTheme="light"
@@ -33,7 +34,7 @@ export default function RootLayout({
               <Toaster />
             </ReduxProvider>
           </ThemeProvider>
-        </AuthProvider>
+        </ClerkProvider>
       </body>
     </html>
   );
