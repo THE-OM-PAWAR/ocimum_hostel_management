@@ -1,15 +1,16 @@
 import { NextResponse } from "next/server";
 import { User } from "@/lib/mongoose/models/user.model";
 import clientPromise from "@/lib/mongodb/client";
+import connectDB from "@/lib/mongodb/client";
 
 export async function GET(
   req: Request,
   { params }: { params: { userId: string } }
 ) {
   try {
-    await clientPromise; // Ensure MongoDB connection
+    await connectDB; // Ensure MongoDB connection
 
-    const user = await User.findOne({ clerkId: params.userId });
+    const user = await User.findOne({ userId: params.userId });
 
     return NextResponse.json({
       isOnboarded: user?.isOnboarded || false,

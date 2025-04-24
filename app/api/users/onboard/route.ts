@@ -2,14 +2,12 @@ import { NextResponse } from "next/server";
 import { User } from "@/lib/mongoose/models/user.model";
 import clientPromise from "@/lib/mongodb/client";
 import { auth } from "@clerk/nextjs";
+import connectDB from "@/lib/mongodb/client";
 
 export async function POST(req: Request) {
   try {
-    const {ownerName, hostelName, phoneNumber, email } = await req.json();
-    const {userId} = auth();
-    console.log(ownerName, hostelName, phoneNumber, email); // Debugging line
+    const { ownerName, hostelName, phoneNumber, email, userId } = await req.json();
     
-    console.log("User ID from Clerk:", userId);
     if (!userId || !ownerName || !hostelName || !phoneNumber || !email) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -17,24 +15,17 @@ export async function POST(req: Request) {
       );
     }
 
-    await clientPromise; // Ensure MongoDB connection
+    await connectDB; // Ensure MongoDB connection
     
-    const existingUser = await User.findOne({ userId });
-    if (existingUser) { 
-        return NextResponse.json(
-            { error: "User already exists" },
-            { status: 400 }
-        );
-    }
     const user = await User.create({
-        userId,
-        ownerName,
-        hostelName,
-        phoneNumber,
-        email,
-        isOnboarded: true, 
-        role: "admin", // Set role to admin for hostel owners
-      });
+      userId,
+      ownerName,
+      hostelName,
+      phoneNumber,
+      email,
+      isOnboarded: true,
+      role: "admin", // Set role to admin for hostel owners
+    });
 
     return NextResponse.json(user);
   } catch (error) {

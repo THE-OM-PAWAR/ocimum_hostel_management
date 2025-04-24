@@ -1,35 +1,44 @@
-import { MongoClient, ServerApiVersion } from "mongodb";
+import mongoose from 'mongoose';
 
-const uri = process.env.MONGODB_URI || "";
-const options = {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  },
-};
+const MONGODB_URI = process.env.MONGODB_URI;
 
-let client;
-let clientPromise: Promise<MongoClient>;
-
-if (!process.env.MONGODB_URI) {
-  throw new Error("Please add your MongoDB URI to .env.local");
+if (!MONGODB_URI) {
+  throw new Error('Please define the MONGODB_URI environment variable inside .env');
 }
 
-if (process.env.NODE_ENV === "development") {
-  // In development mode, use a global variable so that the value
-  // is preserved across module reloads caused by HMR (Hot Module Replacement).
-  if (!global._mongoClientPromise) {
-    client = new MongoClient(uri, options);
-    global._mongoClientPromise = client.connect();
+interface MongooseConnection {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
+}
+
+let cached: MongooseConnection = (global as any).mongoose || { conn: null, promise: null };
+
+if (!(global as any).mongoose) {
+  (global as any).mongoose = cached;
+}
+
+async function connectDB() {
+  if (cached.conn) {
+    return cached.conn;
   }
-  clientPromise = global._mongoClientPromise;
-} else {
-  // In production mode, it's best to not use a global variable.
-  client = new MongoClient(uri, options);
-  clientPromise = client.connect();
+
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: false,
+    };
+
+    // We can safely assert MONGODB_URI is string here since we check it above
+    cached.promise = mongoose.connect(MONGODB_URI as string, opts);
+  }
+
+  try {
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    throw e;
+  }
+
+  return cached.conn;
 }
 
-// Export a module-scoped MongoClient promise. By doing this in a
-// separate module, the client can be shared across functions.
-export default clientPromise;
+export default connectDB;

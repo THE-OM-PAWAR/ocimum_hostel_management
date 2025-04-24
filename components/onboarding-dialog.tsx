@@ -23,7 +23,6 @@ export function OnboardingDialog() {
   });
 
   useEffect(() => {
-    console.log("User Loaded:", isLoaded, user); // Debugging line
     if (isLoaded && user) {
       setFormData(prev => ({
         ...prev,
@@ -31,14 +30,20 @@ export function OnboardingDialog() {
         email: user.primaryEmailAddress?.emailAddress || "",
         phoneNumber: user.phoneNumbers?.[0]?.phoneNumber || "",
       }));
+
+      console.log("User data:", user.id);  
       
       // Check if user is onboarded
       const checkOnboarding = async () => {
         try {
-          const response = await api.get(`/api/users/${user.id}/onboarding-status`);
-          if (!response.data.isOnboarded) {
-            setOpen(true);
-          }
+          const response = await fetch(`/api/users/${user.id}/onboarding-status`, {
+            method: 'GET',
+          });
+          
+          console.log("Onboarding status response:", response);
+          // if (!response.data.isOnboarded) {
+          //   setOpen(true);
+          // }
         } catch (error) {
           console.error("Error checking onboarding status:", error);
           setOpen(true); // Show dialog on error as fallback
@@ -53,9 +58,9 @@ export function OnboardingDialog() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-        console.log("Form Data:", formData); // Debugging line
       await api.post("/api/users/onboard", {
-        ...formData
+        ...formData,
+        userId: user?.id,
       });
 
       toast({
