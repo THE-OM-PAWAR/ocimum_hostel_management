@@ -1,10 +1,10 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { ClerkProvider } from '@clerk/nextjs';
 import { ThemeProvider } from '@/components/theme-provider';
 import { ReduxProvider } from '@/lib/redux/provider';
 import { Toaster } from '@/components/ui/toaster';
+import { AuthProvider } from '@/components/providers/clerk-provider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -19,9 +19,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
-        <body className={inter.className}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
+        <AuthProvider>
           <ThemeProvider
             attribute="class"
             defaultTheme="light"
@@ -33,8 +33,8 @@ export default function RootLayout({
               <Toaster />
             </ReduxProvider>
           </ThemeProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+        </AuthProvider>
+      </body>
+    </html>
   );
 }

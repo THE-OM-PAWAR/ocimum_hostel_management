@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Home, Building2, Users, CreditCard, HelpCircle, Menu, X } from "lucide-react";
+import { SignInButton, SignUpButton } from "@clerk/nextjs";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -88,12 +89,16 @@ export function LandingHeader() {
 
         <div className="hidden md:flex items-center gap-4">
           <ThemeToggle />
-          <Button variant="outline" asChild>
-            <Link href="/login">Sign In</Link>
-          </Button>
-          <Button asChild>
-            <Link href="/register">Get Started</Link>
-          </Button>
+          <SignInButton mode="modal">
+            <Button variant="outline">
+              Sign In
+            </Button>
+          </SignInButton>
+          <SignUpButton mode="modal">
+            <Button>
+              Get Started
+            </Button>
+          </SignUpButton>
         </div>
 
         <div className="flex md:hidden items-center gap-4">
@@ -130,12 +135,16 @@ export function LandingHeader() {
               About Us
             </Link>
             <div className="pt-2 border-t border-border flex flex-col gap-2">
-              <Button variant="outline" className="w-full" asChild>
-                <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>Sign In</Link>
-              </Button>
-              <Button className="w-full" asChild>
-                <Link href="/register" onClick={() => setIsMobileMenuOpen(false)}>Get Started</Link>
-              </Button>
+              <SignInButton mode="modal">
+                <Button variant="outline" className="w-full">
+                  Sign In
+                </Button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <Button className="w-full">
+                  Get Started
+                </Button>
+              </SignUpButton>
             </div>
           </div>
         </div>
