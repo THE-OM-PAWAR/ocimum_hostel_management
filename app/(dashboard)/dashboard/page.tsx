@@ -18,14 +18,13 @@ interface Block {
   description?: string;
 }
 
-
 function CreateBlockCard({ onClick }: { onClick: () => void }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ scale: 1.05 }}
-      className="bg-card p-6 rounded-lg border border-dashed shadow-sm cursor-pointer flex flex-col items-center justify-center min-h-[160px]"
+      className="bg-card p-6 rounded-lg border border-dashed shadow-sm cursor-pointer flex flex-col items-center justify-center h-[200px]"
       onClick={onClick}
     >
       <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
@@ -45,21 +44,26 @@ function BlockCard({ index, name, description }: BlockCardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
-      className="bg-card p-6 rounded-lg border shadow-sm hover:shadow-md hover:scale-105 transition-all duration-300"
+      className="bg-card p-6 rounded-lg border shadow-sm hover:shadow-md transition-all duration-300 h-[200px] flex flex-col"
     >
       <h3 className="font-medium">{name}</h3>
-      {description && (
-        <p className="text-sm text-muted-foreground mt-2">{description}</p>
-      )}
-      {!description && (
-        <p className="text-sm text-muted-foreground mt-2">
-          Click to manage rooms and tenants
-        </p>
-      )}
+      <div className="flex-1 mt-2">
+        {description ? (
+          <p className="text-sm text-muted-foreground">{description}</p>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Click to manage rooms and tenants
+          </p>
+        )}
+      </div>
+      <div className="mt-auto pt-4">
+        <div className="text-sm text-muted-foreground">
+          Click to view details
+        </div>
+      </div>
     </motion.div>
   );
 }
-
 
 export default function DashboardPage() {
   const { user } = useUser();

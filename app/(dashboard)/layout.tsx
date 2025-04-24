@@ -69,10 +69,9 @@ interface SidebarItemProps {
   title: string;
   href: string;
   isActive?: boolean;
-  isCollapsed?: boolean;
 }
 
-function SidebarItem({ icon, title, href, isActive, isCollapsed }: SidebarItemProps) {
+function SidebarItem({ icon, title, href, isActive }: SidebarItemProps) {
   return (
     <TooltipProvider delayDuration={0}>
       <Tooltip>
@@ -82,19 +81,13 @@ function SidebarItem({ icon, title, href, isActive, isCollapsed }: SidebarItemPr
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
               "hover:bg-accent hover:text-accent-foreground",
-              isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground",
-              isCollapsed ? "justify-center" : ""
+              isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
             )}
           >
             {icon}
-            {!isCollapsed && <span>{title}</span>}
+            <span>{title}</span>
           </Link>
         </TooltipTrigger>
-        {isCollapsed && (
-          <TooltipContent side="right" className="flex items-center gap-4">
-            {title}
-          </TooltipContent>
-        )}
       </Tooltip>
     </TooltipProvider>
   );
@@ -119,7 +112,6 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [userName, setUserName] = useState("");
   const pathname = usePathname();
@@ -137,33 +129,14 @@ export default function DashboardLayout({
   return (
     <div className="flex min-h-screen">
       {/* Desktop Sidebar */}
-      <aside
-        className={cn(
-          "hidden md:flex h-screen border-r bg-card transition-all duration-300",
-          isCollapsed ? "w-[80px]" : "w-[240px]"
-        )}
-      >
+      <aside className="hidden md:flex h-screen w-[240px] border-r bg-card">
         <div className="flex w-full flex-col">
           {/* Logo */}
-          <div className={cn(
-            "flex h-16 items-center border-b px-4",
-            isCollapsed ? "justify-center" : "justify-between"
-          )}>
+          <div className="flex h-16 items-center border-b px-4">
             <div className="flex items-center gap-2">
               <Building2 className="h-6 w-6 text-primary" />
-              {!isCollapsed && (
-                <span className="text-xl font-bold">HostelHub</span>
-              )}
+              <span className="text-xl font-bold">HostelHub</span>
             </div>
-            {!isCollapsed && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsCollapsed(true)}
-              >
-                <Menu className="h-4 w-4" />
-              </Button>
-            )}
           </div>
 
           {/* Navigation */}
@@ -172,76 +145,38 @@ export default function DashboardLayout({
               <SidebarItem
                 key={item.href}
                 {...item}
-                isCollapsed={isCollapsed}
                 isActive={pathname === item.href}
               />
             ))}
           </nav>
 
           {/* User */}
-          <div className={cn(
-            "border-t p-4",
-            isCollapsed ? "flex justify-center" : ""
-          )}>
-            {isCollapsed ? (
-              <UserButton
-                afterSignOutUrl="/"
-                appearance={{
-                  elements: {
-                    rootBox: "w-fit",
-                    userButtonBox: "w-fit",
-                    userButtonTrigger: "w-fit",
-                  },
-                }}
-              />
-            ) : (
-              <Button
-                variant="outline"
-                className="w-full flex justify-between items-center gap-2"
-              >
-                <div className="flex items-center gap-2">
-                  <UserButton
-                    afterSignOutUrl="/"
-                    appearance={{
-                      elements: {
-                        rootBox: "w-fit",
-                        userButtonBox: "w-fit",
-                        userButtonTrigger: "w-fit",
-                      },
-                    }}
-                  />
-                  <span className="text-sm font-medium">{userName}</span>
-                </div>
-                <Settings className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-
-          {/* Collapse Button */}
-          {isCollapsed && (
+          <div className="border-t p-4">
             <Button
-              variant="ghost"
-              size="icon"
-              className="m-4"
-              onClick={() => setIsCollapsed(false)}
+              variant="outline"
+              className="w-full flex justify-between items-center gap-2"
             >
-              <Menu className="h-4 w-4" />
+              <div className="flex items-center gap-2">
+                <UserButton
+                  afterSignOutUrl="/"
+                  appearance={{
+                    elements: {
+                      rootBox: "w-fit",
+                      userButtonBox: "w-fit",
+                      userButtonTrigger: "w-fit",
+                    },
+                  }}
+                />
+                <span className="text-sm font-medium">{userName}</span>
+              </div>
+              <Settings className="h-4 w-4" />
             </Button>
-          )}
+          </div>
         </div>
       </aside>
 
       {/* Mobile Sidebar */}
       <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
-        <SheetTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden fixed top-4 left-4 z-40"
-          >
-            <Menu className="h-6 w-6" />
-          </Button>
-        </SheetTrigger>
         <SheetContent side="left" className="w-[240px] p-0">
           <div className="flex h-full flex-col">
             <div className="flex h-16 items-center border-b px-4">
@@ -255,7 +190,6 @@ export default function DashboardLayout({
                 <SidebarItem
                   key={item.href}
                   {...item}
-                  isCollapsed={false}
                   isActive={pathname === item.href}
                 />
               ))}
