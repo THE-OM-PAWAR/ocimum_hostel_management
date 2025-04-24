@@ -1,31 +1,115 @@
 "use client";
 
 import { useClerk, UserButton } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Settings } from "lucide-react";
+import {
+  Building2,
+  LayoutDashboard,
+  Settings,
+  Users,
+  CreditCard,
+  Home,
+  Bell,
+  BarChart3,
+  Menu,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { OnboardingDialog } from "@/components/onboarding-dialog";
+
+const navigationItems = [
+  {
+    title: "Dashboard",
+    icon: <LayoutDashboard className="h-5 w-5" />,
+    href: "/dashboard",
+  },
+  {
+    title: "Tenants",
+    icon: <Users className="h-5 w-5" />,
+    href: "/tenants",
+  },
+  {
+    title: "Rooms",
+    icon: <Home className="h-5 w-5" />,
+    href: "/rooms",
+  },
+  {
+    title: "Payments",
+    icon: <CreditCard className="h-5 w-5" />,
+    href: "/payments",
+  },
+  {
+    title: "Analytics",
+    icon: <BarChart3 className="h-5 w-5" />,
+    href: "/analytics",
+  },
+  {
+    title: "Settings",
+    icon: <Settings className="h-5 w-5" />,
+    href: "/settings",
+  },
+];
 
 interface SidebarItemProps {
   icon: React.ReactNode;
-  label: string;
+  title: string;
   href: string;
   isActive?: boolean;
+  isCollapsed?: boolean;
 }
 
-function SidebarItem({ icon, label, href, isActive }: SidebarItemProps) {
+function SidebarItem({ icon, title, href, isActive, isCollapsed }: SidebarItemProps) {
+  return (
+    <TooltipProvider delayDuration={0}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Link
+            href={href}
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+              "hover:bg-accent hover:text-accent-foreground",
+              isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground",
+              isCollapsed ? "justify-center" : ""
+            )}
+          >
+            {icon}
+            {!isCollapsed && <span>{title}</span>}
+          </Link>
+        </TooltipTrigger>
+        {isCollapsed && (
+          <TooltipContent side="right" className="flex items-center gap-4">
+            {title}
+          </TooltipContent>
+        )}
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+
+function MobileNavItem({ icon, href, isActive }: { icon: React.ReactNode; href: string; isActive: boolean }) {
   return (
     <Link
       href={href}
       className={cn(
-        "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors",
-        "hover:bg-accent hover:text-accent-foreground",
-        isActive && "bg-accent text-accent-foreground"
+        "flex flex-1 justify-center p-3 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
+        isActive && "bg-accent/50 text-accent-foreground"
       )}
     >
       {icon}
-      <span>{label}</span>
     </Link>
   );
 }
@@ -35,53 +119,185 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Only show first 5 items in mobile navigation
+  const mobileNavItems = navigationItems.slice(0, 5);
+
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar */}
-      <aside className="w-60 bg-card border-r flex flex-col fixed h-screen">
-        {/* Logo */}
-        <div className="p-6 border-b">
-          <div className="h-8 w-8 bg-primary rounded-lg"></div>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 p-4">
-          <div className="space-y-2">
-            <SidebarItem
-              icon={<LayoutDashboard className="h-5 w-5" />}
-              label="Dashboard"
-              href="/dashboard"
-            />
-            <SidebarItem
-              icon={<Settings className="h-5 w-5" />}
-              label="Settings"
-              href="/settings"
-            />
+      {/* Desktop Sidebar */}
+      <aside
+        className={cn(
+          "hidden md:flex h-screen border-r bg-card transition-all duration-300",
+          isCollapsed ? "w-[80px]" : "w-[240px]"
+        )}
+      >
+        <div className="flex w-full flex-col">
+          {/* Logo */}
+          <div className={cn(
+            "flex h-16 items-center border-b px-4",
+            isCollapsed ? "justify-center" : "justify-between"
+          )}>
+            <div className="flex items-center gap-2">
+              <Building2 className="h-6 w-6 text-primary" />
+              {!isCollapsed && (
+                <span className="text-xl font-bold">HostelHub</span>
+              )}
+            </div>
+            {!isCollapsed && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsCollapsed(true)}
+              >
+                <Menu className="h-4 w-4" />
+              </Button>
+            )}
           </div>
-        </nav>
 
-        {/* Account Button */}
-        <div className="p-4 border-t">
-          <Button variant="outline" className="w-full flex flex-row justify-start items-center gap-3 px-2 py-2 rounded-lg hover:bg-accent transition-colors">
-            <UserButton
-              afterSignOutUrl="/"
-              appearance={{
-                elements: {
-                  rootBox: "w-fit",
-                  userButtonBox: "w-fit",
-                  userButtonTrigger: "w-fit",
-                },
-              }}
-            />
-            <span className="text-sm font-medium">Profile Information</span>
-          </Button>
+          {/* Navigation */}
+          <nav className="flex-1 space-y-1 p-4">
+            {navigationItems.map((item) => (
+              <SidebarItem
+                key={item.href}
+                {...item}
+                isCollapsed={isCollapsed}
+                isActive={pathname === item.href}
+              />
+            ))}
+          </nav>
+
+          {/* User */}
+          <div className={cn(
+            "border-t p-4",
+            isCollapsed ? "flex justify-center" : ""
+          )}>
+            {isCollapsed ? (
+              <UserButton
+                afterSignOutUrl="/"
+                appearance={{
+                  elements: {
+                    rootBox: "w-fit",
+                    userButtonBox: "w-fit",
+                    userButtonTrigger: "w-fit",
+                  },
+                }}
+              />
+            ) : (
+              <Button
+                variant="outline"
+                className="w-full flex justify-between items-center gap-2"
+              >
+                <div className="flex items-center gap-2">
+                  <UserButton
+                    afterSignOutUrl="/"
+                    appearance={{
+                      elements: {
+                        rootBox: "w-fit",
+                        userButtonBox: "w-fit",
+                        userButtonTrigger: "w-fit",
+                      },
+                    }}
+                  />
+                  <span className="text-sm font-medium">Profile</span>
+                </div>
+                <Settings className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+
+          {/* Collapse Button */}
+          {isCollapsed && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="m-4"
+              onClick={() => setIsCollapsed(false)}
+            >
+              <Menu className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </aside>
 
+      {/* Mobile Sidebar */}
+      <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
+        <SheetTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden fixed top-4 left-4 z-40"
+          >
+            <Menu className="h-6 w-6" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className="w-[240px] p-0">
+          <div className="flex h-full flex-col">
+            <div className="flex h-16 items-center border-b px-4">
+              <div className="flex items-center gap-2">
+                <Building2 className="h-6 w-6 text-primary" />
+                <span className="text-xl font-bold">HostelHub</span>
+              </div>
+            </div>
+            <nav className="flex-1 space-y-1 p-4">
+              {navigationItems.map((item) => (
+                <SidebarItem
+                  key={item.href}
+                  {...item}
+                  isCollapsed={false}
+                  isActive={pathname === item.href}
+                />
+              ))}
+            </nav>
+            <div className="border-t p-4">
+              <Button
+                variant="outline"
+                className="w-full flex justify-between items-center gap-2"
+              >
+                <div className="flex items-center gap-2">
+                  <UserButton
+                    afterSignOutUrl="/"
+                    appearance={{
+                      elements: {
+                        rootBox: "w-fit",
+                        userButtonBox: "w-fit",
+                        userButtonTrigger: "w-fit",
+                      },
+                    }}
+                  />
+                  <span className="text-sm font-medium">Profile</span>
+                </div>
+                <Settings className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+
       {/* Main Content */}
-      <main className="flex-1 ml-60 min-h-screen bg-background">
-        <div className="container py-8">{children}</div>
-      </main>
+      <div className="flex-1 overflow-y-auto bg-background pb-16 md:pb-0">
+        <div className="container py-8 px-4 md:px-8">
+          {children}
+        </div>
+      </div>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 border-t bg-background md:hidden">
+        <nav className="flex items-center">
+          {mobileNavItems.map((item) => (
+            <MobileNavItem
+              key={item.href}
+              icon={item.icon}
+              href={item.href}
+              isActive={pathname === item.href}
+            />
+          ))}
+        </nav>
+      </div>
+      <OnboardingDialog />
     </div>
   );
 }
