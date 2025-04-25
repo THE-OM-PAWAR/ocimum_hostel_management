@@ -53,12 +53,6 @@ const tenantSchema = new Schema<ITenant>(
       type: Date,
       required: [true, 'Please provide check-in date'],
     },
-    plannedCheckOutDate: {
-      type: Date,
-    },
-    actualCheckOutDate: {
-      type: Date,
-    },
     room: {
       type: Schema.Types.ObjectId,
       ref: 'Room',
