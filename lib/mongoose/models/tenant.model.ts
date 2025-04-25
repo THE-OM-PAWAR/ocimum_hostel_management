@@ -1,17 +1,16 @@
 import mongoose, { Document, Model, Schema } from 'mongoose';
 
 export interface ITenant extends Document {
-  user: mongoose.Types.ObjectId;
-  fullName: string;
+  name: string;
   phone: string;
   emergencyContact: string;
   idType: string;
   idNumber: string;
-  checkInDate: Date;
-  plannedCheckOutDate?: Date;
-  actualCheckOutDate?: Date;
-  room: mongoose.Types.ObjectId;
-  hostel: mongoose.Types.ObjectId;
+  joinDate: Date;
+  roomNumber: string;
+  roomType: string;
+  block: mongoose.Types.ObjectId;
+  paymentStatus: 'paid' | 'pending' | 'overdue';
   status: 'active' | 'inactive' | 'pending';
   createdAt: Date;
   updatedAt: Date;
@@ -19,12 +18,7 @@ export interface ITenant extends Document {
 
 const tenantSchema = new Schema<ITenant>(
   {
-    user: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: [true, 'Please provide the user account'],
-    },
-    fullName: {
+    name: {
       type: String,
       required: [true, 'Please provide a full name'],
       trim: true,
@@ -49,19 +43,27 @@ const tenantSchema = new Schema<ITenant>(
       required: [true, 'Please provide ID number'],
       trim: true,
     },
-    checkInDate: {
+    joinDate: {
       type: Date,
-      required: [true, 'Please provide check-in date'],
+      required: [true, 'Please provide join date'],
     },
-    room: {
-      type: Schema.Types.ObjectId,
-      ref: 'Room',
-      required: [true, 'Please provide the room ID'],
+    roomNumber: {
+      type: String,
+      required: [true, 'Please provide room number'],
     },
-    hostel: {
+    roomType: {
+      type: String,
+      required: [true, 'Please provide room type'],
+    },
+    block: {
       type: Schema.Types.ObjectId,
-      ref: 'Hostel',
-      required: [true, 'Please provide the hostel ID'],
+      ref: 'Block',
+      required: [true, 'Please provide the block ID'],
+    },
+    paymentStatus: {
+      type: String,
+      enum: ['paid', 'pending', 'overdue'],
+      default: 'pending',
     },
     status: {
       type: String,

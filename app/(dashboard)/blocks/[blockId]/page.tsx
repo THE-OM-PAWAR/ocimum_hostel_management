@@ -24,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { CreateTenantDialog } from "@/components/create-tenant-dialog";
 
 interface Tenant {
   id: string;
@@ -56,6 +57,7 @@ export default function BlockDetailsPage() {
   const [selectedRooms, setSelectedRooms] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [roomTypeFilter, setRoomTypeFilter] = useState<string | null>(null);
+  const [isCreateTenantOpen, setIsCreateTenantOpen] = useState(false);
   const [tenants, setTenants] = useState<Tenant[]>([
     {
       id: "1",
@@ -134,6 +136,12 @@ export default function BlockDetailsPage() {
       fetchBlockDetails();
     }
   }, [params.blockId, user?.id, isLoaded]);
+
+  const handleTenantCreated = () => {
+    // Refresh the tenants list
+    // This is where you would fetch the updated list from the API
+    console.log("Tenant created successfully");
+  };
 
   const filteredTenants = tenants.filter(tenant => {
     if (statusFilter && tenant.paymentStatus !== statusFilter) return false;
@@ -292,7 +300,10 @@ export default function BlockDetailsPage() {
                     {selectedTenants.length} selected
                   </span>
                 )}
-                <Button className="shadow-sm hover:shadow-md transition-all">
+                <Button 
+                  className="shadow-sm hover:shadow-md transition-all"
+                  onClick={() => setIsCreateTenantOpen(true)}
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Create Tenant
                 </Button>
@@ -466,6 +477,13 @@ export default function BlockDetailsPage() {
           </div>
         </TabsContent>
       </Tabs>
+
+      <CreateTenantDialog
+        isOpen={isCreateTenantOpen}
+        onClose={() => setIsCreateTenantOpen(false)}
+        onSuccess={handleTenantCreated}
+        blockId={Array.isArray(params.blockId) ? params.blockId[0] : params.blockId}
+      />
     </div>
   );
 }
