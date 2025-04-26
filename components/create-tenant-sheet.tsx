@@ -11,7 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { uploadToCloudinary } from "@/lib/cloudinary";
+import { CloudinaryUploadWidget } from "@/components/ui/cloudinary-upload-widget";
 
 interface CreateTenantSheetProps {
   blockId: string;
@@ -22,7 +22,6 @@ export function CreateTenantSheet({ blockId, onSuccess }: CreateTenantSheetProps
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [roomTypes, setRoomTypes] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     name: "",
@@ -40,42 +39,34 @@ export function CreateTenantSheet({ blockId, onSuccess }: CreateTenantSheetProps
   });
 
   useEffect(() => {
-    const fetchRoomTypes = async () => {
-      try {
-        const response = await fetch(`/api/blocks/${blockId}/room-types`);
-        if (response.ok) {
-          const data = await response.json();
-          setRoomTypes(data);
-        }
-      } catch (error) {
-        console.error("Error fetching room types:", error);
-      }
-    };
-
     if (isOpen) {
       fetchRoomTypes();
     }
   }, [isOpen, blockId]);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-      try {
-        const url = await uploadToCloudinary(file);
-        setFormData(prev => ({ ...prev, documentUrl: url }));
-        toast({
-          title: "Success",
-          description: "Document uploaded successfully",
-        });
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to upload document",
-          variant: "destructive",
-        });
+  const fetchRoomTypes = async () => {
+    try {
+      const response = await fetch(`/api/blocks/${blockId}/room-types`);
+      if (response.ok) {
+        const data = await response.json();
+        setRoomTypes(data);
       }
+    } catch (error) {
+      console.error("Error fetching room types:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch room types",
+        variant: "destructive",
+      });
     }
+  };
+
+  const handleUploadSuccess = (url: string) => {
+    setFormData(prev => ({ ...prev, documentUrl: url }));
+    toast({
+      title: "Success",
+      description: "Document uploaded successfully",
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -120,7 +111,6 @@ export function CreateTenantSheet({ blockId, onSuccess }: CreateTenantSheetProps
         documentUrl: "",
         paymentStatus: "pending",
       });
-      setSelectedFile(null);
     } catch (error) {
       toast({
         title: "Error",
@@ -298,24 +288,15 @@ export function CreateTenantSheet({ blockId, onSuccess }: CreateTenantSheetProps
 
           <div className="space-y-2">
             <Label>Upload Document</Label>
-            <div className="border-2 border-dashed rounded-lg p-4 text-center">
-              <input
-                type="file"
-                accept="image/*,.pdf"
-                onChange={handleFileChange}
-                className="hidden"
-                id="document-upload"
-              />
-              <label
-                htmlFor="document-upload"
-                className="cursor-pointer flex flex-col items-center gap-2"
-              >
-                <Upload className="h-8 w-8 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">
-                  {selectedFile ? selectedFile.name : "Click to upload document"}
-                </span>
-              </label>
-            </div>
+            <CloudinaryUploadWidget
+              onUploadSuccess={handleUploadSuccess}
+              buttonText={formData.documentUrl ? "Change Document" : "Upload Document"}
+            />
+            {formData.documentUrl && (
+              <div className="mt-2 text-sm text-muted-foreground">
+                Document uploaded successfully
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
