@@ -51,7 +51,7 @@ export default function BlockSettingsPage() {
           <span className="ml-2">Dashboard</span>
         </Link>
         <ChevronRight className="h-4 w-4" />
-        <Link href={`/blocks/${blockId}`} className="flex items-center hover:text-foreground">
+        <Link href={`/dashboard/${blockId}`} className="flex items-center hover:text-foreground">
           <Building2 className="h-4 w-4" />
           <span className="ml-2">Block</span>
         </Link>
@@ -71,7 +71,7 @@ export default function BlockSettingsPage() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {settingsOptions.map((option, index) => (
-          <Link key={option.href} href={`/blocks/${blockId}/settings/${option.href}`}>
+          <Link key={option.href} href={`/dashboard/${blockId}/settings/${option.href}`}>
             <motion.div
               className="group relative overflow-hidden rounded-lg border bg-card p-6 hover:shadow-md transition-all duration-300"
               initial={{ opacity: 0, y: 20 }}
