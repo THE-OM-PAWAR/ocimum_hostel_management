@@ -26,9 +26,7 @@ export async function POST(
       blockId,
     });
 
-    const populatedRoomType = await RoomType.findById(roomType._id).populate('components');
-
-    return NextResponse.json(populatedRoomType);
+    return NextResponse.json(roomType);
   } catch (error) {
     console.error("Error creating room type:", error);
     return NextResponse.json(
