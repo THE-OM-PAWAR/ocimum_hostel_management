@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
 interface RoomComponent {
-  id: string;
+  _id: string;
   name: string;
   description: string;
 }
@@ -51,15 +51,23 @@ export function CreateRoomTypeDialog({
     if (isOpen) {
       fetchComponents();
     }
-  }, [isOpen]);
+  }, [isOpen, blockId]);
 
   const fetchComponents = async () => {
     try {
       const response = await fetch(`/api/blocks/${blockId}/components`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch components");
+      }
       const data = await response.json();
       setComponents(data);
     } catch (error) {
       console.error("Error fetching components:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch room components",
+        variant: "destructive",
+      });
     }
   };
 
@@ -177,18 +185,18 @@ export function CreateRoomTypeDialog({
                   <div className="max-h-[200px] overflow-y-auto">
                     {filteredComponents.map((component) => (
                       <div
-                        key={component.id}
+                        key={component._id}
                         className={cn(
                           "flex items-center space-x-2 p-2 cursor-pointer hover:bg-accent rounded-md",
-                          formData.components.includes(component.id) && "bg-accent"
+                          formData.components.includes(component._id) && "bg-accent"
                         )}
-                        onClick={() => handleComponentToggle(component.id)}
+                        onClick={() => handleComponentToggle(component._id)}
                       >
                         <div className={cn(
                           "h-4 w-4 border rounded-sm flex items-center justify-center",
-                          formData.components.includes(component.id) && "bg-primary border-primary"
+                          formData.components.includes(component._id) && "bg-primary border-primary"
                         )}>
-                          {formData.components.includes(component.id) && (
+                          {formData.components.includes(component._id) && (
                             <Check className="h-3 w-3 text-primary-foreground" />
                           )}
                         </div>

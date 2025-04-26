@@ -18,13 +18,14 @@ import { EditRoomTypeDialog } from "@/components/room-types/edit-room-type-dialo
 import { DeleteRoomTypeDialog } from "@/components/room-types/delete-room-type-dialog";
 
 interface RoomComponent {
+  _id: string;
   id: string;
   name: string;
   description: string;
 }
 
 interface RoomType {
-  id: string;
+  _id: string;
   name: string;
   description: string;
   components: RoomComponent[];
@@ -65,6 +66,7 @@ export default function RoomTypesPage() {
   };
 
   const handleDelete = async (roomTypeId: string) => {
+    console.log("Deleting room type with ID:", roomTypeId);
     try {
       await fetch(`/api/blocks/${params.blockId}/room-types/${roomTypeId}`, {
         method: "DELETE",
@@ -202,7 +204,7 @@ export default function RoomTypesPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredRoomTypes.map((roomType) => (
-            <RoomTypeCard key={roomType.id} roomType={roomType} />
+            <RoomTypeCard key={roomType._id} roomType={roomType} />
           ))}
         </div>
       )}
@@ -233,7 +235,7 @@ export default function RoomTypesPage() {
               setIsDeleteDialogOpen(false);
               setSelectedRoomType(null);
             }}
-            onConfirm={() => handleDelete(selectedRoomType.id)}
+            onConfirm={() => handleDelete(selectedRoomType._id)}
             roomTypeName={selectedRoomType.name}
           />
         </>

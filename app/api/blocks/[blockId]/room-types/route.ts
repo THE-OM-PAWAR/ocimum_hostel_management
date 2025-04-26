@@ -9,6 +9,7 @@ export async function POST(
   try {
     await connectDB();
     const { name, description, components, rent } = await req.json();
+    console.log("Received data:", { name, description, components, rent });
     const { blockId } = params;
 
     if (!name || !description || !components || !rent || !blockId) {
@@ -18,15 +19,27 @@ export async function POST(
       );
     }
 
+    // Filter out any null or invalid component IDs
+    const validComponents = components.filter((id: string) => id && typeof id === 'string');
+
+    if (validComponents.length === 0) {
+      return NextResponse.json(
+        { error: "At least one valid component is required" },
+        { status: 400 }
+      );
+    }
+
     const roomType = await RoomType.create({
       name,
       description,
-      components,
+      components: validComponents,
       rent,
       blockId,
     });
 
-    return NextResponse.json(roomType);
+    const populatedRoomType = await RoomType.findById(roomType._id).populate('components');
+
+    return NextResponse.json(populatedRoomType);
   } catch (error) {
     console.error("Error creating room type:", error);
     return NextResponse.json(

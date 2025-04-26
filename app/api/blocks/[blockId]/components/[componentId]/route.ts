@@ -1,60 +1,61 @@
 import { NextResponse } from "next/server";
-import { RoomType } from "@/lib/mongoose/models/room-type.model";
+import { RoomComponent } from "@/lib/mongoose/models/room-component.model";
 import connectDB from "@/lib/mongodb/client";
 
-export async function POST(
+export async function PUT(
   req: Request,
-  { params }: { params: { blockId: string } }
+  { params }: { params: { blockId: string; componentId: string } }
 ) {
   try {
     await connectDB();
-    const { name, description, components, rent } = await req.json();
-    const { blockId } = params;
+    const { name, description } = await req.json();
+    const { componentId } = params;
 
-    if (!name || !description || !components || !rent || !blockId) {
+    const updatedComponent = await RoomComponent.findByIdAndUpdate(
+      componentId,
+      { name, description },
+      { new: true }
+    );
+
+    if (!updatedComponent) {
       return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
+        { error: "Component not found" },
+        { status: 404 }
       );
     }
 
-    const roomType = await RoomType.create({
-      name,
-      description,
-      components,
-      rent,
-      blockId,
-    });
-
-    const populatedRoomType = await RoomType.findById(roomType._id).populate('components');
-
-    return NextResponse.json(populatedRoomType);
+    return NextResponse.json(updatedComponent);
   } catch (error) {
-    console.error("Error creating room type:", error);
+    console.error("Error updating component:", error);
     return NextResponse.json(
-      { error: "Failed to create room type" },
+      { error: "Failed to update component" },
       { status: 500 }
     );
   }
 }
 
-export async function GET(
+export async function DELETE(
   req: Request,
-  { params }: { params: { blockId: string } }
+  { params }: { params: { blockId: string; componentId: string } }
 ) {
   try {
     await connectDB();
-    const { blockId } = params;
+    const { componentId } = params;
 
-    const roomTypes = await RoomType.find({ blockId })
-      .populate('components')
-      .sort({ createdAt: -1 });
-      
-    return NextResponse.json(roomTypes);
+    const deletedComponent = await RoomComponent.findByIdAndDelete(componentId);
+
+    if (!deletedComponent) {
+      return NextResponse.json(
+        { error: "Component not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ message: "Component deleted successfully" });
   } catch (error) {
-    console.error("Error fetching room types:", error);
+    console.error("Error deleting component:", error);
     return NextResponse.json(
-      { error: "Failed to fetch room types" },
+      { error: "Failed to delete component" },
       { status: 500 }
     );
   }

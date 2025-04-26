@@ -44,24 +44,6 @@ export default function BlockSettingsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Breadcrumb */}
-      <nav className="flex items-center space-x-1 text-sm text-muted-foreground">
-        <Link href="/dashboard" className="flex items-center hover:text-foreground">
-          <Home className="h-4 w-4" />
-          <span className="ml-2">Dashboard</span>
-        </Link>
-        <ChevronRight className="h-4 w-4" />
-        <Link href={`/dashboard/${blockId}`} className="flex items-center hover:text-foreground">
-          <Building2 className="h-4 w-4" />
-          <span className="ml-2">Block</span>
-        </Link>
-        <ChevronRight className="h-4 w-4" />
-        <div className="flex items-center">
-          <Settings className="h-4 w-4" />
-          <span className="ml-2">Settings</span>
-        </div>
-      </nav>
-
       <div>
         <h1 className="text-3xl font-bold">Block Settings</h1>
         <p className="text-muted-foreground mt-2">

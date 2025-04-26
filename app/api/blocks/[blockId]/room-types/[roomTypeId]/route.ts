@@ -11,11 +11,33 @@ export async function PUT(
     const { roomTypeId } = params;
     const { name, description, components, rent } = await req.json();
 
+    // Filter out any null or invalid component IDs
+    const validComponents = components.filter((id : string) => id && typeof id === 'string');
+
+    if (validComponents.length === 0) {
+      return NextResponse.json(
+        { error: "At least one valid component is required" },
+        { status: 400 }
+      );
+    }
+
     const updatedRoomType = await RoomType.findByIdAndUpdate(
       roomTypeId,
-      { name, description, components, rent },
+      { 
+        name, 
+        description, 
+        components: validComponents,
+        rent 
+      },
       { new: true }
     ).populate('components');
+
+    if (!updatedRoomType) {
+      return NextResponse.json(
+        { error: "Room type not found" },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json(updatedRoomType);
   } catch (error) {
@@ -35,7 +57,14 @@ export async function DELETE(
     await connectDB();
     const { roomTypeId } = params;
 
-    await RoomType.findByIdAndDelete(roomTypeId);
+    const deletedRoomType = await RoomType.findByIdAndDelete(roomTypeId);
+
+    if (!deletedRoomType) {
+      return NextResponse.json(
+        { error: "Room type not found" },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json({ message: "Room type deleted successfully" });
   } catch (error) {

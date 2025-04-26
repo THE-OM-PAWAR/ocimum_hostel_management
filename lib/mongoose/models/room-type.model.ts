@@ -22,11 +22,17 @@ const roomTypeSchema = new Schema<IRoomType>(
       required: [true, 'Please provide a description'],
       trim: true,
     },
-    components: [{
-      type: Schema.Types.ObjectId,
+    components: {
+      type: [Schema.Types.ObjectId],
       ref: 'RoomComponent',
       required: [true, 'Please provide at least one component'],
-    }],
+      validate: {
+        validator: function(v: mongoose.Types.ObjectId[]) {
+          return Array.isArray(v) && v.length > 0;
+        },
+        message: 'At least one component is required'
+      }
+    },
     rent: {
       type: Number,
       required: [true, 'Please provide the monthly rent'],

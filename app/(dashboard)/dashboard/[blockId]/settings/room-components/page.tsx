@@ -18,7 +18,7 @@ import { EditComponentDialog } from "@/components/room-components/edit-component
 import { DeleteComponentDialog } from "@/components/room-components/delete-component-dialog";
 
 interface RoomComponent {
-  id: string;
+  _id: string;
   name: string;
   description: string;
   blockId: string;
@@ -58,9 +58,14 @@ export default function RoomComponentsPage() {
 
   const handleDelete = async (componentId: string) => {
     try {
-      await fetch(`/api/blocks/${params.blockId}/components/${componentId}`, {
+      const response = await fetch(`/api/blocks/${params.blockId}/components/${componentId}`, {
         method: "DELETE",
       });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete component");
+      }
+
       toast({
         title: "Success",
         description: "Component deleted successfully",
@@ -175,7 +180,7 @@ export default function RoomComponentsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredComponents.map((component) => (
-            <ComponentCard key={component.id} component={component} />
+            <ComponentCard key={component._id} component={component} />
           ))}
         </div>
       )}
@@ -197,7 +202,11 @@ export default function RoomComponentsPage() {
             }}
             onSuccess={fetchComponents}
             blockId={Array.isArray(params.blockId) ? params.blockId[0] : params.blockId}
-            component={selectedComponent}
+            component={{
+              id: selectedComponent._id,
+              name: selectedComponent.name,
+              description: selectedComponent.description,
+            }}
           />
 
           <DeleteComponentDialog
@@ -206,7 +215,7 @@ export default function RoomComponentsPage() {
               setIsDeleteDialogOpen(false);
               setSelectedComponent(null);
             }}
-            onConfirm={() => handleDelete(selectedComponent.id)}
+            onConfirm={() => handleDelete(selectedComponent._id)}
             componentName={selectedComponent.name}
           />
         </>

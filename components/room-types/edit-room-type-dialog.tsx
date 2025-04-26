@@ -17,13 +17,13 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
 interface RoomComponent {
-  id: string;
+  _id: string;
   name: string;
   description: string;
 }
 
 interface RoomType {
-  id: string;
+  _id: string;
   name: string;
   description: string;
   components: RoomComponent[];
@@ -53,21 +53,31 @@ export function EditRoomTypeDialog({
   const [formData, setFormData] = useState({
     name: roomType.name,
     description: roomType.description,
-    components: roomType.components.map(c => c.id),
+    components: roomType.components.map(c => c._id),
     rent: roomType.rent.toString(),
   });
 
   useEffect(() => {
-    fetchComponents();
-  }, []);
+    if (isOpen) {
+      fetchComponents();
+    }
+  }, [isOpen, blockId]);
 
   const fetchComponents = async () => {
     try {
       const response = await fetch(`/api/blocks/${blockId}/components`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch components");
+      }
       const data = await response.json();
       setComponents(data);
     } catch (error) {
       console.error("Error fetching components:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch room components",
+        variant: "destructive",
+      });
     }
   };
 
@@ -76,7 +86,8 @@ export function EditRoomTypeDialog({
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`/api/blocks/${blockId}/room-types/${roomType.id}`, {
+        console.log("roomType", roomType);
+      const response = await fetch(`/api/blocks/${blockId}/room-types/${roomType._id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -112,6 +123,15 @@ export function EditRoomTypeDialog({
   const filteredComponents = components.filter((component) =>
     component.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleComponentToggle = (componentId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      components: prev.components.includes(componentId)
+        ? prev.components.filter(id => id !== componentId)
+        : [...prev.components, componentId]
+    }));
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -169,25 +189,18 @@ export function EditRoomTypeDialog({
                   <div className="max-h-[200px] overflow-y-auto">
                     {filteredComponents.map((component) => (
                       <div
-                        key={component.id}
+                        key={component._id}
                         className={cn(
                           "flex items-center space-x-2 p-2 cursor-pointer hover:bg-accent rounded-md",
-                          formData.components.includes(component.id) && "bg-accent"
+                          formData.components.includes(component._id) && "bg-accent"
                         )}
-                        onClick={() => {
-                          setFormData(prev => ({
-                            ...prev,
-                            components: prev.components.includes(component.id)
-                              ? prev.components.filter(id => id !== component.id)
-                              : [...prev.components, component.id]
-                          }));
-                        }}
+                        onClick={() => handleComponentToggle(component._id)}
                       >
                         <div className={cn(
                           "h-4 w-4 border rounded-sm flex items-center justify-center",
-                          formData.components.includes(component.id) && "bg-primary border-primary"
+                          formData.components.includes(component._id) && "bg-primary border-primary"
                         )}>
-                          {formData.components.includes(component.id) && (
+                          {formData.components.includes(component._id) && (
                             <Check className="h-3 w-3 text-primary-foreground" />
                           )}
                         </div>
@@ -195,6 +208,7 @@ export function EditRoomTypeDialog({
                       </div>
                     ))}
                     <Button
+                      type="button"
                       variant="ghost"
                       className="w-full mt-2 text-primary"
                       onClick={() => router.push(`/dashboard/${blockId}/settings/room-components`)}
