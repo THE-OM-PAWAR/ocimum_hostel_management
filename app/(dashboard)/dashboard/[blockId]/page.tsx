@@ -208,7 +208,7 @@ export default function BlockDetailsPage() {
   };
 
   const handleSettingsClick = () => {
-    router.push(`/blocks/${params.blockId}/settings`);
+    router.push(`/dashboard/${params.blockId}/settings`);
   };
 
   return (

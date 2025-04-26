@@ -49,7 +49,7 @@ function BlockCard({ index, name, description, id }: BlockCardProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
       className="bg-card p-6 rounded-lg border shadow-sm hover:shadow-md transition-all duration-300 h-[200px] flex flex-col cursor-pointer"
-      onClick={() => router.push(`/blocks/${id}`)}
+      onClick={() => router.push(`/dashboard/${id}`)}
     >
       <h3 className="font-medium">{name}</h3>
       <div className="flex-1 mt-2">
