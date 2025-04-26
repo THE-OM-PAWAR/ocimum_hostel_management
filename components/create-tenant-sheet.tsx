@@ -6,12 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Upload } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { CloudinaryUploadWidget } from "@/components/ui/cloudinary-upload-widget";
+import { useUser } from "@clerk/nextjs";
 
 interface CreateTenantSheetProps {
   blockId: string;
@@ -22,6 +22,7 @@ export function CreateTenantSheet({ blockId, onSuccess }: CreateTenantSheetProps
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { user } = useUser();
   const [roomTypes, setRoomTypes] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     name: "",
@@ -34,47 +35,33 @@ export function CreateTenantSheet({ blockId, onSuccess }: CreateTenantSheetProps
     roomType: "",
     address: "",
     pinCode: "",
-    documentUrl: "",
     paymentStatus: "pending" as const,
   });
 
   useEffect(() => {
+    const fetchRoomTypes = async () => {
+      try {
+        const response = await fetch(`/api/blocks/${blockId}/room-types`);
+        if (response.ok) {
+          const data = await response.json();
+          setRoomTypes(data);
+        }
+      } catch (error) {
+        console.error("Error fetching room types:", error);
+      }
+    };
+
     if (isOpen) {
       fetchRoomTypes();
     }
   }, [isOpen, blockId]);
-
-  const fetchRoomTypes = async () => {
-    try {
-      const response = await fetch(`/api/blocks/${blockId}/room-types`);
-      if (response.ok) {
-        const data = await response.json();
-        setRoomTypes(data);
-      }
-    } catch (error) {
-      console.error("Error fetching room types:", error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch room types",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleUploadSuccess = (url: string) => {
-    setFormData(prev => ({ ...prev, documentUrl: url }));
-    toast({
-      title: "Success",
-      description: "Document uploaded successfully",
-    });
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("/api/tenants", {
+      const response = await fetch(`/api/users/${user?.id}/tenants`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -108,7 +95,6 @@ export function CreateTenantSheet({ blockId, onSuccess }: CreateTenantSheetProps
         roomType: "",
         address: "",
         pinCode: "",
-        documentUrl: "",
         paymentStatus: "pending",
       });
     } catch (error) {
@@ -130,23 +116,23 @@ export function CreateTenantSheet({ blockId, onSuccess }: CreateTenantSheetProps
           Create Tenant
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
+      <SheetContent className="w-full sm:w-[50%] max-w-full sm:max-w-full overflow-y-auto">
         <SheetHeader>
           <SheetTitle>Create New Tenant</SheetTitle>
         </SheetHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-              placeholder="Enter full name"
-              required
-            />
-          </div>
+        <form onSubmit={handleSubmit} className="space-y-6 mt-8">
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name</Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Enter full name"
+                required
+              />
+            </div>
 
-          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="phone">Phone Number</Label>
               <Input
@@ -168,9 +154,7 @@ export function CreateTenantSheet({ blockId, onSuccess }: CreateTenantSheetProps
                 required
               />
             </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="idType">ID Type</Label>
               <select
@@ -198,38 +182,36 @@ export function CreateTenantSheet({ blockId, onSuccess }: CreateTenantSheetProps
                 required
               />
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label>Join Date</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !formData.joinDate && "text-muted-foreground"
-                  )}
-                >
-                  {formData.joinDate ? (
-                    format(formData.joinDate, "PPP")
-                  ) : (
-                    <span>Pick a date</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={formData.joinDate}
-                  onSelect={(date) => date && setFormData(prev => ({ ...prev, joinDate: date }))}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
+            <div className="space-y-2">
+              <Label>Join Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !formData.joinDate && "text-muted-foreground"
+                    )}
+                  >
+                    {formData.joinDate ? (
+                      format(formData.joinDate, "PPP")
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={formData.joinDate}
+                    onSelect={(date) => date && setFormData(prev => ({ ...prev, joinDate: date }))}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
 
-          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="roomNumber">Room Number</Label>
               <Input
@@ -286,20 +268,7 @@ export function CreateTenantSheet({ blockId, onSuccess }: CreateTenantSheetProps
             />
           </div>
 
-          <div className="space-y-2">
-            <Label>Upload Document</Label>
-            <CloudinaryUploadWidget
-              onUploadSuccess={handleUploadSuccess}
-              buttonText={formData.documentUrl ? "Change Document" : "Upload Document"}
-            />
-            {formData.documentUrl && (
-              <div className="mt-2 text-sm text-muted-foreground">
-                Document uploaded successfully
-              </div>
-            )}
-          </div>
-
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="flex justify-end gap-3 pt-6">
             <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
               Cancel
             </Button>

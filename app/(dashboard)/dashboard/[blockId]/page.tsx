@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useParams, useRouter } from "next/navigation";
-import { Plus, MoreHorizontal, Settings, Search, Package2 } from "lucide-react";
+import { Plus, Settings, Search, Package2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -13,18 +13,27 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { CreateTenantSheet } from "@/components/create-tenant-sheet";
 
+interface RentPayment {
+  month: string;
+  amount: number;
+  status: "paid" | "pending" | "overdue";
+  dueDate: string;
+}
+
 interface Tenant {
-  id: string;
+  _id: string;
   name: string;
-  contactNumber: string;
+  phone: string;
   paymentStatus: "paid" | "pending" | "overdue";
   roomNumber: string;
   roomType: string;
-  joiningDate: string;
+  joinDate: string;
+  recentPayments: RentPayment[];
 }
 
 interface Block {
@@ -63,15 +72,52 @@ export default function BlockDetailsPage() {
       }
     };
 
+    const fetchTenants = async () => {
+      if (!isLoaded || !user || !params.blockId) return;
+      try {
+        const response = await fetch(`/api/users/${user.id}/tenants?blockId=${params.blockId}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const data = await response.json();
+        setTenants(data);
+      } catch (error) {
+        console.error("Error fetching tenants:", error);
+      }
+    };
+
     if (params.blockId) {
       fetchBlockDetails();
+      fetchTenants();
     }
   }, [params.blockId, user?.id, isLoaded]);
 
   const handleTenantCreated = () => {
-    // Refresh the tenants list
-    // This is where you would fetch the updated list from the API
-    console.log("Tenant created successfully");
+    if (isLoaded && user && params.blockId) {
+      fetchTenants();
+    }
+  };
+
+  const fetchTenants = async () => {
+    if (!isLoaded || !user || !params.blockId) return;
+    try {
+      const response = await fetch(`/api/users/${user.id}/tenants?blockId=${params.blockId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const data = await response.json();
+      setTenants(data);
+    } catch (error) {
+      console.error("Error fetching tenants:", error);
+    }
   };
 
   const getPaymentStatusBadge = (status: string) => {
@@ -101,6 +147,10 @@ export default function BlockDetailsPage() {
 
   const handleSettingsClick = () => {
     router.push(`/dashboard/${params.blockId}/settings`);
+  };
+
+  const handleViewDetails = (tenantId: string) => {
+    router.push(`/dashboard/${params.blockId}/tenants/${tenantId}`);
   };
 
   const filteredTenants = tenants.filter(tenant =>
@@ -159,7 +209,7 @@ export default function BlockDetailsPage() {
           <div className="divide-y">
             {filteredTenants.map((tenant) => (
               <div 
-                key={tenant.id}
+                key={tenant._id}
                 className="p-4 flex items-center justify-between hover:bg-accent/5 transition-colors"
               >
                 <div className="flex items-center gap-4">
@@ -177,15 +227,41 @@ export default function BlockDetailsPage() {
                   {getPaymentStatusBadge(tenant.paymentStatus)}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="h-4 w-4" />
+                      <Button variant="outline" size="sm">
+                        Rent History
+                        <ChevronDown className="ml-2 h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>View Details</DropdownMenuItem>
-                      <DropdownMenuItem>Edit Tenant</DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
-                        Remove Tenant
+                    <DropdownMenuContent align="end" className="w-[240px]">
+                      <div className="p-2">
+                        <h4 className="text-sm font-medium mb-2">Last 3 Months</h4>
+                        <div className="space-y-2">
+                          {[
+                            { month: "March 2024", status: "paid", amount: 12000 },
+                            { month: "February 2024", status: "paid", amount: 12000 },
+                            { month: "January 2024", status: "paid", amount: 12000 },
+                          ].map((payment, index) => (
+                            <div key={index} className="flex items-center justify-between">
+                              <div className="text-sm">
+                                <div>{payment.month}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  ₹{payment.amount.toLocaleString()}
+                                </div>
+                              </div>
+                              {getPaymentStatusBadge(payment.status)}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        className="text-primary cursor-pointer"
+                        onClick={() => handleViewDetails(tenant._id)}
+                      >
+                        View Details
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="cursor-pointer">
+                        Add Rent Payment
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
