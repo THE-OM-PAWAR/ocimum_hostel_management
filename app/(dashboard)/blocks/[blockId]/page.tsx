@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useParams } from "next/navigation";
-import { Plus, Pencil, Trash2, RefreshCw, Filter } from "lucide-react";
+import { Plus, Pencil, Trash2, RefreshCw, Filter, Settings, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -23,6 +23,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { CreateTenantDialog } from "@/components/create-tenant-dialog";
 
@@ -200,16 +206,103 @@ export default function BlockDetailsPage() {
     console.log("Deleting selected items...");
   };
 
-  const isFiltersActive = statusFilter !== null || roomTypeFilter !== null;
-
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-6">
         <h1 className="text-3xl font-bold">{block?.name || "Loading..."}</h1>
+
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-2 flex-1">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input 
+                placeholder="Search tenants..." 
+                className="pl-9 bg-background"
+              />
+            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  className={cn(
+                    "relative",
+                    (statusFilter || roomTypeFilter) && "bg-primary/10 text-primary hover:bg-primary/20"
+                  )}
+                >
+                  <Filter className="h-4 w-4" />
+                  {(statusFilter || roomTypeFilter) && (
+                    <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-primary" />
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-56">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-sm">Payment Status</h4>
+                    <div className="space-y-1">
+                      {['All', 'Paid', 'Pending', 'Overdue'].map((status) => (
+                        <button
+                          key={status}
+                          className={cn(
+                            "w-full text-left px-2 py-1 text-sm rounded-md hover:bg-accent",
+                            statusFilter === status.toLowerCase() && "bg-primary/10 text-primary"
+                          )}
+                          onClick={() => setStatusFilter(status === 'All' ? null : status.toLowerCase())}
+                        >
+                          {status}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-sm">Room Type</h4>
+                    <div className="space-y-1">
+                      {['All', 'Single', 'Double', 'Triple'].map((type) => (
+                        <button
+                          key={type}
+                          className={cn(
+                            "w-full text-left px-2 py-1 text-sm rounded-md hover:bg-accent",
+                            roomTypeFilter === type.toLowerCase() && "bg-primary/10 text-primary"
+                          )}
+                          onClick={() => setRoomTypeFilter(type === 'All' ? null : type.toLowerCase())}
+                        >
+                          {type}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+            <Button 
+              variant="outline" 
+              size="icon"
+              className="hover:bg-accent"
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            {selectedTenants.length > 0 && (
+              <span className="text-sm text-muted-foreground">
+                {selectedTenants.length} selected
+              </span>
+            )}
+            <Button 
+              className="shadow-sm hover:shadow transition-all"
+              onClick={() => setIsCreateTenantOpen(true)}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create Tenant
+            </Button>
+          </div>
+        </div>
       </div>
 
       <Tabs defaultValue="tenants" className="w-full">
-        <TabsList className="w-full sm:w-auto border bg-card shadow-sm">
+        <TabsList className="w-full sm:w-auto bg-background border">
           <TabsTrigger value="tenants" className="flex-1 sm:flex-none">Tenants</TabsTrigger>
           <TabsTrigger value="rooms" className="flex-1 sm:flex-none">Rooms</TabsTrigger>
         </TabsList>
@@ -231,82 +324,6 @@ export default function BlockDetailsPage() {
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 )}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      className={cn(
-                        "relative",
-                        isFiltersActive && "bg-primary/10 text-primary hover:bg-primary/20"
-                      )}
-                    >
-                      <Filter className="h-4 w-4" />
-                      {isFiltersActive && (
-                        <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-primary" />
-                      )}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-48">
-                    <DropdownMenuItem 
-                      onClick={() => setStatusFilter(null)}
-                      className={cn(statusFilter === null && "bg-primary/10")}
-                    >
-                      All Payment Status
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => setStatusFilter("paid")}
-                      className={cn(statusFilter === "paid" && "bg-primary/10")}
-                    >
-                      Paid Only
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => setStatusFilter("pending")}
-                      className={cn(statusFilter === "pending" && "bg-primary/10")}
-                    >
-                      Pending Only
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => setStatusFilter("overdue")}
-                      className={cn(statusFilter === "overdue" && "bg-primary/10")}
-                    >
-                      Overdue Only
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      className={cn("border-t", roomTypeFilter === null && "bg-primary/10")} 
-                      onClick={() => setRoomTypeFilter(null)}
-                    >
-                      All Room Types
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => setRoomTypeFilter("Single")}
-                      className={cn(roomTypeFilter === "Single" && "bg-primary/10")}
-                    >
-                      Single Rooms
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => setRoomTypeFilter("Double")}
-                      className={cn(roomTypeFilter === "Double" && "bg-primary/10")}
-                    >
-                      Double Rooms
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-              
-              <div className="flex items-center gap-4">
-                {selectedTenants.length > 0 && (
-                  <span className="text-sm text-muted-foreground">
-                    {selectedTenants.length} selected
-                  </span>
-                )}
-                <Button 
-                  className="shadow-sm hover:shadow-md transition-all"
-                  onClick={() => setIsCreateTenantOpen(true)}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Tenant
-                </Button>
               </div>
             </div>
             <div className="overflow-x-auto">
