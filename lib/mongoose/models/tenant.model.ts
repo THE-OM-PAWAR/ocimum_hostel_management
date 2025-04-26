@@ -12,6 +12,9 @@ export interface ITenant extends Document {
   block: mongoose.Types.ObjectId;
   paymentStatus: 'paid' | 'pending' | 'overdue';
   status: 'active' | 'inactive' | 'pending';
+  address?: string;
+  pinCode?: string;
+  documentUrl?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -69,6 +72,18 @@ const tenantSchema = new Schema<ITenant>(
       type: String,
       enum: ['active', 'inactive', 'pending'],
       default: 'pending',
+    },
+    address: {
+      type: String,
+      trim: true,
+    },
+    pinCode: {
+      type: String,
+      trim: true,
+    },
+    documentUrl: {
+      type: String,
+      trim: true,
     },
   },
   {
