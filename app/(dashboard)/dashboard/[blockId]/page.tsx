@@ -307,7 +307,199 @@ export default function BlockDetailsPage() {
         </div>
       </div>
 
+      <Tabs defaultValue="tenants" className="w-full">
+        <TabsList className="w-full sm:w-auto bg-background border">
+          <TabsTrigger value="tenants" className="flex-1 sm:flex-none">Tenants</TabsTrigger>
+          <TabsTrigger value="rooms" className="flex-1 sm:flex-none">Rooms</TabsTrigger>
+        </TabsList>
 
+        <TabsContent value="tenants" className="mt-6">
+          <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+            <div className="p-4 border-b flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" onClick={refreshData}>
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+                {selectedTenants.length > 0 && (
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="text-destructive hover:text-destructive"
+                    onClick={handleDeleteSelected}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50 hover:bg-muted/50">
+                    <TableHead className="w-12">
+                      <Checkbox 
+                        checked={selectedTenants.length === filteredTenants.length && filteredTenants.length > 0}
+                        onCheckedChange={handleSelectAllTenants}
+                      />
+                    </TableHead>
+                    <TableHead className="font-semibold">Tenant Name</TableHead>
+                    <TableHead className="font-semibold">Contact Number</TableHead>
+                    <TableHead className="font-semibold">Payment Status</TableHead>
+                    <TableHead className="font-semibold">Room Number</TableHead>
+                    <TableHead className="font-semibold">Room Type</TableHead>
+                    <TableHead className="font-semibold">Joining Date</TableHead>
+                    <TableHead className="font-semibold">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredTenants.map((tenant) => (
+                    <TableRow 
+                      key={tenant.id}
+                      className="hover:bg-muted/50 transition-colors"
+                    >
+                      <TableCell>
+                        <Checkbox 
+                          checked={selectedTenants.includes(tenant.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedTenants([...selectedTenants, tenant.id]);
+                            } else {
+                              setSelectedTenants(selectedTenants.filter(id => id !== tenant.id));
+                            }
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell className="font-medium">{tenant.name}</TableCell>
+                      <TableCell>{tenant.contactNumber}</TableCell>
+                      <TableCell>{getPaymentStatusBadge(tenant.paymentStatus)}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="bg-background">
+                          {tenant.roomNumber}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{tenant.roomType}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {format(new Date(tenant.joiningDate), "MMM d, yyyy")}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            className="hover:bg-accent h-8 w-8"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            className="hover:bg-destructive/10 hover:text-destructive h-8 w-8"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="rooms" className="mt-6">
+          <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+            <div className="p-4 border-b flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" onClick={refreshData}>
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+                {selectedRooms.length > 0 && (
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="text-destructive hover:text-destructive"
+                    onClick={handleDeleteSelected}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+              <div className="flex items-center gap-4">
+                {selectedRooms.length > 0 && (
+                  <span className="text-sm text-muted-foreground">
+                    {selectedRooms.length} selected
+                  </span>
+                )}
+                <Button className="shadow-sm hover:shadow-md transition-all">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Room
+                </Button>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50 hover:bg-muted/50">
+                    <TableHead className="w-12">
+                      <Checkbox 
+                        checked={selectedRooms.length === rooms.length && rooms.length > 0}
+                        onCheckedChange={handleSelectAllRooms}
+                      />
+                    </TableHead>
+                    <TableHead className="font-semibold">Room Type</TableHead>
+                    <TableHead className="font-semibold">Price per Bed</TableHead>
+                    <TableHead className="font-semibold">Number of Rooms</TableHead>
+                    <TableHead className="font-semibold">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {rooms.map((room) => (
+                    <TableRow 
+                      key={room.id}
+                      className="hover:bg-muted/50 transition-colors"
+                    >
+                      <TableCell>
+                        <Checkbox 
+                          checked={selectedRooms.includes(room.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedRooms([...selectedRooms, room.id]);
+                            } else {
+                              setSelectedRooms(selectedRooms.filter(id => id !== room.id));
+                            }
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell className="font-medium">{room.type}</TableCell>
+                      <TableCell>₹{room.pricePerBed.toLocaleString()}</TableCell>
+                      <TableCell>{room.numberOfRooms}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            className="hover:bg-accent h-8 w-8"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            className="hover:bg-destructive/10 hover:text-destructive h-8 w-8"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
 
       <CreateTenantDialog
         isOpen={isCreateTenantOpen}
