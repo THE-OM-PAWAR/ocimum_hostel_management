@@ -1,6 +1,6 @@
 "use client";
 
-import { useUser, UserButton } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import {
@@ -9,12 +9,11 @@ import {
   Settings,
   Users,
   CreditCard,
-  Home,
   Bell,
   BarChart3,
   Menu,
-  X,
-  User
+  ChevronLeft,
+  User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -24,13 +23,8 @@ import {
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { OnboardingDialog } from "@/components/onboarding-dialog";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 
 const navigationItems = [
   {
@@ -60,27 +54,23 @@ interface SidebarItemProps {
   title: string;
   href: string;
   isActive?: boolean;
+  collapsed?: boolean;
 }
 
-function SidebarItem({ icon, title, href, isActive }: SidebarItemProps) {
+function SidebarItem({ icon, title, href, isActive, collapsed }: SidebarItemProps) {
   return (
-    <TooltipProvider delayDuration={0}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Link
-            href={href}
-            className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-              "hover:bg-accent hover:text-accent-foreground",
-              isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
-            )}
-          >
-            {icon}
-            <span>{title}</span>
-          </Link>
-        </TooltipTrigger>
-      </Tooltip>
-    </TooltipProvider>
+    <Link
+      href={href}
+      className={cn(
+        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+        "hover:bg-accent hover:text-accent-foreground",
+        isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground",
+        collapsed && "justify-center px-2"
+      )}
+    >
+      {icon}
+      {!collapsed && <span>{title}</span>}
+    </Link>
   );
 }
 
@@ -103,7 +93,7 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [userName, setUserName] = useState("");
   const pathname = usePathname();
   const { user } = useUser();
@@ -115,19 +105,25 @@ export default function DashboardLayout({
     }
   }, [user]);
 
-  // Only show first 5 items in mobile navigation
   const mobileNavItems = navigationItems.slice(0, 5);
 
   return (
     <div className="flex min-h-screen">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex fixed h-screen w-[240px] border-r bg-card">
+      <aside 
+        className={cn(
+          "hidden md:flex fixed h-screen border-r bg-card transition-all duration-300",
+          isSidebarCollapsed ? "w-[80px]" : "w-[240px]"
+        )}
+      >
         <div className="flex w-full flex-col">
           {/* Logo */}
           <div className="flex h-16 items-center border-b px-4">
             <div className="flex items-center gap-2">
               <Building2 className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold">Ocimum</span>
+              {!isSidebarCollapsed && (
+                <span className="text-xl font-bold">HostelHub</span>
+              )}
             </div>
           </div>
 
@@ -138,6 +134,7 @@ export default function DashboardLayout({
                 key={item.href}
                 {...item}
                 isActive={pathname === item.href}
+                collapsed={isSidebarCollapsed}
               />
             ))}
           </nav>
@@ -147,17 +144,40 @@ export default function DashboardLayout({
             <Button
               onClick={() => user && router.push(`/profile/${user.id}`)}
               variant="outline"
-              className="w-full flex items-center gap-2"
+              className={cn(
+                "w-full flex items-center gap-2",
+                isSidebarCollapsed && "justify-center p-2"
+              )}
             >
               <User className="h-4 w-4" />
-              {userName}
+              {!isSidebarCollapsed && userName}
             </Button>
           </div>
         </div>
+
+        {/* New Collapse Button */}
+        <Button
+          variant="secondary"
+          size="sm"
+          className={cn(
+            "absolute top-4 -right-3 h-6 w-6 rounded-full",
+            "hover:bg-accent hover:text-accent-foreground",
+            "transition-transform duration-200",
+            isSidebarCollapsed && "rotate-180"
+          )}
+          onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
       </aside>
 
       {/* Mobile Sidebar */}
-      <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button variant="ghost" size="icon" className="md:hidden fixed top-4 left-4 z-40">
+            <Menu className="h-5 w-5" />
+          </Button>
+        </SheetTrigger>
         <SheetContent side="left" className="w-[240px] p-0">
           <div className="flex h-full flex-col">
             <div className="flex h-16 items-center border-b px-4">
@@ -186,9 +206,13 @@ export default function DashboardLayout({
       </Sheet>
 
       {/* Main Content */}
-      <div className="flex-1 md:ml-[240px]">
+      <div className={cn(
+        "flex-1 transition-all duration-300",
+        isSidebarCollapsed ? "md:ml-[80px]" : "md:ml-[240px]"
+      )}>
         <div className="min-h-screen overflow-y-auto">
           <div className="container py-8 px-4 md:px-8">
+            <Breadcrumbs />
             {children}
           </div>
         </div>
