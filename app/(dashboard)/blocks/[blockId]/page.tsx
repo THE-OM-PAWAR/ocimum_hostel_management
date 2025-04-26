@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Plus, Pencil, Trash2, RefreshCw, Filter, Settings, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -56,6 +56,7 @@ interface Block {
 }
 
 export default function BlockDetailsPage() {
+  const router = useRouter();
   const params = useParams();
   const { user, isLoaded } = useUser();
   const [block, setBlock] = useState<Block | null>(null);
@@ -206,6 +207,10 @@ export default function BlockDetailsPage() {
     console.log("Deleting selected items...");
   };
 
+  const handleSettingsClick = () => {
+    router.push(`/blocks/${params.blockId}/settings`);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-6">
@@ -279,6 +284,7 @@ export default function BlockDetailsPage() {
               variant="outline" 
               size="icon"
               className="hover:bg-accent"
+              onClick={handleSettingsClick}
             >
               <Settings className="h-4 w-4" />
             </Button>

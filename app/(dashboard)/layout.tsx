@@ -94,16 +94,9 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [userName, setUserName] = useState("");
   const pathname = usePathname();
   const { user } = useUser();
   const router = useRouter();
-
-  useEffect(() => {
-    if (user) {
-      setUserName(user.fullName || "User Profile");
-    }
-  }, [user]);
 
   const mobileNavItems = navigationItems.slice(0, 5);
 
@@ -150,25 +143,10 @@ export default function DashboardLayout({
               )}
             >
               <User className="h-4 w-4" />
-              {!isSidebarCollapsed && userName}
+              {!isSidebarCollapsed && (user?.fullName || "User Profile")}
             </Button>
           </div>
         </div>
-
-        {/* New Collapse Button */}
-        <Button
-          variant="secondary"
-          size="sm"
-          className={cn(
-            "absolute top-4 -right-3 h-6 w-6 rounded-full",
-            "hover:bg-accent hover:text-accent-foreground",
-            "transition-transform duration-200",
-            isSidebarCollapsed && "rotate-180"
-          )}
-          onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
       </aside>
 
       {/* Mobile Sidebar */}
@@ -198,7 +176,7 @@ export default function DashboardLayout({
             <div className="border-t p-4">
               <Button onClick={() => user && router.push(`/profile/${user.id}`)} variant="outline" className="w-full flex items-center gap-2">
                 <User className="h-4 w-4" />
-                {userName}
+                {user?.fullName || "User Profile"}
               </Button>
             </div>
           </div>
@@ -211,8 +189,25 @@ export default function DashboardLayout({
         isSidebarCollapsed ? "md:ml-[80px]" : "md:ml-[240px]"
       )}>
         <div className="min-h-screen overflow-y-auto">
+          {/* Header with Toggle and Breadcrumbs */}
+          <div className="h-16 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-30 flex items-center w-full">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="ml-4"
+              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            >
+              <ChevronLeft className={cn(
+                "h-4 w-4 transition-transform duration-200",
+                isSidebarCollapsed && "rotate-180"
+              )} />
+            </Button>
+            <div className="px-4">
+              <Breadcrumbs />
+            </div>
+          </div>
+
           <div className="container py-8 px-4 md:px-8">
-            <Breadcrumbs />
             {children}
           </div>
         </div>

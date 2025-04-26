@@ -5,7 +5,6 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { ReduxProvider } from '@/lib/redux/provider';
 import { Toaster } from '@/components/ui/toaster';
 import { ClerkProvider } from "@clerk/nextjs";
-import { Clerk } from '@clerk/nextjs/server';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -22,19 +21,19 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ClerkProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="light"
-            enableSystem
-            disableTransitionOnChange
-          >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ClerkProvider>
             <ReduxProvider>
               {children}
               <Toaster />
             </ReduxProvider>
-          </ThemeProvider>
-        </ClerkProvider>
+          </ClerkProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
