@@ -29,17 +29,20 @@ export async function POST(req: Request) {
       throw new Error("Block not found");
     }
 
-    // Generate rent payments from join date to current month
+    const generationDay = parseInt(block.rentGenerationDay) || 5;
+
+    // Generate rent payments from join date to next month
     const joinDate = new Date(data.joinDate);
     const currentDate = new Date();
+    const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
     const months = [];
     
     let date = new Date(joinDate);
-    while (date <= currentDate) {
+    while (date <= nextMonth) {
       months.push({
         month: date.toLocaleString('default', { month: 'long' }),
         year: date.getFullYear(),
-        dueDate: new Date(date.getFullYear(), date.getMonth(), Number(block.rentGenerationDay) || 5)
+        dueDate: new Date(date.getFullYear(), date.getMonth(), generationDay)
       });
       date.setMonth(date.getMonth() + 1);
     }

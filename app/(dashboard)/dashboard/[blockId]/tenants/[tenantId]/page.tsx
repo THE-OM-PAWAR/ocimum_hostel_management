@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-import { Phone, Mail, MapPin, Calendar, Building2, Upload as UploadIcon, Bed, Users, Key, MoreVertical } from "lucide-react";
+import { Phone, Mail, MapPin, Calendar, Building2, Upload as UploadIcon, Bed, Users, Key, MoreVertical, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AddRentPaymentDialog } from "@/components/rent-payments/add-rent-payment-dialog";
 import {
@@ -48,6 +48,8 @@ interface RentPayment {
   paymentMethod?: string;
   type: "monthly" | "additional";
   label?: string;
+  roomType?: string;
+  roomNumber?: string;
 }
 
 export default function TenantDetailsPage() {
@@ -138,6 +140,7 @@ export default function TenantDetailsPage() {
   };
 
   const getPaymentStatusBadge = (status: string) => {
+ 
     switch (status) {
       case "paid":
         return (
@@ -167,40 +170,53 @@ export default function TenantDetailsPage() {
   };
 
   const RentPaymentCard = ({ payment }: { payment: RentPayment }) => (
-    <div className="relative flex items-start gap-4 pb-8">
-      <div className="absolute left-4 top-8 bottom-0 w-0.5 bg-border -z-10" />
+    <div className="relative  flex items-start gap-4 pb-8">
+
       
-      <div className={cn(
-        "mt-2 h-2 w-2 rounded-full border-2",
-        payment.status === "paid" ? "bg-success border-success" :
-        payment.status === "pending" ? "bg-warning border-warning" :
-        payment.status === "overdue" ? "bg-destructive border-destructive" :
-        "bg-muted border-muted"
-      )} />
-      
-      <div className="flex-1 space-y-3">
-        <div className="bg-card border rounded-lg p-4">
+      <div className="flex-1">
+        <div className="bg-card  border-2 rounded-lg p-6 hover:shadow-md transition-all">
           <div className="flex items-start justify-between">
-            <div>
+            <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <h4 className="font-medium">
+                <h4 className="font-medium text-lg">
                   {payment.type === "monthly" ? "Monthly Rent" : payment.label}
                 </h4>
                 {getPaymentStatusBadge(payment.status)}
               </div>
               
-              <div className="mt-1 text-sm text-muted-foreground">
+              <div className="text-sm text-muted-foreground">
                 {payment.month} {payment.year}
               </div>
               
-              <div className="mt-2 text-lg font-semibold">
+              <div className="mt-4 text-2xl font-bold">
                 ₹{payment.amount.toLocaleString()}
               </div>
               
-              {payment.paidDate && (
-                <div className="mt-1 text-sm text-muted-foreground">
-                  Paid on {format(new Date(payment.paidDate), "PPP")}
-                  {payment.paymentMethod && ` via ${payment.paymentMethod}`}
+              <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Room Type:</span>
+                  <div className="font-medium">{payment.roomType}</div>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Room Number:</span>
+                  <div className="font-medium">{payment.roomNumber}</div>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Due Date:</span>
+                  <div className="font-medium">{format(new Date(payment.dueDate), "PPP")}</div>
+                </div>
+                {payment.paidDate && (
+                  <div>
+                    <span className="text-muted-foreground">Paid Date:</span>
+                    <div className="font-medium">{format(new Date(payment.paidDate), "PPP")}</div>
+                  </div>
+                )}
+              </div>
+              
+              {payment.paymentMethod && (
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Paid via</span>
+                  <Badge variant="secondary">{payment.paymentMethod}</Badge>
                 </div>
               )}
             </div>
@@ -477,20 +493,72 @@ export default function TenantDetailsPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="payments" className="space-y-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Payment History</CardTitle>
-              <Button onClick={() => setIsAddPaymentOpen(true)}>Add Payment</Button>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-1">
-                {rentPayments.map((payment) => (
-                  <RentPaymentCard key={payment._id} payment={payment} />
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+        <TabsContent value="payments" className="space-y-8">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold">Payment History</h2>
+            <Button onClick={() => setIsAddPaymentOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Additional Payment
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium">Total Paid</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">₹24,000</div>
+                <p className="text-xs text-muted-foreground">Last 3 months</p>
+                <div className="mt-4 h-[60px]">
+                  <div className="flex items-end justify-between h-full gap-2">
+                    {[65, 85, 95].map((height, i) => (
+                      <div key={i} className="flex-1 bg-primary/20 rounded-sm" style={{ height: `${height}%` }} />
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium">Payment Status</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Paid</span>
+                    <Badge className="bg-success/10 text-success">6</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Pending</span>
+                    <Badge variant="secondary" className="bg-warning/10 text-warning">2</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Overdue</span>
+                    <Badge variant="destructive">1</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium">Next Payment</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">₹12,000</div>
+                <p className="text-xs text-muted-foreground">Due on {format(new Date(), "PPP")}</p>
+                <Button className="w-full mt-4" size="sm">Pay Now</Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="space-y-1">
+            {rentPayments.map((payment) => (
+              <RentPaymentCard key={payment._id} payment={payment} />
+            ))}
+          </div>
         </TabsContent>
       </Tabs>
 

@@ -3,7 +3,7 @@
 import { AwaitedReactNode, JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useParams, useRouter } from "next/navigation";
-import { Plus, Settings, Search, Package2, ChevronDown } from "lucide-react";
+import { Plus, Settings, Search, Package2, ChevronDown, MoreVertical, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { CreateTenantSheet } from "@/components/create-tenant-sheet";
+import { useToast } from "@/hooks/use-toast";
 
 interface RentPayment {
   month: string;
@@ -55,6 +56,8 @@ export default function BlockDetailsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchBlockDetails = async () => {
@@ -104,6 +107,43 @@ export default function BlockDetailsPage() {
   const handleTenantCreated = () => {
     if (isLoaded && user && params.blockId) {
       fetchTenants();
+    }
+  };
+
+  const handleRefreshPayments = async () => {
+    if (!params.blockId) return;
+    
+    setRefreshing(true);
+    try {
+      const response = await fetch('/api/rent-payments/refresh', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ blockId: params.blockId }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to refresh payments');
+      }
+
+      toast({
+        title: "Success",
+        description: `Payment entries refreshed. Generated ${data.currentMonthGenerated} current month and ${data.nextMonthGenerated} next month entries.`,
+      });
+
+      // Refresh the tenant list to show updated payment statuses
+      fetchTenants();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to refresh payment entries",
+        variant: "destructive",
+      });
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -182,14 +222,28 @@ export default function BlockDetailsPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button 
-              variant="outline" 
-              size="icon"
-              className="hover:bg-accent"
-              onClick={handleSettingsClick}
-            >
-              <Settings className="h-4 w-4" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" className="hover:bg-accent">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem 
+                  onClick={handleRefreshPayments}
+                  disabled={refreshing}
+                  className="flex items-center"
+                >
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  {refreshing ? "Refreshing..." : "Refresh Payment Entries"}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSettingsClick}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           
           <CreateTenantSheet
@@ -212,7 +266,7 @@ export default function BlockDetailsPage() {
           </div>
         ) : (
           <div className="divide-y">
-            {filteredTenants.map((tenant: { _id: Key | null | undefined; name: string | number | bigint | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<AwaitedReactNode> | null | undefined; roomNumber: string | number | bigint | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<AwaitedReactNode> | null | undefined; roomType: string | number | bigint | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<AwaitedReactNode> | null | undefined; paymentStatus: string; }) => (
+            {filteredTenants.map((tenant) => (
               <div 
                 key={tenant._id}
                 className="p-4 flex items-center justify-between hover:bg-accent/5 transition-colors cursor-pointer"

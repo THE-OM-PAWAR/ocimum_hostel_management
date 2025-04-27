@@ -33,47 +33,58 @@ export async function POST(req: Request) {
       );
     }
 
+    // Get current date and generation day
+    const currentDate = new Date();
+    const generationDay = parseInt(block.rentGenerationDay) || 5;
+    
+    // Calculate next month's date
+    const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+    
     // Get all active tenants in the block
     const tenants = await Tenant.find({ 
       block: blockId,
       status: 'active'
     });
 
-    const nextMonth = new Date();
-    nextMonth.setMonth(nextMonth.getMonth() + 1);
-    
     const generatedRents = [];
 
     for (const tenant of tenants) {
       try {
-        // Get room type for rent amount
-        const roomType = await RoomType.findOne({
-          blockId,
-          name: tenant.roomType
-        });
-
-        if (!roomType) continue;
-
-        // Create next month's rent entry
-        const rentPayment = await RentPayment.create({
+        // Check if rent entry already exists for next month
+        const existingRent = await RentPayment.findOne({
           tenant: tenant._id,
-          block: blockId,
-          roomNumber: tenant.roomNumber,
-          roomType: tenant.roomType,
-          amount: roomType.rent,
           month: nextMonth.toLocaleString('default', { month: 'long' }),
           year: nextMonth.getFullYear(),
-          dueDate: new Date(nextMonth.getFullYear(), nextMonth.getMonth(), Number(block.rentGenerationDay) || 5),
-          status: 'undefined',
           type: 'monthly'
         });
 
-        generatedRents.push(rentPayment);
-      } catch (error: any) {
-        // Skip if duplicate entry
-        if (error.code !== 11000) {
-          console.error(`Error generating rent for tenant ${tenant._id}:`, error);
+        if (!existingRent) {
+          // Get room type for rent amount
+          const roomType = await RoomType.findOne({
+            blockId,
+            name: tenant.roomType
+          });
+
+          if (!roomType) continue;
+
+          // Create next month's rent entry
+          const rentPayment = await RentPayment.create({
+            tenant: tenant._id,
+            block: blockId,
+            roomNumber: tenant.roomNumber,
+            roomType: tenant.roomType,
+            amount: roomType.rent,
+            month: nextMonth.toLocaleString('default', { month: 'long' }),
+            year: nextMonth.getFullYear(),
+            dueDate: new Date(nextMonth.getFullYear(), nextMonth.getMonth(), generationDay),
+            status: 'undefined',
+            type: 'monthly'
+          });
+
+          generatedRents.push(rentPayment);
         }
+      } catch (error: any) {
+        console.error(`Error generating rent for tenant ${tenant._id}:`, error);
       }
     }
 

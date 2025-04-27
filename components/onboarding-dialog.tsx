@@ -43,7 +43,6 @@ export function OnboardingDialog() {
             },
           });
           const data = await response.json();
-          console.log("Onboarding status response:", data);
           if (!data.isOnboarded) {
             setOpen(true);
           }
