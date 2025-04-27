@@ -11,16 +11,9 @@ export interface ITenant extends Document {
   roomNumber: string;
   roomType: string;
   block: mongoose.Types.ObjectId;
-  paymentStatus: 'paid' | 'pending' | 'overdue';
   status: 'active' | 'inactive' | 'pending';
   address?: string;
   pinCode?: string;
-  paymentHistory?: {
-    month: string;
-    amount: number;
-    status: 'paid' | 'pending' | 'overdue';
-    paidOn?: string;
-  }[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -73,11 +66,6 @@ const tenantSchema = new Schema<ITenant>(
       ref: 'Block',
       required: [true, 'Please provide the block ID'],
     },
-    paymentStatus: {
-      type: String,
-      enum: ['paid', 'pending', 'overdue'],
-      default: 'pending',
-    },
     status: {
       type: String,
       enum: ['active', 'inactive', 'pending'],
@@ -91,15 +79,6 @@ const tenantSchema = new Schema<ITenant>(
       type: String,
       trim: true,
     },
-    paymentHistory: [{
-      month: String,
-      amount: Number,
-      status: {
-        type: String,
-        enum: ['paid', 'pending', 'overdue'],
-      },
-      paidOn: String,
-    }],
   },
   {
     timestamps: true,

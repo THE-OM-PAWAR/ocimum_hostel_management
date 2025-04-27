@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Phone, Mail, MapPin, Calendar, Building2, Upload as UploadIcon, Bed, Users, Key } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AddRentPaymentDialog } from "@/components/rent-payments/add-rent-payment-dialog";
 
 interface Tenant {
   _id: string;
@@ -27,21 +28,29 @@ interface Tenant {
   roomNumber: string;
   roomType: string;
   documents: { type: string; url: string }[];
-  paymentHistory: {
-    month: string;
-    amount: number;
-    status: "paid" | "pending" | "overdue";
-    paidOn?: string;
-  }[];
+  block: string;
+}
+
+interface RentPayment {
+  _id: string;
+  amount: number;
+  month: string;
+  year: number;
+  status: "paid" | "pending" | "overdue";
+  dueDate: string;
+  paidDate?: string;
+  paymentMethod?: string;
 }
 
 export default function TenantDetailsPage() {
   const params = useParams();
   const { user } = useUser();
   const [tenant, setTenant] = useState<Tenant | null>(null);
+  const [rentPayments, setRentPayments] = useState<RentPayment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [isAddPaymentOpen, setIsAddPaymentOpen] = useState(false);
 
   useEffect(() => {
     const fetchTenantDetails = async () => {
@@ -62,7 +71,22 @@ export default function TenantDetailsPage() {
       }
     };
 
+    const fetchRentPayments = async () => {
+      if (!params.tenantId) return;
+      try {
+        const response = await fetch(`/api/rent-payments?tenantId=${params.tenantId}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch rent payments");
+        }
+        const data = await response.json();
+        setRentPayments(data);
+      } catch (error) {
+        console.error("Error fetching rent payments:", error);
+      }
+    };
+
     fetchTenantDetails();
+    fetchRentPayments();
   }, [user?.id, params.tenantId]);
 
   const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,13 +108,24 @@ export default function TenantDetailsPage() {
 
       const updatedTenant = await response.json();
       setTenant(updatedTenant);
-      
-      // Show success message
     } catch (error) {
       console.error("Error uploading document:", error);
-      // Show error message
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handlePaymentSuccess = async () => {
+    if (!params.tenantId) return;
+    try {
+      const response = await fetch(`/api/rent-payments?tenantId=${params.tenantId}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch rent payments");
+      }
+      const data = await response.json();
+      setRentPayments(data);
+    } catch (error) {
+      console.error("Error fetching rent payments:", error);
     }
   };
 
@@ -350,23 +385,28 @@ export default function TenantDetailsPage() {
             <CardContent>
               <div className="space-y-6">
                 <div className="flex justify-end">
-                  <Button>Add Payment</Button>
+                  <Button onClick={() => setIsAddPaymentOpen(true)}>Add Payment</Button>
                 </div>
 
                 <div className="grid gap-4">
-                  {tenant.paymentHistory?.map((payment, index) => (
+                  {rentPayments.map((payment) => (
                     <div
-                      key={index}
+                      key={payment._id}
                       className="flex items-center justify-between p-4 border rounded-lg"
                     >
                       <div>
-                        <div className="font-medium">{payment.month}</div>
+                        <div className="font-medium">{payment.month} {payment.year}</div>
                         <div className="text-sm text-muted-foreground">
                           ₹{payment.amount.toLocaleString()}
                         </div>
-                        {payment.paidOn && (
+                        {payment.paidDate && (
                           <div className="text-xs text-muted-foreground">
-                            Paid on {format(new Date(payment.paidOn), "PP")}
+                            Paid on {format(new Date(payment.paidDate), "PP")}
+                          </div>
+                        )}
+                        {payment.paymentMethod && (
+                          <div className="text-xs text-muted-foreground">
+                            via {payment.paymentMethod}
                           </div>
                         )}
                       </div>
@@ -387,6 +427,16 @@ export default function TenantDetailsPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <AddRentPaymentDialog
+        isOpen={isAddPaymentOpen}
+        onClose={() => setIsAddPaymentOpen(false)}
+        onSuccess={handlePaymentSuccess}
+        tenantId={tenant._id}
+        blockId={tenant.block}
+        roomNumber={tenant.roomNumber}
+        roomType={tenant.roomType}
+      />
     </div>
   );
 }
