@@ -44,6 +44,15 @@ export function EditPaymentDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.message) {
+      toast({
+        title: "Error",
+        description: "Please provide a reason for the change",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {

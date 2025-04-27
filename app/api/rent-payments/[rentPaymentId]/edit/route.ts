@@ -4,14 +4,17 @@ import connectDB from "@/lib/mongodb/client";
 
 export async function PUT(
   req: Request,
-  { params }: { params: { paymentId: string } }
+  { params }: { params: { rentPaymentId: string } }
 ) {
   try {
     await connectDB();
-    const { paymentId } = params;
+    const { rentPaymentId } = params;
     const { amount, status, paymentMethod, message } = await req.json();
 
-    const payment = await RentPayment.findById(paymentId);
+    console.log("Received data:", { amount, status, paymentMethod, message });
+    console.log("Payment ID:", rentPaymentId);
+
+    const payment = await RentPayment.findById(rentPaymentId);
     if (!payment) {
       return NextResponse.json(
         { error: "Payment not found" },
@@ -31,18 +34,27 @@ export async function PUT(
       message,
     };
 
+    // Update payment details
     const updatedPayment = await RentPayment.findByIdAndUpdate(
-      paymentId,
+      rentPaymentId,
       {
         $set: {
           amount,
           status,
           paymentMethod,
+          ...(status === 'paid' && { paidDate: new Date() }),
         },
         $push: { changeLog },
       },
       { new: true }
     );
+
+    if (!updatedPayment) {
+      return NextResponse.json(
+        { error: "Failed to update payment" },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(updatedPayment);
   } catch (error) {

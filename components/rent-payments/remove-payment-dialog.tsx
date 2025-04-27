@@ -71,13 +71,13 @@ export function RemovePaymentDialog({
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Remove Payment</AlertDialogTitle>
+          <AlertDialogTitle>Cancel Payment</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to remove this payment? This action will mark the payment as cancelled.
+            Are you sure you want to cancel this payment? This action will mark the payment as cancelled.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="space-y-2 py-4">
-          <Label htmlFor="message">Removal Reason</Label>
+          <Label htmlFor="message">Cancel Reason</Label>
           <Textarea
             id="message"
             value={message}
@@ -93,7 +93,7 @@ export function RemovePaymentDialog({
             disabled={!message || isSubmitting}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            {isSubmitting ? "Removing..." : "Remove Payment"}
+            {isSubmitting ? "Canceling..." : "Cancel Payment"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -4,14 +4,14 @@ import connectDB from "@/lib/mongodb/client";
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { paymentId: string } }
+  { params }: { params: { rentPaymentId: string } }
 ) {
   try {
     await connectDB();
-    const { paymentId } = params;
+    const { rentPaymentId } = params;
     const { message } = await req.json();
 
-    const payment = await RentPayment.findById(paymentId);
+    const payment = await RentPayment.findById(rentPaymentId);
     if (!payment) {
       return NextResponse.json(
         { error: "Payment not found" },
@@ -27,7 +27,7 @@ export async function DELETE(
     };
 
     await RentPayment.findByIdAndUpdate(
-      paymentId,
+      rentPaymentId,
       {
         $set: { status: 'cancelled' },
         $push: { changeLog },

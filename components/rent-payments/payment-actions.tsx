@@ -44,7 +44,7 @@ export function PaymentActions({ payment, onSuccess }: PaymentActionsProps) {
             className="text-destructive focus:text-destructive"
           >
             <Trash2 className="mr-2 h-4 w-4" />
-            Remove Payment
+            Cancel Payment
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setIsDetailsDrawerOpen(true)}>
             <FileText className="mr-2 h-4 w-4" />

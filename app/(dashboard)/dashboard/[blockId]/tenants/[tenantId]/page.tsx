@@ -170,7 +170,7 @@ export default function TenantDetailsPage() {
     switch (status) {
       case "paid":
         return (
-          <Badge className="bg-success/10 text-success hover:bg-success/20 transition-colors">
+          <Badge className="bg-success/20 text-success hover:bg-success/20 transition-colors">
             Paid
           </Badge>
         );
@@ -192,6 +192,15 @@ export default function TenantDetailsPage() {
             Overdue
           </Badge>
         );
+      case "cancelled":
+        return (
+          <Badge
+            variant="destructive"
+            className="bg-destructive hover:bg-destructive/80 transition-colors"
+          >
+            Cancelled
+          </Badge>
+        );
       default:
         return (
           <Badge
@@ -204,6 +213,7 @@ export default function TenantDetailsPage() {
     }
   };
 
+  console.log("Tenant Details:", rentPayments);
   const RentPaymentCard = ({ payment }: { payment: RentPayment }) => (
     <div className="relative flex items-start gap-4 pb-8">
       <div className="flex-1">
