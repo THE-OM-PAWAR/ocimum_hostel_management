@@ -10,7 +10,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-import { Phone, Mail, MapPin, Calendar, Building2, Upload as UploadIcon, Bed, Users, Key, MoreVertical, Plus } from "lucide-react";
+import {
+  Phone,
+  Mail,
+  MapPin,
+  Calendar,
+  Building2,
+  Upload as UploadIcon,
+  Bed,
+  Users,
+  Key,
+  MoreVertical,
+  Plus,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AddRentPaymentDialog } from "@/components/rent-payments/add-rent-payment-dialog";
 import { AddAdditionalPaymentDialog } from "@/components/rent-payments/add-additional-payment-dialog";
@@ -20,6 +32,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { PaymentActions } from "@/components/rent-payments/payment-actions";
 
 interface Tenant {
   _id: string;
@@ -62,13 +75,16 @@ export default function TenantDetailsPage() {
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [isAddPaymentOpen, setIsAddPaymentOpen] = useState(false);
-  const [isAddAdditionalPaymentOpen, setIsAddAdditionalPaymentOpen] = useState(false);
+  const [isAddAdditionalPaymentOpen, setIsAddAdditionalPaymentOpen] =
+    useState(false);
 
   useEffect(() => {
     const fetchTenantDetails = async () => {
       if (!user?.id || !params.tenantId) return;
       try {
-        const response = await fetch(`/api/users/${user.id}/tenants/${params.tenantId}`);
+        const response = await fetch(
+          `/api/users/${user.id}/tenants/${params.tenantId}`
+        );
         if (!response.ok) {
           throw new Error(`Failed to fetch tenant: ${response.statusText}`);
         }
@@ -86,7 +102,9 @@ export default function TenantDetailsPage() {
     const fetchRentPayments = async () => {
       if (!params.tenantId) return;
       try {
-        const response = await fetch(`/api/rent-payments?tenantId=${params.tenantId}`);
+        const response = await fetch(
+          `/api/rent-payments?tenantId=${params.tenantId}`
+        );
         if (!response.ok) {
           throw new Error("Failed to fetch rent payments");
         }
@@ -101,7 +119,9 @@ export default function TenantDetailsPage() {
     fetchRentPayments();
   }, [user?.id, params.tenantId]);
 
-  const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDocumentUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -111,10 +131,13 @@ export default function TenantDetailsPage() {
       formData.append("file", file);
       formData.append("tenantId", params.tenantId as string);
 
-      const response = await fetch(`/api/users/${user?.id}/tenants/${params.tenantId}/documents`, {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `/api/users/${user?.id}/tenants/${params.tenantId}/documents`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (!response.ok) throw new Error("Failed to upload document");
 
@@ -130,7 +153,9 @@ export default function TenantDetailsPage() {
   const handlePaymentSuccess = async () => {
     if (!params.tenantId) return;
     try {
-      const response = await fetch(`/api/rent-payments?tenantId=${params.tenantId}`);
+      const response = await fetch(
+        `/api/rent-payments?tenantId=${params.tenantId}`
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch rent payments");
       }
@@ -151,19 +176,28 @@ export default function TenantDetailsPage() {
         );
       case "pending":
         return (
-          <Badge variant="secondary" className="bg-warning/10 text-warning hover:bg-warning/20 transition-colors">
+          <Badge
+            variant="secondary"
+            className="bg-warning/10 text-warning hover:bg-warning/20 transition-colors"
+          >
             Pending
           </Badge>
         );
       case "overdue":
         return (
-          <Badge variant="destructive" className="bg-destructive/10 hover:bg-destructive/20 transition-colors">
+          <Badge
+            variant="destructive"
+            className="bg-destructive/10 hover:bg-destructive/20 transition-colors"
+          >
             Overdue
           </Badge>
         );
       default:
         return (
-          <Badge variant="outline" className="bg-muted/10 hover:bg-muted/20 transition-colors">
+          <Badge
+            variant="outline"
+            className="bg-muted/10 hover:bg-muted/20 transition-colors"
+          >
             Undefined
           </Badge>
         );
@@ -182,15 +216,15 @@ export default function TenantDetailsPage() {
                 </h4>
                 {getPaymentStatusBadge(payment.status)}
               </div>
-              
+
               <div className="text-sm text-muted-foreground">
                 {payment.month} {payment.year}
               </div>
-              
+
               <div className="mt-4 text-2xl font-bold">
                 ₹{payment.amount.toLocaleString()}
               </div>
-              
+
               <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="text-muted-foreground">Room Type:</span>
@@ -202,42 +236,37 @@ export default function TenantDetailsPage() {
                 </div>
                 <div>
                   <span className="text-muted-foreground">Due Date:</span>
-                  <div className="font-medium">{format(new Date(payment.dueDate), "PPP")}</div>
+                  <div className="font-medium">
+                    {format(new Date(payment.dueDate), "PPP")}
+                  </div>
                 </div>
                 {payment.paidDate && (
                   <div>
                     <span className="text-muted-foreground">Paid Date:</span>
-                    <div className="font-medium">{format(new Date(payment.paidDate), "PPP")}</div>
+                    <div className="font-medium">
+                      {format(new Date(payment.paidDate), "PPP")}
+                    </div>
                   </div>
                 )}
               </div>
-              
+
               {payment.paymentMethod && (
                 <div className="mt-2 flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Paid via</span>
+                  <span className="text-sm text-muted-foreground">
+                    Paid via
+                  </span>
                   <Badge variant="secondary">{payment.paymentMethod}</Badge>
                 </div>
               )}
             </div>
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                  Mark as Paid
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  Download Receipt
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  View Details
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+
+            <div className="flex items-center gap-4">
+              
+              <PaymentActions
+                payment={payment}
+                onSuccess={handlePaymentSuccess}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -255,7 +284,9 @@ export default function TenantDetailsPage() {
   if (error || !tenant) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <div className="text-lg text-destructive">{error || "Tenant not found"}</div>
+        <div className="text-lg text-destructive">
+          {error || "Tenant not found"}
+        </div>
         <Button variant="outline" onClick={() => window.history.back()}>
           Go Back
         </Button>
@@ -289,7 +320,10 @@ export default function TenantDetailsPage() {
               <div className="flex items-center gap-4">
                 <div className="h-24 w-24 rounded-full bg-primary/10 flex items-center justify-center">
                   <span className="text-2xl font-semibold">
-                    {tenant.name.split(" ").map(n => n[0]).join("")}
+                    {tenant.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
                   </span>
                 </div>
                 <div>
@@ -337,7 +371,9 @@ export default function TenantDetailsPage() {
                   <Label>ID Type & Number</Label>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span>{tenant.idType} - {tenant.idNumber}</span>
+                    <span>
+                      {tenant.idType} - {tenant.idNumber}
+                    </span>
                   </div>
                 </div>
 
@@ -345,7 +381,9 @@ export default function TenantDetailsPage() {
                   <Label>Room Details</Label>
                   <div className="flex items-center gap-2">
                     <Building2 className="h-4 w-4 text-muted-foreground" />
-                    <span>Room {tenant.roomNumber} ({tenant.roomType})</span>
+                    <span>
+                      Room {tenant.roomNumber} ({tenant.roomType})
+                    </span>
                   </div>
                 </div>
               </div>
@@ -390,7 +428,11 @@ export default function TenantDetailsPage() {
                         <span>{doc.type}</span>
                       </div>
                       <Button variant="outline" size="sm" asChild>
-                        <a href={doc.url} target="_blank" rel="noopener noreferrer">
+                        <a
+                          href={doc.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           View
                         </a>
                       </Button>
@@ -418,11 +460,17 @@ export default function TenantDetailsPage() {
                       </div>
                       <div className="space-y-2">
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Room Number</span>
-                          <span className="font-medium">{tenant.roomNumber}</span>
+                          <span className="text-muted-foreground">
+                            Room Number
+                          </span>
+                          <span className="font-medium">
+                            {tenant.roomNumber}
+                          </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Room Type</span>
+                          <span className="text-muted-foreground">
+                            Room Type
+                          </span>
                           <span className="font-medium">{tenant.roomType}</span>
                         </div>
                         <div className="flex justify-between">
@@ -438,7 +486,12 @@ export default function TenantDetailsPage() {
                         <h3 className="font-medium">Room Amenities</h3>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        {["Air Conditioning", "Attached Bathroom", "Study Table", "Wardrobe"].map((amenity, index) => (
+                        {[
+                          "Air Conditioning",
+                          "Attached Bathroom",
+                          "Study Table",
+                          "Wardrobe",
+                        ].map((amenity, index) => (
                           <Badge key={index} variant="secondary">
                             {amenity}
                           </Badge>
@@ -455,15 +508,21 @@ export default function TenantDetailsPage() {
                       </div>
                       <div className="space-y-2">
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Total Capacity</span>
+                          <span className="text-muted-foreground">
+                            Total Capacity
+                          </span>
                           <span className="font-medium">2 Persons</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Current Occupancy</span>
+                          <span className="text-muted-foreground">
+                            Current Occupancy
+                          </span>
                           <span className="font-medium">1 Person</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Available Beds</span>
+                          <span className="text-muted-foreground">
+                            Available Beds
+                          </span>
                           <span className="font-medium">1 Bed</span>
                         </div>
                       </div>
@@ -476,11 +535,17 @@ export default function TenantDetailsPage() {
                       </div>
                       <div className="space-y-2">
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Check-in Date</span>
-                          <span className="font-medium">{format(new Date(tenant.joinDate), "PPP")}</span>
+                          <span className="text-muted-foreground">
+                            Check-in Date
+                          </span>
+                          <span className="font-medium">
+                            {format(new Date(tenant.joinDate), "PPP")}
+                          </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Duration</span>
+                          <span className="text-muted-foreground">
+                            Duration
+                          </span>
                           <span className="font-medium">6 Months</span>
                         </div>
                       </div>
@@ -500,7 +565,10 @@ export default function TenantDetailsPage() {
                 <Plus className="h-4 w-4 mr-2" />
                 Add Monthly Payment
               </Button>
-              <Button onClick={() => setIsAddAdditionalPaymentOpen(true)} variant="outline">
+              <Button
+                onClick={() => setIsAddAdditionalPaymentOpen(true)}
+                variant="outline"
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Additional Payment
               </Button>
@@ -510,7 +578,9 @@ export default function TenantDetailsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Total Paid</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Total Paid
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">₹24,000</div>
@@ -518,7 +588,11 @@ export default function TenantDetailsPage() {
                 <div className="mt-4 h-[60px]">
                   <div className="flex items-end justify-between h-full gap-2">
                     {[65, 85, 95].map((height, i) => (
-                      <div key={i} className="flex-1 bg-primary/20 rounded-sm" style={{ height: `${height}%` }} />
+                      <div
+                        key={i}
+                        className="flex-1 bg-primary/20 rounded-sm"
+                        style={{ height: `${height}%` }}
+                      />
                     ))}
                   </div>
                 </div>
@@ -527,7 +601,9 @@ export default function TenantDetailsPage() {
 
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Payment Status</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Payment Status
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
@@ -537,7 +613,12 @@ export default function TenantDetailsPage() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Pending</span>
-                    <Badge variant="secondary" className="bg-warning/10 text-warning">2</Badge>
+                    <Badge
+                      variant="secondary"
+                      className="bg-warning/10 text-warning"
+                    >
+                      2
+                    </Badge>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Overdue</span>
@@ -549,12 +630,18 @@ export default function TenantDetailsPage() {
 
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Next Payment</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Next Payment
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">₹12,000</div>
-                <p className="text-xs text-muted-foreground">Due on {format(new Date(), "PPP")}</p>
-                <Button className="w-full mt-4" size="sm">Pay Now</Button>
+                <p className="text-xs text-muted-foreground">
+                  Due on {format(new Date(), "PPP")}
+                </p>
+                <Button className="w-full mt-4" size="sm">
+                  Pay Now
+                </Button>
               </CardContent>
             </Card>
           </div>

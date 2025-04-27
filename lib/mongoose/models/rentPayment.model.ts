@@ -1,5 +1,16 @@
 import mongoose, { Document, Model, Schema } from 'mongoose';
 
+interface ChangeLogEntry {
+  type: 'edit' | 'delete';
+  date: Date;
+  changes?: {
+    amount?: { from: number; to: number };
+    status?: { from: string; to: string };
+    paymentMethod?: { from: string; to: string };
+  };
+  message: string;
+}
+
 export interface IRentPayment extends Document {
   tenant: mongoose.Types.ObjectId;
   block: mongoose.Types.ObjectId;
@@ -10,13 +21,14 @@ export interface IRentPayment extends Document {
   year: number;
   dueDate: Date;
   paidDate?: Date;
-  status: 'pending' | 'paid' | 'overdue' | 'undefined';
+  status: 'pending' | 'paid' | 'overdue' | 'undefined' | 'cancelled';
   type: 'monthly' | 'additional';
   label?: string;
   paymentMethod?: string;
   transactionId?: string;
   receiptNumber?: string;
   description?: string;
+  changeLog?: ChangeLogEntry[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -62,7 +74,7 @@ const rentPaymentSchema = new Schema<IRentPayment>(
     },
     status: {
       type: String,
-      enum: ['pending', 'paid', 'overdue', 'undefined'],
+      enum: ['pending', 'paid', 'overdue', 'undefined', 'cancelled'],
       default: 'undefined',
     },
     type: {
@@ -85,6 +97,35 @@ const rentPaymentSchema = new Schema<IRentPayment>(
     description: {
       type: String,
     },
+    changeLog: [{
+      type: {
+        type: String,
+        enum: ['edit', 'delete'],
+        required: true,
+      },
+      date: {
+        type: Date,
+        required: true,
+      },
+      changes: {
+        amount: {
+          from: Number,
+          to: Number,
+        },
+        status: {
+          from: String,
+          to: String,
+        },
+        paymentMethod: {
+          from: String,
+          to: String,
+        },
+      },
+      message: {
+        type: String,
+        required: true,
+      },
+    }],
   },
   {
     timestamps: true,

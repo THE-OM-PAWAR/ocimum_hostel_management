@@ -95,3 +95,26 @@ export async function DELETE(
     );
   }
 }
+
+
+
+
+
+
+
+
+// in the payment tab of tenants payments having a popover  on clicking three dot 
+
+// in that pop over I want three option 
+// 1. edit payment (on click open dialogue)
+// 2. remove payment  (on click open dialogue)
+// 3. payment details  (on click open drawer )
+
+// after that 
+
+// 1. edit payment dialogue have field ( amount, status  , change method and a message for this edit ),
+// 2. remove payment dialogue will have a message for removing the payment 
+// (this two will also save the date of changes in the payment )
+// 3. the payment details drawer will have all the log messages of edit and delete with the payment data 
+
+// so create this 
