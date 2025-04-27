@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { Tenant } from "@/lib/mongoose/models/tenant.model";
 import { Block } from "@/lib/mongoose/models/block.model";
 import connectDB from "@/lib/mongodb/client";
+import { RentPayment } from "@/lib/mongoose/models/rentPayment.model";
+import { RoomType } from "@/lib/mongoose/models/room-type.model";
 
 export async function GET(req: Request) {
   try {

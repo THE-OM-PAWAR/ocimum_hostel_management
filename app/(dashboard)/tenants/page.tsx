@@ -102,11 +102,11 @@ export default function TenantsPage() {
       </div>
 
       <div className="flex items-center justify-between gap-4">
-        <div className="relative flex-1 max-w-md">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input 
             placeholder="Search tenants..." 
-            className="pl-9 bg-background"
+            className="pl-9 bg-background w-full"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -120,7 +120,7 @@ export default function TenantsPage() {
               <Package2 className="h-6 w-6 text-primary" />
             </div>
             <h3 className="font-medium text-lg">No tenants yet</h3>
-            <p className="text-muted-foreground mt-2 text-center max-w-sm">
+            <p className="text-muted-foreground mt-2 text-center max-w-sm px-4">
               Start by adding tenants to your blocks
             </p>
           </div>
@@ -129,45 +129,45 @@ export default function TenantsPage() {
             {filteredTenants.map((tenant) => (
               <motion.div 
                 key={tenant._id}
-                className="p-4 flex items-center justify-between hover:bg-accent/5 transition-colors cursor-pointer"
+                className="p-4 hover:bg-accent/5 transition-colors cursor-pointer"
                 onClick={() => tenant._id && handleViewDetails(tenant.block._id, tenant._id)}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                   <div>
                     <h3 className="font-medium">{tenant.name}</h3>
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex flex-wrap items-center gap-2 mt-1">
                       <span className="text-sm text-muted-foreground">Room {tenant.roomNumber}</span>
-                      <span className="text-muted-foreground">•</span>
+                      <span className="hidden md:inline text-muted-foreground">•</span>
                       <span className="text-sm text-muted-foreground">{tenant.roomType}</span>
-                      <span className="text-muted-foreground">•</span>
+                      <span className="hidden md:inline text-muted-foreground">•</span>
                       <span className="text-sm text-muted-foreground">{tenant.block.name}</span>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex items-center gap-4">
-                  {getStatusBadge(tenant.status)}
-                  <div className="text-sm text-muted-foreground">
-                    Joined {format(new Date(tenant.joinDate), "PP")}
+                  <div className="flex items-center justify-between md:justify-end gap-4">
+                    {getStatusBadge(tenant.status)}
+                    <div className="text-sm text-muted-foreground hidden md:block">
+                      Joined {format(new Date(tenant.joinDate), "PP")}
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewDetails(tenant.block._id, tenant._id);
+                        }}>
+                          View Details
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={(e) => {
-                        e.stopPropagation();
-                        handleViewDetails(tenant.block._id, tenant._id);
-                      }}>
-                        View Details
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </div>
               </motion.div>
             ))}
