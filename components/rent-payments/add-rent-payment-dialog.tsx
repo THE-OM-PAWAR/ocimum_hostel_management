@@ -35,51 +35,34 @@ export function AddRentPaymentDialog({
 }: AddRentPaymentDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  const [settings, setSettings] = useState({
-    rentGenerationDay: "1",
-  });
   const [formData, setFormData] = useState({
     amount: "",
-    month: "",
+    month: new Date().toLocaleString('default', { month: 'long' }),
     year: new Date().getFullYear(),
+    status: "pending" as "pending" | "paid" | "overdue",
+    paymentMethod: "",
   });
 
   useEffect(() => {
-    const fetchSettings = async () => {
+    const fetchRoomTypeDetails = async () => {
+      if (!isOpen) return;
+      
       try {
-        // Fetch block settings
-        const settingsResponse = await fetch(`/api/blocks/${blockId}/payment-settings`);
-        if (settingsResponse.ok) {
-          const settingsData = await settingsResponse.json();
-          setSettings(settingsData);
+        const response = await fetch(`/api/blocks/${blockId}/room-types`);
+        if (!response.ok) throw new Error("Failed to fetch room types");
+        
+        const roomTypes = await response.json();
+        const currentRoomType = roomTypes.find((type: any) => type.name === roomType);
+        
+        if (currentRoomType) {
+          setFormData(prev => ({ ...prev, amount: currentRoomType.rent.toString() }));
         }
-
-        // Fetch room type details for rent amount
-        const roomTypeResponse = await fetch(`/api/blocks/${blockId}/room-types`);
-        if (roomTypeResponse.ok) {
-          const roomTypes = await roomTypeResponse.json();
-          const currentRoomType = roomTypes.find((type: any) => type.name === roomType);
-          if (currentRoomType) {
-            setFormData(prev => ({ ...prev, amount: currentRoomType.rent.toString() }));
-          }
-        }
-
-        // Set next month as default
-        const nextMonth = new Date();
-        nextMonth.setMonth(nextMonth.getMonth() + 1);
-        setFormData(prev => ({
-          ...prev,
-          month: nextMonth.toLocaleString('default', { month: 'long' }),
-          year: nextMonth.getFullYear(),
-        }));
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching room type details:", error);
       }
     };
 
-    if (isOpen) {
-      fetchSettings();
-    }
+    fetchRoomTypeDetails();
   }, [isOpen, blockId, roomType]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -87,12 +70,6 @@ export function AddRentPaymentDialog({
     setIsSubmitting(true);
 
     try {
-      // Calculate due date based on settings
-      const dueDate = new Date(formData.year, 
-        new Date(Date.parse(`${formData.month} 1, 2000`)).getMonth(), 
-        parseInt(settings.rentGenerationDay)
-      );
-
       const response = await fetch("/api/rent-payments", {
         method: "POST",
         headers: {
@@ -106,15 +83,15 @@ export function AddRentPaymentDialog({
           amount: parseFloat(formData.amount),
           month: formData.month,
           year: formData.year,
-          dueDate: dueDate.toISOString(),
-          status: "pending",
+          status: formData.status,
+          paymentMethod: formData.paymentMethod,
           type: "monthly"
         }),
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to create rent payment");
+        const error = await response.json();
+        throw new Error(error.error || "Failed to create rent payment");
       }
 
       toast({
@@ -126,13 +103,15 @@ export function AddRentPaymentDialog({
       onClose();
       setFormData({
         amount: "",
-        month: "",
+        month: new Date().toLocaleString('default', { month: 'long' }),
         year: new Date().getFullYear(),
+        status: "pending",
+        paymentMethod: "",
       });
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to add rent payment. Please try again.",
+        description: error.message || "Failed to add rent payment",
         variant: "destructive",
       });
     } finally {
@@ -204,6 +183,43 @@ export function AddRentPaymentDialog({
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Status</Label>
+            <Select
+              value={formData.status}
+              onValueChange={(value: "pending" | "paid" | "overdue") => 
+                setFormData(prev => ({ ...prev, status: value }))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="paid">Paid</SelectItem>
+                <SelectItem value="overdue">Overdue</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Payment Method</Label>
+            <Select
+              value={formData.paymentMethod}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, paymentMethod: value }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select payment method" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="cash">Cash</SelectItem>
+                <SelectItem value="upi">UPI</SelectItem>
+                <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                <SelectItem value="card">Card</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="flex justify-end gap-3">

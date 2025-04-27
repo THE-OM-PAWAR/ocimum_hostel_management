@@ -8,7 +8,25 @@ export async function POST(req: Request) {
     await connectDB();
     const data = await req.json();
 
-    // If it's a monthly rent, check for duplicates
+    // Get block settings for rent generation
+    const block = await Block.findById(data.block);
+    if (!block) {
+      return NextResponse.json(
+        { error: "Block not found" },
+        { status: 404 }
+      );
+    }
+
+    const generationDay = parseInt(block.rentGenerationDay) || 5;
+
+    // Calculate due date based on settings
+    const dueDate = new Date(
+      data.year,
+      new Date(Date.parse(`${data.month} 1, 2000`)).getMonth(),
+      generationDay
+    );
+
+    // Check for duplicate monthly rent
     if (data.type === 'monthly') {
       const existingPayment = await RentPayment.findOne({
         tenant: data.tenant,
@@ -25,7 +43,13 @@ export async function POST(req: Request) {
       }
     }
 
-    const rentPayment = await RentPayment.create(data);
+    // Create the rent payment
+    const rentPayment = await RentPayment.create({
+      ...data,
+      dueDate,
+      type: 'monthly'
+    });
+
     return NextResponse.json(rentPayment);
   } catch (error) {
     console.error("Error creating rent payment:", error);
@@ -59,7 +83,7 @@ export async function GET(req: Request) {
 
     const rentPayments = await RentPayment.find(query)
       .sort({ year: -1, month: -1 })
-      .limit(12); // Get last 12 months by default
+      .limit(12);
 
     return NextResponse.json(rentPayments);
   } catch (error) {
