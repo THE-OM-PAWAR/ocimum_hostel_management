@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Tenant } from "@/lib/mongoose/models/tenant.model";
 import { RentPayment } from "@/lib/mongoose/models/rentPayment.model";
 import { RoomType } from "@/lib/mongoose/models/room-type.model";
+import { Block } from "@/lib/mongoose/models/block.model";
 import connectDB from "@/lib/mongodb/client";
 
 export async function POST(req: Request) {
@@ -22,6 +23,12 @@ export async function POST(req: Request) {
       throw new Error("Room type not found");
     }
 
+    // Get block settings for rent generation
+    const block = await Block.findById(data.block);
+    if (!block) {
+      throw new Error("Block not found");
+    }
+
     // Generate rent payments from join date to current month
     const joinDate = new Date(data.joinDate);
     const currentDate = new Date();
@@ -32,7 +39,7 @@ export async function POST(req: Request) {
       months.push({
         month: date.toLocaleString('default', { month: 'long' }),
         year: date.getFullYear(),
-        dueDate: new Date(date.getFullYear(), date.getMonth(), 5) // Due date is 5th of each month
+        dueDate: new Date(date.getFullYear(), date.getMonth(), Number(block.rentGenerationDay) || 5)
       });
       date.setMonth(date.getMonth() + 1);
     }
@@ -47,10 +54,21 @@ export async function POST(req: Request) {
       month: month.month,
       year: month.year,
       dueDate: month.dueDate,
-      status: 'undefined'
+      status: 'undefined',
+      type: 'monthly'
     }));
 
-    await RentPayment.insertMany(rentPayments);
+    // Insert rent payments, handling potential duplicates
+    for (const payment of rentPayments) {
+      try {
+        await RentPayment.create(payment);
+      } catch (error: any) {
+        // Skip if duplicate monthly rent entry
+        if (error.code !== 11000) {
+          throw error;
+        }
+      }
+    }
 
     return NextResponse.json(tenant);
   } catch (error) {

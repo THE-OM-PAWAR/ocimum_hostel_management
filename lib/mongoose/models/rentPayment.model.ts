@@ -11,6 +11,8 @@ export interface IRentPayment extends Document {
   dueDate: Date;
   paidDate?: Date;
   status: 'pending' | 'paid' | 'overdue' | 'undefined';
+  type: 'monthly' | 'additional';
+  label?: string;
   paymentMethod?: string;
   transactionId?: string;
   receiptNumber?: string;
@@ -63,6 +65,14 @@ const rentPaymentSchema = new Schema<IRentPayment>(
       enum: ['pending', 'paid', 'overdue', 'undefined'],
       default: 'undefined',
     },
+    type: {
+      type: String,
+      enum: ['monthly', 'additional'],
+      required: [true, 'Please provide the rent type'],
+    },
+    label: {
+      type: String,
+    },
     paymentMethod: {
       type: String,
     },
@@ -79,6 +89,12 @@ const rentPaymentSchema = new Schema<IRentPayment>(
   {
     timestamps: true,
   }
+);
+
+// Create a compound unique index to prevent duplicate monthly rents
+rentPaymentSchema.index(
+  { tenant: 1, month: 1, year: 1, type: 1 },
+  { unique: true, partialFilterExpression: { type: 'monthly' } }
 );
 
 export const RentPayment = (mongoose.models.RentPayment as Model<IRentPayment>) ||

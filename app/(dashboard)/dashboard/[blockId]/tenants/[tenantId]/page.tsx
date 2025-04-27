@@ -10,9 +10,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-import { Phone, Mail, MapPin, Calendar, Building2, Upload as UploadIcon, Bed, Users, Key } from "lucide-react";
+import { Phone, Mail, MapPin, Calendar, Building2, Upload as UploadIcon, Bed, Users, Key, MoreVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AddRentPaymentDialog } from "@/components/rent-payments/add-rent-payment-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Tenant {
   _id: string;
@@ -36,10 +42,12 @@ interface RentPayment {
   amount: number;
   month: string;
   year: number;
-  status: "paid" | "pending" | "overdue";
+  status: "paid" | "pending" | "overdue" | "undefined";
   dueDate: string;
   paidDate?: string;
   paymentMethod?: string;
+  type: "monthly" | "additional";
+  label?: string;
 }
 
 export default function TenantDetailsPage() {
@@ -128,6 +136,98 @@ export default function TenantDetailsPage() {
       console.error("Error fetching rent payments:", error);
     }
   };
+
+  const getPaymentStatusBadge = (status: string) => {
+    switch (status) {
+      case "paid":
+        return (
+          <Badge className="bg-success/10 text-success hover:bg-success/20 transition-colors">
+            Paid
+          </Badge>
+        );
+      case "pending":
+        return (
+          <Badge variant="secondary" className="bg-warning/10 text-warning hover:bg-warning/20 transition-colors">
+            Pending
+          </Badge>
+        );
+      case "overdue":
+        return (
+          <Badge variant="destructive" className="bg-destructive/10 hover:bg-destructive/20 transition-colors">
+            Overdue
+          </Badge>
+        );
+      default:
+        return (
+          <Badge variant="outline" className="bg-muted/10 hover:bg-muted/20 transition-colors">
+            Undefined
+          </Badge>
+        );
+    }
+  };
+
+  const RentPaymentCard = ({ payment }: { payment: RentPayment }) => (
+    <div className="relative flex items-start gap-4 pb-8">
+      <div className="absolute left-4 top-8 bottom-0 w-0.5 bg-border -z-10" />
+      
+      <div className={cn(
+        "mt-2 h-2 w-2 rounded-full border-2",
+        payment.status === "paid" ? "bg-success border-success" :
+        payment.status === "pending" ? "bg-warning border-warning" :
+        payment.status === "overdue" ? "bg-destructive border-destructive" :
+        "bg-muted border-muted"
+      )} />
+      
+      <div className="flex-1 space-y-3">
+        <div className="bg-card border rounded-lg p-4">
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="font-medium">
+                  {payment.type === "monthly" ? "Monthly Rent" : payment.label}
+                </h4>
+                {getPaymentStatusBadge(payment.status)}
+              </div>
+              
+              <div className="mt-1 text-sm text-muted-foreground">
+                {payment.month} {payment.year}
+              </div>
+              
+              <div className="mt-2 text-lg font-semibold">
+                ₹{payment.amount.toLocaleString()}
+              </div>
+              
+              {payment.paidDate && (
+                <div className="mt-1 text-sm text-muted-foreground">
+                  Paid on {format(new Date(payment.paidDate), "PPP")}
+                  {payment.paymentMethod && ` via ${payment.paymentMethod}`}
+                </div>
+              )}
+            </div>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>
+                  Mark as Paid
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  Download Receipt
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  View Details
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   if (loading) {
     return (
@@ -379,49 +479,15 @@ export default function TenantDetailsPage() {
 
         <TabsContent value="payments" className="space-y-6">
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Payment History</CardTitle>
+              <Button onClick={() => setIsAddPaymentOpen(true)}>Add Payment</Button>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
-                <div className="flex justify-end">
-                  <Button onClick={() => setIsAddPaymentOpen(true)}>Add Payment</Button>
-                </div>
-
-                <div className="grid gap-4">
-                  {rentPayments.map((payment) => (
-                    <div
-                      key={payment._id}
-                      className="flex items-center justify-between p-4 border rounded-lg"
-                    >
-                      <div>
-                        <div className="font-medium">{payment.month} {payment.year}</div>
-                        <div className="text-sm text-muted-foreground">
-                          ₹{payment.amount.toLocaleString()}
-                        </div>
-                        {payment.paidDate && (
-                          <div className="text-xs text-muted-foreground">
-                            Paid on {format(new Date(payment.paidDate), "PP")}
-                          </div>
-                        )}
-                        {payment.paymentMethod && (
-                          <div className="text-xs text-muted-foreground">
-                            via {payment.paymentMethod}
-                          </div>
-                        )}
-                      </div>
-                      <Badge
-                        className={cn(
-                          payment.status === "paid" && "bg-success/10 text-success",
-                          payment.status === "pending" && "bg-warning/10 text-warning",
-                          payment.status === "overdue" && "bg-destructive/10 text-destructive"
-                        )}
-                      >
-                        {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
+              <div className="space-y-1">
+                {rentPayments.map((payment) => (
+                  <RentPaymentCard key={payment._id} payment={payment} />
+                ))}
               </div>
             </CardContent>
           </Card>

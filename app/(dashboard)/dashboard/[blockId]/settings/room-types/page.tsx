@@ -52,6 +52,7 @@ export default function RoomTypesPage() {
     try {
       const response = await fetch(`/api/blocks/${params.blockId}/room-types`);
       const data = await response.json();
+      console.log("Fetched room types:", data);
       setRoomTypes(data);
     } catch (error) {
       console.error("Error fetching room types:", error);

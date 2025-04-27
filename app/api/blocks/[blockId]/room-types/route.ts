@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { RoomType } from "@/lib/mongoose/models/room-type.model";
+import { RoomComponent } from "@/lib/mongoose/models/room-component.model";
 import connectDB from "@/lib/mongodb/client";
 
 export async function POST(
@@ -57,9 +58,13 @@ export async function GET(
     await connectDB();
     const { blockId } = params;
 
+    // First, ensure RoomComponent model is registered
+    await import("@/lib/mongoose/models/room-component.model");
+
     const roomTypes = await RoomType.find({ blockId })
       .populate('components')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean(); // Convert to plain JavaScript objects
       
     return NextResponse.json(roomTypes);
   } catch (error) {
