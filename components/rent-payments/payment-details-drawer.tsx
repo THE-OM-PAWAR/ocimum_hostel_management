@@ -11,6 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import { Separator } from "@/components/ui/separator";
 
 interface PaymentDetailsDrawerProps {
   isOpen: boolean;
@@ -42,7 +43,7 @@ export function PaymentDetailsDrawer({
       }
     };
 
-    if (isOpen) {
+    if (isOpen && payment._id) {
       fetchDetails();
     }
   }, [isOpen, payment._id, toast]);
@@ -73,7 +74,7 @@ export function PaymentDetailsDrawer({
         
         <ScrollArea className="h-[calc(100vh-8rem)] pr-4">
           <div className="space-y-6 mt-6">
-            {/* Payment Information */}
+            {/* Basic Payment Information */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Payment Information</h3>
               <div className="grid grid-cols-2 gap-4">
@@ -90,9 +91,41 @@ export function PaymentDetailsDrawer({
                   <p>{paymentDetails.month} {paymentDetails.year}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Payment Method</p>
-                  <p>{paymentDetails.paymentMethod || "Not specified"}</p>
+                  <p className="text-sm text-muted-foreground">Payment Type</p>
+                  <p className="capitalize">{paymentDetails.type}</p>
                 </div>
+                {paymentDetails.label && (
+                  <div className="col-span-2">
+                    <p className="text-sm text-muted-foreground">Label</p>
+                    <p>{paymentDetails.label}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Room Details */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Room Details</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Room Number</p>
+                  <p>{paymentDetails.roomNumber}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Room Type</p>
+                  <p>{paymentDetails.roomType}</p>
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Payment Schedule */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Payment Schedule</h3>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Due Date</p>
                   <p>{format(new Date(paymentDetails.dueDate), "PPP")}</p>
@@ -103,50 +136,79 @@ export function PaymentDetailsDrawer({
                     <p>{format(new Date(paymentDetails.paidDate), "PPP")}</p>
                   </div>
                 )}
+                {paymentDetails.paymentMethod && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Payment Method</p>
+                    <p className="capitalize">{paymentDetails.paymentMethod.replace('_', ' ')}</p>
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Change History */}
             {paymentDetails.changeLog && paymentDetails.changeLog.length > 0 && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Change History</h3>
+              <>
+                <Separator />
                 <div className="space-y-4">
-                  {paymentDetails.changeLog.map((log: any, index: number) => (
-                    <div key={index} className="border rounded-lg p-4 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Badge variant={log.type === 'edit' ? 'outline' : 'destructive'}>
-                          {log.type === 'edit' ? 'Edited' : 'Removed'}
-                        </Badge>
-                        <span className="text-sm text-muted-foreground">
-                          {format(new Date(log.date), "PPP")}
-                        </span>
-                      </div>
-                      
-                      {log.changes && (
-                        <div className="space-y-2 mt-2">
-                          {log.changes.amount && (
-                            <p className="text-sm">
-                              Amount: ₹{log.changes.amount.from} → ₹{log.changes.amount.to}
-                            </p>
-                          )}
-                          {log.changes.status && (
-                            <p className="text-sm">
-                              Status: {log.changes.status.from} → {log.changes.status.to}
-                            </p>
-                          )}
-                          {log.changes.paymentMethod && (
-                            <p className="text-sm">
-                              Payment Method: {log.changes.paymentMethod.from || 'None'} → {log.changes.paymentMethod.to}
-                            </p>
-                          )}
+                  <h3 className="text-lg font-semibold">Change History</h3>
+                  <div className="space-y-4">
+                    {paymentDetails.changeLog.map((log: any, index: number) => (
+                      <div key={index} className="border rounded-lg p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <Badge variant={log.type === 'edit' ? 'outline' : 'destructive'}>
+                            {log.type === 'edit' ? 'Edited' : 'Cancelled'}
+                          </Badge>
+                          <span className="text-sm text-muted-foreground">
+                            {format(new Date(log.date), "PPP")}
+                          </span>
                         </div>
-                      )}
-                      
-                      <p className="text-sm mt-2">{log.message}</p>
-                    </div>
-                  ))}
+                        
+                        {log.changes && (
+                          <div className="space-y-2 pt-2">
+                            {log.changes.amount && (
+                              <div className="flex items-center gap-2 text-sm">
+                                <span className="text-muted-foreground">Amount:</span>
+                                <span className="line-through text-muted-foreground">
+                                  ₹{log.changes.amount.from.toLocaleString()}
+                                </span>
+                                <span>→</span>
+                                <span className="font-medium">
+                                  ₹{log.changes.amount.to.toLocaleString()}
+                                </span>
+                              </div>
+                            )}
+                            {log.changes.status && (
+                              <div className="flex items-center gap-2 text-sm">
+                                <span className="text-muted-foreground">Status:</span>
+                                <span>{getStatusBadge(log.changes.status.from)}</span>
+                                <span>→</span>
+                                <span>{getStatusBadge(log.changes.status.to)}</span>
+                              </div>
+                            )}
+                            {log.changes.paymentMethod && (
+                              <div className="flex items-center gap-2 text-sm">
+                                <span className="text-muted-foreground">Payment Method:</span>
+                                <span className="capitalize">
+                                  {log.changes.paymentMethod.from || 'None'}
+                                </span>
+                                <span>→</span>
+                                <span className="capitalize font-medium">
+                                  {log.changes.paymentMethod.to}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        
+                        <div className="pt-2 text-sm">
+                          <span className="text-muted-foreground">Reason: </span>
+                          <span>{log.message}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              </>
             )}
           </div>
         </ScrollArea>

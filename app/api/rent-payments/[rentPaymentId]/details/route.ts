@@ -4,13 +4,15 @@ import connectDB from "@/lib/mongodb/client";
 
 export async function GET(
   req: Request,
-  { params }: { params: { paymentId: string } }
+  { params }: { params: { rentPaymentId: string } }
 ) {
   try {
     await connectDB();
-    const { paymentId } = params;
+    const { rentPaymentId } = params;
 
-    const payment = await RentPayment.findById(paymentId);
+    console.log("Fetching payment details for ID:", rentPaymentId);
+
+    const payment = await RentPayment.findById(rentPaymentId);
     if (!payment) {
       return NextResponse.json(
         { error: "Payment not found" },
