@@ -20,35 +20,12 @@ export async function GET(
     const tenant = await Tenant.findById(tenantId);
 
     if (!tenant) {
-      return NextResponse.json(
+      return NextResponse.json( 
         { error: "Tenant not found" },
         { status: 404 }
       );
     }
 
-    // Add mock payment history if none exists
-    if (!tenant.paymentHistory) {
-      tenant.paymentHistory = [
-        {
-          month: "March 2024",
-          amount: 12000,
-          status: "paid",
-          paidOn: new Date().toISOString()
-        },
-        {
-          month: "February 2024",
-          amount: 12000,
-          status: "paid",
-          paidOn: new Date(2024, 1, 15).toISOString()
-        },
-        {
-          month: "January 2024",
-          amount: 12000,
-          status: "paid",
-          paidOn: new Date(2024, 0, 15).toISOString()
-        }
-      ];
-    }
 
     return NextResponse.json(tenant);
   } catch (error) {

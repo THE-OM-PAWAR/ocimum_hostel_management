@@ -25,10 +25,13 @@ import { CreateTenantSheet } from "@/components/create-tenant-sheet";
 import { useToast } from "@/hooks/use-toast";
 
 interface RentPayment {
+  _id: string;
   month: string;
   amount: number;
-  status: "paid" | "pending" | "overdue";
+  status: "paid" | "pending" | "overdue" | "undefined";
   dueDate: string;
+  paidDate?: string;
+  paymentMethod?: string;
 }
 
 interface Tenant {
@@ -59,6 +62,37 @@ export default function BlockDetailsPage() {
   const [refreshing, setRefreshing] = useState(false);
   const { toast } = useToast();
 
+  const fetchTenants = async () => {
+    if (!isLoaded || !user || !params.blockId) return;
+    try {
+      const response = await fetch(`/api/users/${user.id}/tenants?blockId=${params.blockId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const data = await response.json();
+      
+      // Fetch rent payments for each tenant
+      const tenantsWithPayments = await Promise.all(
+        data.map(async (tenant: Tenant) => {
+          const paymentsResponse = await fetch(`/api/rent-payments?tenantId=${tenant._id}`);
+          const payments = await paymentsResponse.json();
+          return {
+            ...tenant,
+            recentPayments: payments
+          };
+        })
+      );
+     
+      setTenants(tenantsWithPayments);
+    } catch (error) {
+      console.error("Error fetching tenants:", error);
+    }
+  };
+
   useEffect(() => {
     const fetchBlockDetails = async () => {
       if (!isLoaded || !user || !params.blockId) return;
@@ -77,24 +111,6 @@ export default function BlockDetailsPage() {
       } catch (error) {
         console.error("Error fetching block details:", error);
         setLoading(false);
-      }
-    };
-
-    const fetchTenants = async () => {
-      if (!isLoaded || !user || !params.blockId) return;
-      try {
-        const response = await fetch(`/api/users/${user.id}/tenants?blockId=${params.blockId}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        const data = await response.json();
-        setTenants(data);
-      } catch (error) {
-        console.error("Error fetching tenants:", error);
       }
     };
 
@@ -147,23 +163,7 @@ export default function BlockDetailsPage() {
     }
   };
 
-  const fetchTenants = async () => {
-    if (!isLoaded || !user || !params.blockId) return;
-    try {
-      const response = await fetch(`/api/users/${user.id}/tenants?blockId=${params.blockId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      const data = await response.json();
-      setTenants(data);
-    } catch (error) {
-      console.error("Error fetching tenants:", error);
-    }
-  };
+
 
   const getPaymentStatusBadge = (status: string) => {
     switch (status) {
@@ -312,12 +312,8 @@ export default function BlockDetailsPage() {
                       <div className="p-2">
                         <h4 className="text-sm font-medium mb-2">Last 3 Months</h4>
                         <div className="space-y-2">
-                          {[
-                            { month: "March 2024", status: "paid", amount: 12000 },
-                            { month: "February 2024", status: "paid", amount: 12000 },
-                            { month: "January 2024", status: "paid", amount: 12000 },
-                          ].map((payment, index) => (
-                            <div key={index} className="flex items-center justify-between">
+                          {tenant.recentPayments?.slice(0, 3).map((payment) => (
+                            <div key={payment._id} className="flex items-center justify-between">
                               <div className="text-sm">
                                 <div>{payment.month}</div>
                                 <div className="text-xs text-muted-foreground">
