@@ -11,7 +11,9 @@ export interface ITenant extends Document {
   roomNumber: string;
   roomType: string;
   block: mongoose.Types.ObjectId;
-  status: 'active' | 'inactive' | 'pending';
+  status: 'active' | 'left' | 'blacklisted' | 'pending';
+  statusChangeDate?: Date;
+  statusChangeReason?: string;
   address?: string;
   pinCode?: string;
   createdAt: Date;
@@ -68,8 +70,14 @@ const tenantSchema = new Schema<ITenant>(
     },
     status: {
       type: String,
-      enum: ['active', 'inactive', 'pending'],
+      enum: ['active', 'left', 'blacklisted', 'pending'],
       default: 'pending',
+    },
+    statusChangeDate: {
+      type: Date,
+    },
+    statusChangeReason: {
+      type: String,
     },
     address: {
       type: String,

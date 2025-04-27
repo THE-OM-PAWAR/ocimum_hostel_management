@@ -18,9 +18,10 @@ import { useToast } from "@/hooks/use-toast";
 interface PaymentActionsProps {
   payment: any;
   onSuccess: () => void;
+  disabled?: boolean;
 }
 
-export function PaymentActions({ payment, onSuccess }: PaymentActionsProps) {
+export function PaymentActions({ payment, onSuccess, disabled = false }: PaymentActionsProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false);
   const [isDetailsDrawerOpen, setIsDetailsDrawerOpen] = useState(false);
@@ -30,18 +31,22 @@ export function PaymentActions({ payment, onSuccess }: PaymentActionsProps) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" disabled={disabled}>
             <MoreVertical className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
+          <DropdownMenuItem 
+            onClick={() => setIsEditDialogOpen(true)}
+            disabled={disabled}
+          >
             <Edit className="mr-2 h-4 w-4" />
             Edit Payment
           </DropdownMenuItem>
           <DropdownMenuItem 
             onClick={() => setIsRemoveDialogOpen(true)}
             className="text-destructive focus:text-destructive"
+            disabled={disabled}
           >
             <Trash2 className="mr-2 h-4 w-4" />
             Cancel Payment

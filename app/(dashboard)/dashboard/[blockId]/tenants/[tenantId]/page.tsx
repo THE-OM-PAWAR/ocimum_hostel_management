@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -26,30 +26,8 @@ import {
 import { cn } from "@/lib/utils";
 import { AddRentPaymentDialog } from "@/components/rent-payments/add-rent-payment-dialog";
 import { AddAdditionalPaymentDialog } from "@/components/rent-payments/add-additional-payment-dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { PaymentActions } from "@/components/rent-payments/payment-actions";
-
-interface Tenant {
-  _id: string;
-  name: string;
-  phone: string;
-  email: string;
-  emergencyContact: string;
-  address: string;
-  pinCode: string;
-  idType: string;
-  idNumber: string;
-  joinDate: string;
-  roomNumber: string;
-  roomType: string;
-  documents: { type: string; url: string }[];
-  block: string;
-}
+import { ChangeStatusDialog } from "@/components/tenants/change-status-dialog";
 
 interface RentPayment {
   _id: string;
@@ -66,6 +44,24 @@ interface RentPayment {
   roomNumber?: string;
 }
 
+interface Tenant {
+  _id: string;
+  name: string;
+  phone: string;
+  email: string;
+  emergencyContact: string;
+  address: string;
+  pinCode: string;
+  idType: string;
+  idNumber: string;
+  joinDate: string;
+  roomNumber: string;
+  roomType: string;
+  documents: { type: string; url: string }[];
+  block: string;
+  status: string;
+}
+
 export default function TenantDetailsPage() {
   const params = useParams();
   const { user } = useUser();
@@ -75,8 +71,23 @@ export default function TenantDetailsPage() {
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [isAddPaymentOpen, setIsAddPaymentOpen] = useState(false);
-  const [isAddAdditionalPaymentOpen, setIsAddAdditionalPaymentOpen] =
-    useState(false);
+  const [isAddAdditionalPaymentOpen, setIsAddAdditionalPaymentOpen] = useState(false);
+  const [isChangeStatusDialogOpen, setIsChangeStatusDialogOpen] = useState(false);
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "active":
+        return <Badge className="bg-success/10 text-success">Active</Badge>;
+      case "left":
+        return <Badge variant="secondary">Left</Badge>;
+      case "blacklisted":
+        return <Badge variant="destructive">Blacklisted</Badge>;
+      case "pending":
+        return <Badge variant="outline">Pending</Badge>;
+      default:
+        return null;
+    }
+  };
 
   useEffect(() => {
     const fetchTenantDetails = async () => {
@@ -166,6 +177,24 @@ export default function TenantDetailsPage() {
     }
   };
 
+  const handleStatusChange = async () => {
+    if (!user?.id || !params.tenantId) return;
+    try {
+      const response = await fetch(
+        `/api/users/${user.id}/tenants/${params.tenantId}`
+      );
+      if (!response.ok) {
+        throw new Error(`Failed to fetch tenant: ${response.statusText}`);
+      }
+      const data = await response.json();
+      setTenant(data);
+      setError(null);
+    } catch (error) {
+      console.error("Error fetching tenant details:", error);
+      setError("Failed to load tenant details. Please try again later.");
+    }
+  };
+
   const getPaymentStatusBadge = (status: string) => {
     switch (status) {
       case "paid":
@@ -176,44 +205,25 @@ export default function TenantDetailsPage() {
         );
       case "pending":
         return (
-          <Badge
-            variant="secondary"
-            className="bg-warning/10 text-warning hover:bg-warning/20 transition-colors"
-          >
+          <Badge variant="secondary" className="bg-warning/10 text-warning hover:bg-warning/20 transition-colors">
             Pending
           </Badge>
         );
       case "overdue":
         return (
-          <Badge
-            variant="destructive"
-            className="bg-destructive/10 hover:bg-destructive/20 transition-colors"
-          >
+          <Badge variant="destructive" className="bg-destructive/10 hover:bg-destructive/20 transition-colors">
             Overdue
-          </Badge>
-        );
-      case "cancelled":
-        return (
-          <Badge
-            variant="destructive"
-            className="bg-destructive hover:bg-destructive/80 transition-colors"
-          >
-            Cancelled
           </Badge>
         );
       default:
         return (
-          <Badge
-            variant="outline"
-            className="bg-muted/10 hover:bg-muted/20 transition-colors"
-          >
+          <Badge variant="outline" className="bg-muted/10 hover:bg-muted/20 transition-colors">
             Undefined
           </Badge>
         );
     }
   };
 
-  console.log("Tenant Details:", rentPayments);
   const RentPaymentCard = ({ payment }: { payment: RentPayment }) => (
     <div className="relative flex items-start gap-4 pb-8">
       <div className="flex-1">
@@ -271,10 +281,10 @@ export default function TenantDetailsPage() {
             </div>
 
             <div className="flex items-center gap-4">
-              
               <PaymentActions
                 payment={payment}
                 onSuccess={handlePaymentSuccess}
+                disabled={tenant?.status !== 'active'}
               />
             </div>
           </div>
@@ -304,13 +314,21 @@ export default function TenantDetailsPage() {
     );
   }
 
+  const isActive = tenant.status === 'active';
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">{tenant.name}</h1>
-        <Badge variant="outline" className="text-sm">
-          Room {tenant.roomNumber}
-        </Badge>
+        <div className="flex items-center gap-4">
+          {getStatusBadge(tenant.status)}
+          <Button 
+            variant="outline"
+            onClick={() => setIsChangeStatusDialogOpen(true)}
+          >
+            Change Status
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="profile" className="w-full">
@@ -415,10 +433,14 @@ export default function TenantDetailsPage() {
                     className="hidden"
                     onChange={handleDocumentUpload}
                     accept=".pdf,.jpg,.jpeg,.png"
+                    disabled={!isActive}
                   />
                   <label
                     htmlFor="document-upload"
-                    className="flex flex-col items-center gap-2 cursor-pointer"
+                    className={cn(
+                      "flex flex-col items-center gap-2 cursor-pointer",
+                      !isActive && "opacity-50 cursor-not-allowed"
+                    )}
                   >
                     <UploadIcon className="h-8 w-8 text-muted-foreground" />
                     <span className="text-sm text-muted-foreground">
@@ -571,13 +593,17 @@ export default function TenantDetailsPage() {
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold">Payment History</h2>
             <div className="flex gap-2">
-              <Button onClick={() => setIsAddPaymentOpen(true)}>
+              <Button 
+                onClick={() => setIsAddPaymentOpen(true)}
+                disabled={!isActive}
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Monthly Payment
               </Button>
               <Button
                 onClick={() => setIsAddAdditionalPaymentOpen(true)}
                 variant="outline"
+                disabled={!isActive}
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Additional Payment
@@ -649,7 +675,11 @@ export default function TenantDetailsPage() {
                 <p className="text-xs text-muted-foreground">
                   Due on {format(new Date(), "PPP")}
                 </p>
-                <Button className="w-full mt-4" size="sm">
+                <Button 
+                  className="w-full mt-4" 
+                  size="sm"
+                  disabled={!isActive}
+                >
                   Pay Now
                 </Button>
               </CardContent>
@@ -683,6 +713,16 @@ export default function TenantDetailsPage() {
         roomNumber={tenant.roomNumber}
         roomType={tenant.roomType}
       />
+
+      {tenant && (
+        <ChangeStatusDialog
+          isOpen={isChangeStatusDialogOpen}
+          onClose={() => setIsChangeStatusDialogOpen(false)}
+          onSuccess={handleStatusChange}
+          tenantId={tenant._id}
+          currentStatus={tenant.status}
+        />
+      )}
     </div>
   );
 }

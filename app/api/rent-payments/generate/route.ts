@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     // Calculate next month's date
     const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
     
-    // Get all active tenants in the block
+    // Get only active tenants
     const tenants = await Tenant.find({ 
       block: blockId,
       status: 'active'

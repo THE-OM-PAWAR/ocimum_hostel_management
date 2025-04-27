@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     const currentYear = currentDate.getFullYear();
     const generationDay = parseInt(block.rentGenerationDay) || 5;
 
-    // Get all active tenants
+    // Get only active tenants
     const tenants = await Tenant.find({
       block: blockId,
       status: 'active'
