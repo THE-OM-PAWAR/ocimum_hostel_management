@@ -19,7 +19,12 @@ interface EditPaymentDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  payment: any;
+  payment: {
+    _id: string;
+    amount: number;
+    status: string;
+    paymentMethod?: string;
+  };
 }
 
 export function EditPaymentDialog({
@@ -103,6 +108,7 @@ export function EditPaymentDialog({
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="paid">Paid</SelectItem>
                 <SelectItem value="overdue">Overdue</SelectItem>
+                <SelectItem value="undefined">Undefined</SelectItem>
               </SelectContent>
             </Select>
           </div>
