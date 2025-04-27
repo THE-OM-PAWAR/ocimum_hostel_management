@@ -158,8 +158,6 @@ export default function BlockDetailsPage() {
     router.push(`/dashboard/${params.blockId}/tenants/${tenantId}`);
   };
 
-  console.log("tenants", tenants);
-  console.log("block", block);
   const filteredTenants = tenants.filter(tenant =>
     tenant.name.toLowerCase().includes(searchQuery.toLowerCase())
   );

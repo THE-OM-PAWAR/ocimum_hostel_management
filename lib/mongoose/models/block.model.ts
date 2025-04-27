@@ -5,6 +5,8 @@ export interface IBlock extends Document {
   description?: string;
   hostelId: string;
   userId: string;
+  rentGenerationDay: string;
+  rentGenerationEnabled: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -27,6 +29,14 @@ const blockSchema = new Schema<IBlock>(
     userId: {
       type: String,
       required: [true, 'Please provide a user ID'],
+    },
+    rentGenerationDay: {
+      type: String,
+      default: "1",
+    },
+    rentGenerationEnabled: {
+      type: Boolean,
+      default: true,
     },
   },
   {
