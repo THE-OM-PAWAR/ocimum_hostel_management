@@ -13,6 +13,7 @@ import { format } from "date-fns";
 import { Phone, Mail, MapPin, Calendar, Building2, Upload as UploadIcon, Bed, Users, Key, MoreVertical, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AddRentPaymentDialog } from "@/components/rent-payments/add-rent-payment-dialog";
+import { AddAdditionalPaymentDialog } from "@/components/rent-payments/add-additional-payment-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -61,6 +62,7 @@ export default function TenantDetailsPage() {
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [isAddPaymentOpen, setIsAddPaymentOpen] = useState(false);
+  const [isAddAdditionalPaymentOpen, setIsAddAdditionalPaymentOpen] = useState(false);
 
   useEffect(() => {
     const fetchTenantDetails = async () => {
@@ -140,7 +142,6 @@ export default function TenantDetailsPage() {
   };
 
   const getPaymentStatusBadge = (status: string) => {
- 
     switch (status) {
       case "paid":
         return (
@@ -170,11 +171,9 @@ export default function TenantDetailsPage() {
   };
 
   const RentPaymentCard = ({ payment }: { payment: RentPayment }) => (
-    <div className="relative  flex items-start gap-4 pb-8">
-
-      
+    <div className="relative flex items-start gap-4 pb-8">
       <div className="flex-1">
-        <div className="bg-card  border-2 rounded-lg p-6 hover:shadow-md transition-all">
+        <div className="bg-card border-2 rounded-lg p-6 hover:shadow-md transition-all">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
@@ -496,10 +495,16 @@ export default function TenantDetailsPage() {
         <TabsContent value="payments" className="space-y-8">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold">Payment History</h2>
-            <Button onClick={() => setIsAddPaymentOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Additional Payment
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={() => setIsAddPaymentOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Monthly Payment
+              </Button>
+              <Button onClick={() => setIsAddAdditionalPaymentOpen(true)} variant="outline">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Additional Payment
+              </Button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -565,6 +570,16 @@ export default function TenantDetailsPage() {
       <AddRentPaymentDialog
         isOpen={isAddPaymentOpen}
         onClose={() => setIsAddPaymentOpen(false)}
+        onSuccess={handlePaymentSuccess}
+        tenantId={tenant._id}
+        blockId={tenant.block}
+        roomNumber={tenant.roomNumber}
+        roomType={tenant.roomType}
+      />
+
+      <AddAdditionalPaymentDialog
+        isOpen={isAddAdditionalPaymentOpen}
+        onClose={() => setIsAddAdditionalPaymentOpen(false)}
         onSuccess={handlePaymentSuccess}
         tenantId={tenant._id}
         blockId={tenant.block}

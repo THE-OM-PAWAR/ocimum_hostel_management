@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -14,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-interface AddRentPaymentDialogProps {
+interface AddAdditionalPaymentDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
@@ -24,7 +25,7 @@ interface AddRentPaymentDialogProps {
   roomType: string;
 }
 
-export function AddRentPaymentDialog({
+export function AddAdditionalPaymentDialog({
   isOpen,
   onClose,
   onSuccess,
@@ -32,107 +33,63 @@ export function AddRentPaymentDialog({
   blockId,
   roomNumber,
   roomType,
-}: AddRentPaymentDialogProps) {
+}: AddAdditionalPaymentDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  const [settings, setSettings] = useState({
-    rentGenerationDay: "1",
-  });
   const [formData, setFormData] = useState({
+    label: "",
     amount: "",
-    month: "",
+    month: new Date().toLocaleString('default', { month: 'long' }),
     year: new Date().getFullYear(),
+    status: "pending" as "pending" | "paid" | "overdue",
+    description: "",
   });
-
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        // Fetch block settings
-        const settingsResponse = await fetch(`/api/blocks/${blockId}/payment-settings`);
-        if (settingsResponse.ok) {
-          const settingsData = await settingsResponse.json();
-          setSettings(settingsData);
-        }
-
-        // Fetch room type details for rent amount
-        const roomTypeResponse = await fetch(`/api/blocks/${blockId}/room-types`);
-        if (roomTypeResponse.ok) {
-          const roomTypes = await roomTypeResponse.json();
-          const currentRoomType = roomTypes.find((type: any) => type.name === roomType);
-          if (currentRoomType) {
-            setFormData(prev => ({ ...prev, amount: currentRoomType.rent.toString() }));
-          }
-        }
-
-        // Set next month as default
-        const nextMonth = new Date();
-        nextMonth.setMonth(nextMonth.getMonth() + 1);
-        setFormData(prev => ({
-          ...prev,
-          month: nextMonth.toLocaleString('default', { month: 'long' }),
-          year: nextMonth.getFullYear(),
-        }));
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    if (isOpen) {
-      fetchSettings();
-    }
-  }, [isOpen, blockId, roomType]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      // Calculate due date based on settings
-      const dueDate = new Date(formData.year, 
-        new Date(Date.parse(`${formData.month} 1, 2000`)).getMonth(), 
-        parseInt(settings.rentGenerationDay)
-      );
-
       const response = await fetch("/api/rent-payments", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          ...formData,
           tenant: tenantId,
           block: blockId,
           roomNumber,
           roomType,
+          type: "additional",
           amount: parseFloat(formData.amount),
-          month: formData.month,
-          year: formData.year,
-          dueDate: dueDate.toISOString(),
-          status: "pending",
-          type: "monthly"
+          dueDate: new Date().toISOString(),
         }),
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to create rent payment");
+        throw new Error("Failed to create additional payment");
       }
 
       toast({
         title: "Success",
-        description: "Monthly rent payment added successfully",
+        description: "Additional payment added successfully",
       });
 
       onSuccess();
       onClose();
       setFormData({
+        label: "",
         amount: "",
-        month: "",
+        month: new Date().toLocaleString('default', { month: 'long' }),
         year: new Date().getFullYear(),
+        status: "pending",
+        description: "",
       });
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Error",
-        description: error.message || "Failed to add rent payment. Please try again.",
+        description: "Failed to add additional payment. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -144,9 +101,20 @@ export function AddRentPaymentDialog({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add Monthly Rent Payment</DialogTitle>
+          <DialogTitle>Add Additional Payment</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+          <div className="space-y-2">
+            <Label htmlFor="label">Payment Name</Label>
+            <Input
+              id="label"
+              value={formData.label}
+              onChange={(e) => setFormData(prev => ({ ...prev, label: e.target.value }))}
+              placeholder="Enter payment name"
+              required
+            />
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="amount">Amount (₹)</Label>
             <Input
@@ -204,6 +172,36 @@ export function AddRentPaymentDialog({
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Status</Label>
+            <Select
+              value={formData.status}
+              onValueChange={(value: "pending" | "paid" | "overdue") => 
+                setFormData(prev => ({ ...prev, status: value }))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="paid">Paid</SelectItem>
+                <SelectItem value="overdue">Overdue</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Description (Optional)</Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              placeholder="Enter description"
+              rows={3}
+            />
           </div>
 
           <div className="flex justify-end gap-3">
