@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { AwaitedReactNode, JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useParams, useRouter } from "next/navigation";
 import { Plus, Settings, Search, Package2, ChevronDown } from "lucide-react";
@@ -15,6 +15,11 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { CreateTenantSheet } from "@/components/create-tenant-sheet";
 
@@ -153,6 +158,8 @@ export default function BlockDetailsPage() {
     router.push(`/dashboard/${params.blockId}/tenants/${tenantId}`);
   };
 
+  console.log("tenants", tenants);
+  console.log("block", block);
   const filteredTenants = tenants.filter(tenant =>
     tenant.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -207,10 +214,18 @@ export default function BlockDetailsPage() {
           </div>
         ) : (
           <div className="divide-y">
-            {filteredTenants.map((tenant) => (
+            {filteredTenants.map((tenant: { _id: Key | null | undefined; name: string | number | bigint | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<AwaitedReactNode> | null | undefined; roomNumber: string | number | bigint | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<AwaitedReactNode> | null | undefined; roomType: string | number | bigint | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<AwaitedReactNode> | null | undefined; paymentStatus: string; }) => (
               <div 
                 key={tenant._id}
-                className="p-4 flex items-center justify-between hover:bg-accent/5 transition-colors"
+                className="p-4 flex items-center justify-between hover:bg-accent/5 transition-colors cursor-pointer"
+                onClick={() => tenant._id && handleViewDetails(tenant._id as string)}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  const element = e.currentTarget.querySelector('[data-trigger="rent-history"]') as HTMLElement;
+                  if (element) {
+                    element.click();
+                  }
+                }}
               >
                 <div className="flex items-center gap-4">
                   <div>
@@ -225,14 +240,23 @@ export default function BlockDetailsPage() {
 
                 <div className="flex items-center gap-4">
                   {getPaymentStatusBadge(tenant.paymentStatus)}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        data-trigger="rent-history"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         Rent History
                         <ChevronDown className="ml-2 h-4 w-4" />
                       </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-[240px]">
+                    </PopoverTrigger>
+                    <PopoverContent 
+                      align="end" 
+                      className="w-[240px]"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <div className="p-2">
                         <h4 className="text-sm font-medium mb-2">Last 3 Months</h4>
                         <div className="space-y-2">
@@ -252,19 +276,25 @@ export default function BlockDetailsPage() {
                             </div>
                           ))}
                         </div>
+                        <div className="mt-4 pt-4 border-t flex flex-col gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="w-full justify-start"
+                            onClick={() => tenant._id && handleViewDetails(tenant._id.toString())}
+                          >
+                            View Details
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            className="w-full justify-start"
+                          >
+                            Add Rent Payment
+                          </Button>
+                        </div>
                       </div>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        className="text-primary cursor-pointer"
-                        onClick={() => handleViewDetails(tenant._id)}
-                      >
-                        View Details
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer">
-                        Add Rent Payment
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
             ))}

@@ -3,6 +3,7 @@ import mongoose, { Document, Model, Schema } from 'mongoose';
 export interface ITenant extends Document {
   name: string;
   phone: string;
+  email: string;
   emergencyContact: string;
   idType: string;
   idNumber: string;
@@ -14,7 +15,12 @@ export interface ITenant extends Document {
   status: 'active' | 'inactive' | 'pending';
   address?: string;
   pinCode?: string;
-  documentUrl?: string;
+  paymentHistory?: {
+    month: string;
+    amount: number;
+    status: 'paid' | 'pending' | 'overdue';
+    paidOn?: string;
+  }[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -29,6 +35,10 @@ const tenantSchema = new Schema<ITenant>(
     phone: {
       type: String,
       required: [true, 'Please provide a phone number'],
+      trim: true,
+    },
+    email: {
+      type: String,
       trim: true,
     },
     emergencyContact: {
@@ -81,10 +91,15 @@ const tenantSchema = new Schema<ITenant>(
       type: String,
       trim: true,
     },
-    documentUrl: {
-      type: String,
-      trim: true,
-    },
+    paymentHistory: [{
+      month: String,
+      amount: Number,
+      status: {
+        type: String,
+        enum: ['paid', 'pending', 'overdue'],
+      },
+      paidOn: String,
+    }],
   },
   {
     timestamps: true,

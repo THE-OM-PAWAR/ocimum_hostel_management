@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-import { Upload, Phone, Mail, MapPin, Calendar, Building2, Upload as UploadIcon } from "lucide-react";
+import { Phone, Mail, MapPin, Calendar, Building2, Upload as UploadIcon, Bed, Users, Key } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Tenant {
@@ -40,6 +40,7 @@ export default function TenantDetailsPage() {
   const { user } = useUser();
   const [tenant, setTenant] = useState<Tenant | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -47,10 +48,15 @@ export default function TenantDetailsPage() {
       if (!user?.id || !params.tenantId) return;
       try {
         const response = await fetch(`/api/users/${user.id}/tenants/${params.tenantId}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch tenant: ${response.statusText}`);
+        }
         const data = await response.json();
         setTenant(data);
+        setError(null);
       } catch (error) {
         console.error("Error fetching tenant details:", error);
+        setError("Failed to load tenant details. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -76,18 +82,36 @@ export default function TenantDetailsPage() {
 
       if (!response.ok) throw new Error("Failed to upload document");
 
-      // Refresh tenant data to show new document
       const updatedTenant = await response.json();
       setTenant(updatedTenant);
+      
+      // Show success message
     } catch (error) {
       console.error("Error uploading document:", error);
+      // Show error message
     } finally {
       setUploading(false);
     }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (!tenant) return <div>Tenant not found</div>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-pulse text-lg">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error || !tenant) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <div className="text-lg text-destructive">{error || "Tenant not found"}</div>
+        <Button variant="outline" onClick={() => window.history.back()}>
+          Go Back
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -102,6 +126,7 @@ export default function TenantDetailsPage() {
         <TabsList>
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
+          <TabsTrigger value="allotted-room">Allotted Room</TabsTrigger>
           <TabsTrigger value="payments">Payments</TabsTrigger>
         </TabsList>
 
@@ -119,7 +144,9 @@ export default function TenantDetailsPage() {
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold">{tenant.name}</h3>
-                  <p className="text-sm text-muted-foreground">Joined on {format(new Date(tenant.joinDate), "PPP")}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Joined on {format(new Date(tenant.joinDate), "PPP")}
+                  </p>
                 </div>
               </div>
 
@@ -209,7 +236,7 @@ export default function TenantDetailsPage() {
                       className="flex items-center justify-between p-4 border rounded-lg"
                     >
                       <div className="flex items-center gap-2">
-                        <Upload className="h-4 w-4" />
+                        <UploadIcon className="h-4 w-4" />
                         <span>{doc.type}</span>
                       </div>
                       <Button variant="outline" size="sm" asChild>
@@ -219,6 +246,96 @@ export default function TenantDetailsPage() {
                       </Button>
                     </div>
                   ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="allotted-room" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Room Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div className="p-4 border rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Key className="h-5 w-5 text-primary" />
+                        <h3 className="font-medium">Room Details</h3>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Room Number</span>
+                          <span className="font-medium">{tenant.roomNumber}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Room Type</span>
+                          <span className="font-medium">{tenant.roomType}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Floor</span>
+                          <span className="font-medium">2nd Floor</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-4 border rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Bed className="h-5 w-5 text-primary" />
+                        <h3 className="font-medium">Room Amenities</h3>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {["Air Conditioning", "Attached Bathroom", "Study Table", "Wardrobe"].map((amenity, index) => (
+                          <Badge key={index} variant="secondary">
+                            {amenity}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="p-4 border rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Users className="h-5 w-5 text-primary" />
+                        <h3 className="font-medium">Room Occupancy</h3>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Total Capacity</span>
+                          <span className="font-medium">2 Persons</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Current Occupancy</span>
+                          <span className="font-medium">1 Person</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Available Beds</span>
+                          <span className="font-medium">1 Bed</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-4 border rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Calendar className="h-5 w-5 text-primary" />
+                        <h3 className="font-medium">Occupancy Period</h3>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Check-in Date</span>
+                          <span className="font-medium">{format(new Date(tenant.joinDate), "PPP")}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Duration</span>
+                          <span className="font-medium">6 Months</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>
