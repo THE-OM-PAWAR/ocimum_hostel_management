@@ -47,7 +47,7 @@ export async function POST(req: Request) {
     const rentPayment = await RentPayment.create({
       ...data,
       dueDate,
-      type: 'monthly'
+      type: 'additional'
     });
 
     return NextResponse.json(rentPayment);
