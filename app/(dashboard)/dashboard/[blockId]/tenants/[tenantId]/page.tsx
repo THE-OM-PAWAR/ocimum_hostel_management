@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -76,76 +76,69 @@ export default function TenantDetailsPage() {
   const [isChangeStatusDialogOpen, setIsChangeStatusDialogOpen] = useState(false);
   const [roomTypes, setRoomTypes] = useState([]);
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "active":
-        return <Badge className="bg-success/10 text-success">Active</Badge>;
-      case "left":
-        return <Badge variant="secondary">Left</Badge>;
-      case "blacklisted":
-        return <Badge variant="destructive">Blacklisted</Badge>;
-      case "pending":
-        return <Badge variant="outline">Pending</Badge>;
-      default:
-        return null;
+  const fetchTenantDetails = useCallback(async () => {
+    if (!user?.id || !params.tenantId) return;
+    try {
+      const response = await fetch(
+        `/api/users/${user.id}/tenants/${params.tenantId}`
+      );
+      if (!response.ok) {
+        throw new Error(`Failed to fetch tenant: ${response.statusText}`);
+      }
+      const data = await response.json();
+      setTenant(data);
+      setError(null);
+    } catch (error) {
+      console.error("Error fetching tenant details:", error);
+      setError("Failed to load tenant details. Please try again later.");
     }
-  };
+  }, [user?.id, params.tenantId]);
+
+  const fetchRentPayments = useCallback(async () => {
+    if (!params.tenantId) return;
+    try {
+      const response = await fetch(
+        `/api/rent-payments?tenantId=${params.tenantId}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch rent payments");
+      }
+      const data = await response.json();
+      setRentPayments(data);
+    } catch (error) {
+      console.error("Error fetching rent payments:", error);
+    }
+  }, [params.tenantId]);
+
+  const fetchRoomTypes = useCallback(async () => {
+    if (!params.blockId) return;
+    try {
+      const response = await fetch(`/api/blocks/${params.blockId}/room-types`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch room types");
+      }
+      const data = await response.json();
+      setRoomTypes(data);
+    } catch (error) {
+      console.error("Error fetching room types:", error);
+    }
+  }, [params.blockId]);
 
   useEffect(() => {
-    const fetchTenantDetails = async () => {
-      if (!user?.id || !params.tenantId) return;
-      try {
-        const response = await fetch(
-          `/api/users/${user.id}/tenants/${params.tenantId}`
-        );
-        if (!response.ok) {
-          throw new Error(`Failed to fetch tenant: ${response.statusText}`);
-        }
-        const data = await response.json();
-        setTenant(data);
-        setError(null);
-      } catch (error) {
-        console.error("Error fetching tenant details:", error);
-        setError("Failed to load tenant details. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
+    const initializeData = async () => {
+      setLoading(true);
+      await Promise.all([
+        fetchTenantDetails(),
+        fetchRentPayments(),
+        fetchRoomTypes()
+      ]);
+      setLoading(false);
     };
 
-    const fetchRentPayments = async () => {
-      if (!params.tenantId) return;
-      try {
-        const response = await fetch(
-          `/api/rent-payments?tenantId=${params.tenantId}`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch rent payments");
-        }
-        const data = await response.json();
-        setRentPayments(data);
-      } catch (error) {
-        console.error("Error fetching rent payments:", error);
-      }
-    };
-
-    const fetchRoomTypes = async () => {
-      if (!params.blockId) return;
-      try {
-        const response = await fetch(`/api/blocks/${params.blockId}/room-types`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch room types");
-        }
-        const data = await response.json();
-        setRoomTypes(data);
-      } catch (error) {
-        console.error("Error fetching room types:", error);
-      }
-    };
-
-    fetchTenantDetails();
-    fetchRentPayments();
-    fetchRoomTypes();
-  }, [user?.id, params.tenantId, params.blockId]);
+    if (user?.id && params.tenantId) {
+      initializeData();
+    }
+  }, [user?.id, params.tenantId, fetchTenantDetails, fetchRentPayments, fetchRoomTypes]);
 
   const handleDocumentUpload = async (
     e: React.ChangeEvent<HTMLInputElement>
@@ -179,37 +172,11 @@ export default function TenantDetailsPage() {
   };
 
   const handlePaymentSuccess = async () => {
-    if (!params.tenantId) return;
-    try {
-      const response = await fetch(
-        `/api/rent-payments?tenantId=${params.tenantId}`
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch rent payments");
-      }
-      const data = await response.json();
-      setRentPayments(data);
-    } catch (error) {
-      console.error("Error fetching rent payments:", error);
-    }
+    await fetchRentPayments();
   };
 
   const handleStatusChange = async () => {
-    if (!user?.id || !params.tenantId) return;
-    try {
-      const response = await fetch(
-        `/api/users/${user.id}/tenants/${params.tenantId}`
-      );
-      if (!response.ok) {
-        throw new Error(`Failed to fetch tenant: ${response.statusText}`);
-      }
-      const data = await response.json();
-      setTenant(data);
-      setError(null);
-    } catch (error) {
-      console.error("Error fetching tenant details:", error);
-      setError("Failed to load tenant details. Please try again later.");
-    }
+    await fetchTenantDetails();
   };
 
   const handleTenantUpdate = async () => {
@@ -245,6 +212,21 @@ export default function TenantDetailsPage() {
     }
   };
 
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "active":
+        return <Badge className="bg-success/10 text-success">Active</Badge>;
+      case "left":
+        return <Badge variant="secondary">Left</Badge>;
+      case "blacklisted":
+        return <Badge variant="destructive">Blacklisted</Badge>;
+      case "pending":
+        return <Badge variant="outline">Pending</Badge>;
+      default:
+        return null;
+    }
+  };
+
   const RentPaymentCard = ({ payment }: { payment: RentPayment }) => (
     <div className="relative flex items-start gap-4 pb-8">
       <div className="flex-1">
@@ -253,7 +235,7 @@ export default function TenantDetailsPage() {
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <h4 className="font-medium text-lg">
-                  {payment.type === "monthly" ? "Monthly Rent" : payment.label}
+                  {payment.type === 'monthly' ? "Monthly Rent" : payment.label}
                 </h4>
                 {getPaymentStatusBadge(payment.status)}
               </div>

@@ -1,9 +1,32 @@
 import { NextResponse } from "next/server";
 import { Tenant } from "@/lib/mongoose/models/tenant.model";
-import { RentPayment } from "@/lib/mongoose/models/rentPayment.model";
-import { RoomType } from "@/lib/mongoose/models/room-type.model";
 import { Block } from "@/lib/mongoose/models/block.model";
 import connectDB from "@/lib/mongodb/client";
+
+export async function GET(req: Request) {
+  try {
+    await connectDB();
+    const { searchParams } = new URL(req.url);
+    const blockId = searchParams.get('blockId');
+
+    let query = {};
+    if (blockId) {
+      query = { block: blockId };
+    }
+
+    const tenants = await Tenant.find(query)
+      .populate('block', 'name')
+      .sort({ createdAt: -1 });
+
+    return NextResponse.json(tenants);
+  } catch (error) {
+    console.error("Error fetching tenants:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch tenants" },
+      { status: 500 }
+    );
+  }
+}
 
 export async function POST(req: Request) {
   try {
@@ -78,30 +101,6 @@ export async function POST(req: Request) {
     console.error("Error creating tenant:", error);
     return NextResponse.json(
       { error: "Failed to create tenant" },
-      { status: 500 }
-    );
-  }
-}
-
-export async function GET(req: Request) {
-  try {
-    await connectDB();
-    const { searchParams } = new URL(req.url);
-    const blockId = searchParams.get('blockId');
-
-    if (!blockId) {
-      return NextResponse.json(
-        { error: "Block ID is required" },
-        { status: 400 }
-      );
-    }
-
-    const tenants = await Tenant.find({ block: blockId }).sort({ createdAt: -1 });
-    return NextResponse.json(tenants);
-  } catch (error) {
-    console.error("Error fetching tenants:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch tenants" },
       { status: 500 }
     );
   }
