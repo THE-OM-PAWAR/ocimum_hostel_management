@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { Calendar } from "lucide-react";
+import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 
 export default function PaymentSettingsPage() {
   const params = useParams();
@@ -94,8 +95,30 @@ export default function PaymentSettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-pulse text-lg">Loading...</div>
+      <div className="space-y-6">
+        <div>
+          <LoadingSkeleton className="h-10 w-64" />
+          <LoadingSkeleton className="h-6 w-96 mt-2" />
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Card>
+            <CardHeader>
+              <LoadingSkeleton className="h-6 w-48" />
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <LoadingSkeleton className="h-20" />
+                <LoadingSkeleton className="h-32" />
+                <LoadingSkeleton className="h-10 w-24 ml-auto" />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     );
   }

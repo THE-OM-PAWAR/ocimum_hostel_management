@@ -15,20 +15,50 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser } from "@clerk/nextjs";
+import { useEffect, useState } from "react";
 
 export function Breadcrumbs() {
   const pathname = usePathname();
   const segments = pathname.split("/").filter(Boolean);
   const { user } = useUser();
 
-  const breadcrumbItems = [
+
+  const [ownerName, setOwnerName] = useState("");
+
+  useEffect(() => {
+    const fetchOwnerName = async () => {
+      if (!user?.id) return;
+      try {
+        const response = await fetch(`/api/users/${user.id}/hostel-info`);
+        const data = await response.json();
+        console.log("Owner Name:", data);
+        setOwnerName(data.ownerName || "");
+      } catch (error) {
+        console.error("Error fetching owner name:", error);
+      }
+    };
+
+    if (user?.id) {
+      fetchOwnerName();
+    }
+  }, [user?.id]);
+
+
+
+  type BreadcrumbItem = {
+    href: string;
+    label: string;
+    icon?: JSX.Element | null;
+    isUserName?: boolean;
+  } | null;
+
+  const breadcrumbItems: BreadcrumbItem[] = [
     // Always show user name as first item if available
-    ...(user?.fullName
+    ...(ownerName
       ? [
           {
-            label: user.fullName,
-            href: "/dashboard",
-            icon: <Home className="h-4 w-4" />,
+            label: ownerName,
+            href: "/dashboard/",
             isUserName: true,
           },
         ]
@@ -112,6 +142,8 @@ export function Breadcrumbs() {
 
   if (breadcrumbItems.length === 0) return null;
 
+  console.log("Breadcrumb Items:", breadcrumbItems);
+
   return (
     <nav className="flex items-center space-x-1 text-sm text-muted-foreground">
       {breadcrumbItems.map((item, index) => 
@@ -124,7 +156,7 @@ export function Breadcrumbs() {
               "flex items-center hover:text-foreground transition-colors",
               index === breadcrumbItems.length - 1 &&
                 "text-foreground pointer-events-none",
-              item.isUserName && "text-lg font-bold text-foreground"
+              item.isUserName && "text-md font-medium text-foreground"
             )}
           >
             {item.icon && <span className="mr-2">{item.icon}</span>}

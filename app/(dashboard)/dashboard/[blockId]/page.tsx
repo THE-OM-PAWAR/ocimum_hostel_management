@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -163,8 +165,6 @@ export default function BlockDetailsPage() {
     }
   };
 
-
-
   const getPaymentStatusBadge = (status: string) => {
     switch (status) {
       case "paid":
@@ -203,7 +203,25 @@ export default function BlockDetailsPage() {
   );
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col gap-6">
+          <LoadingSkeleton className="h-10 w-64" />
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <LoadingSkeleton className="h-10 flex-1 max-w-md" />
+            <LoadingSkeleton className="h-10 w-32" />
+          </div>
+        </div>
+
+        <div className="rounded-xl border bg-card shadow-sm p-6">
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <LoadingSkeleton key={i} className="h-24" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -6,6 +6,7 @@ import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { CreateBlockDialog } from "@/components/create-block-dialog";
 import { useRouter } from "next/navigation";
+import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 
 interface BlockCardProps {
   index: number;
@@ -107,7 +108,21 @@ export default function DashboardPage() {
   }, [user?.id]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="space-y-8">
+        <div>
+          <LoadingSkeleton className="h-10 w-64" />
+          <LoadingSkeleton className="h-6 w-96 mt-2" />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <LoadingSkeleton className="h-[200px]" />
+          {[1, 2, 3].map((i) => (
+            <LoadingSkeleton key={i} className="h-[200px]" />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -137,7 +152,7 @@ export default function DashboardPage() {
         onClose={() => setIsCreateDialogOpen(false)}
         onSuccess={fetchBlocks}
         userId={user?.id || ""}
-        hostelId={hostelName} // Using hostelName as hostelId for now
+        hostelId={hostelName}
       />
     </div>
   );

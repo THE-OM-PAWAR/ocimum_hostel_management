@@ -29,6 +29,7 @@ import { AddAdditionalPaymentDialog } from "@/components/rent-payments/add-addit
 import { PaymentActions } from "@/components/rent-payments/payment-actions";
 import { ChangeStatusDialog } from "@/components/tenants/change-status-dialog";
 import { EditTenantDetails } from "@/components/tenants/edit-tenant-details";
+import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 
 interface RentPayment {
   _id: string;
@@ -199,7 +200,7 @@ export default function TenantDetailsPage() {
         );
       case "overdue":
         return (
-          <Badge variant="destructive" className="bg-destructive/10 hover:bg-destructive/20 transition-colors">
+          <Badge variant="destructive" className="bg-destructive/60 hover:bg-destructive/20 transition-colors">
             Overdue
           </Badge>
         );
@@ -298,8 +299,34 @@ export default function TenantDetailsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-pulse text-lg">Loading...</div>
+      <div className="space-y-8">
+        <div className="flex items-center justify-between">
+          <LoadingSkeleton className="h-10 w-64" />
+          <LoadingSkeleton className="h-10 w-32" />
+        </div>
+
+        <Tabs defaultValue="profile" className="w-full">
+          <TabsList>
+            <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="documents">Documents</TabsTrigger>
+            <TabsTrigger value="payments">Payments</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="profile" className="space-y-6">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="space-y-8">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {[1, 2, 3, 4].map((i) => (
+                      <LoadingSkeleton key={i} className="h-20" />
+                    ))}
+                  </div>
+                  <LoadingSkeleton className="h-32" />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     );
   }
