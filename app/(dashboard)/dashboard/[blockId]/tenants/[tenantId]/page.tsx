@@ -22,6 +22,7 @@ import {
   Key,
   MoreVertical,
   Plus,
+  Construction,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AddRentPaymentDialog } from "@/components/rent-payments/add-rent-payment-dialog";
@@ -76,6 +77,44 @@ export default function TenantDetailsPage() {
   const [isAddAdditionalPaymentOpen, setIsAddAdditionalPaymentOpen] = useState(false);
   const [isChangeStatusDialogOpen, setIsChangeStatusDialogOpen] = useState(false);
   const [roomTypes, setRoomTypes] = useState([]);
+
+  const calculatePaymentStats = () => {
+    if (!rentPayments?.length) return {
+      totalPaid: 0,
+      paymentDue: 0,
+      paidCount: 0,
+      pendingCount: 0,
+      overdueCount: 0
+    };
+
+    return rentPayments.reduce((acc, payment) => {
+      // Calculate total paid
+      if (payment.status === 'paid') {
+        acc.totalPaid += payment.amount;
+        acc.paidCount += 1;
+      }
+      
+      // Calculate payment due (pending + overdue)
+      if (payment.status === 'pending' || payment.status === 'overdue') {
+        acc.paymentDue += payment.amount;
+      }
+
+      // Count payment statuses
+      if (payment.status === 'pending') acc.pendingCount += 1;
+      if (payment.status === 'overdue') acc.overdueCount += 1;
+
+      return acc;
+    }, {
+      totalPaid: 0,
+      paymentDue: 0,
+      paidCount: 0,
+      pendingCount: 0,
+      overdueCount: 0
+    });
+  };
+
+  // Calculate payment statistics
+  const paymentStats = calculatePaymentStats();
 
   const fetchTenantDetails = useCallback(async () => {
     if (!user?.id || !params.tenantId) return;
@@ -140,37 +179,6 @@ export default function TenantDetailsPage() {
       initializeData();
     }
   }, [user?.id, params.tenantId, fetchTenantDetails, fetchRentPayments, fetchRoomTypes]);
-
-  const handleDocumentUpload = async (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("tenantId", params.tenantId as string);
-
-      const response = await fetch(
-        `/api/users/${user?.id}/tenants/${params.tenantId}/documents`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      if (!response.ok) throw new Error("Failed to upload document");
-
-      const updatedTenant = await response.json();
-      setTenant(updatedTenant);
-    } catch (error) {
-      console.error("Error uploading document:", error);
-    } finally {
-      setUploading(false);
-    }
-  };
 
   const handlePaymentSuccess = async () => {
     await fetchRentPayments();
@@ -386,52 +394,14 @@ export default function TenantDetailsPage() {
               <CardTitle>Documents</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-6">
-                <div className="border-2 border-dashed rounded-lg p-6">
-                  <input
-                    type="file"
-                    id="document-upload"
-                    className="hidden"
-                    onChange={handleDocumentUpload}
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    disabled={!isActive}
-                  />
-                  <label
-                    htmlFor="document-upload"
-                    className={cn(
-                      "flex flex-col items-center gap-2 cursor-pointer",
-                      !isActive && "opacity-50 cursor-not-allowed"
-                    )}
-                  >
-                    <UploadIcon className="h-8 w-8 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">
-                      {uploading ? "Uploading..." : "Click to upload document"}
-                    </span>
-                  </label>
+              <div className="flex flex-col items-center justify-center py-12 text-center space-y-4">
+                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Construction className="h-6 w-6 text-primary" />
                 </div>
-
-                <div className="grid gap-4">
-                  {tenant.documents?.map((doc, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-4 border rounded-lg"
-                    >
-                      <div className="flex items-center gap-2">
-                        <UploadIcon className="h-4 w-4" />
-                        <span>{doc.type}</span>
-                      </div>
-                      <Button variant="outline" size="sm" asChild>
-                        <a
-                          href={doc.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          View
-                        </a>
-                      </Button>
-                    </div>
-                  ))}
-                </div>
+                <h3 className="text-lg font-medium">Coming Soon!</h3>
+                <p className="text-muted-foreground max-w-sm">
+                  Document management features are currently under development. Stay tuned for updates!
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -467,15 +437,18 @@ export default function TenantDetailsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">₹24,000</div>
+                <div className="text-2xl font-bold">₹{paymentStats.totalPaid.toLocaleString()}</div>
                 <p className="text-xs text-muted-foreground">Last 3 months</p>
                 <div className="mt-4 h-[60px]">
                   <div className="flex items-end justify-between h-full gap-2">
-                    {[65, 85, 95].map((height, i) => (
+                    {rentPayments.slice(0, 3).map((payment, i) => (
                       <div
                         key={i}
-                        className="flex-1 bg-primary/20 rounded-sm"
-                        style={{ height: `${height}%` }}
+                        className={cn(
+                          "flex-1 rounded-sm",
+                          payment.status === 'paid' ? 'bg-success/20' : 'bg-primary/20'
+                        )}
+                        style={{ height: `${(payment.amount / Math.max(...rentPayments.slice(0, 3).map(p => p.amount))) * 100}%` }}
                       />
                     ))}
                   </div>
@@ -493,7 +466,7 @@ export default function TenantDetailsPage() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Paid</span>
-                    <Badge className="bg-success/10 text-success">6</Badge>
+                    <Badge className="bg-success/10 text-success">{paymentStats.paidCount}</Badge>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Pending</span>
@@ -501,12 +474,12 @@ export default function TenantDetailsPage() {
                       variant="secondary"
                       className="bg-warning/10 text-warning"
                     >
-                      2
+                      {paymentStats.pendingCount}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Overdue</span>
-                    <Badge variant="destructive">1</Badge>
+                    <Badge variant="destructive">{paymentStats.overdueCount}</Badge>
                   </div>
                 </div>
               </CardContent>
@@ -515,18 +488,18 @@ export default function TenantDetailsPage() {
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium">
-                  Next Payment
+                  Payment Due
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">₹12,000</div>
+                <div className="text-2xl font-bold">₹{paymentStats.paymentDue.toLocaleString()}</div>
                 <p className="text-xs text-muted-foreground">
-                  Due on {format(new Date(), "PPP")}
+                  Total pending and overdue payments
                 </p>
                 <Button 
                   className="w-full mt-4" 
                   size="sm"
-                  disabled={!isActive}
+                  disabled={!isActive || paymentStats.paymentDue === 0}
                 >
                   Pay Now
                 </Button>
