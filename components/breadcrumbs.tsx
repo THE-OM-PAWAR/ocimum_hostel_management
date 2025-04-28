@@ -142,7 +142,6 @@ export function Breadcrumbs() {
 
   if (breadcrumbItems.length === 0) return null;
 
-  console.log("Breadcrumb Items:", breadcrumbItems);
 
   return (
     <nav className="flex items-center space-x-1 text-sm text-muted-foreground">
