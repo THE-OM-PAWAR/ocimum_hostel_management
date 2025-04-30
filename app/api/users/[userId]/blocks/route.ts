@@ -36,6 +36,7 @@ export async function GET(req: Request) {
     await connectDB();
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get('userId');
+    console.log("User ID:", userId);
 
     if (!userId) {
       return NextResponse.json(
@@ -45,6 +46,7 @@ export async function GET(req: Request) {
     }
 
     const blocks = await Block.find({ userId }).sort({ createdAt: -1 });
+    console.log("Fetched blocks:", blocks);
     return NextResponse.json(blocks);
   } catch (error) {
     console.error("Error fetching blocks:", error);
