@@ -108,6 +108,7 @@ export default function BlockDetailsPage() {
           }
         );
         const data = await response.json();
+        console.log("Block Details:", data);
         setBlock(data);
         setLoading(false);
       } catch (error) {

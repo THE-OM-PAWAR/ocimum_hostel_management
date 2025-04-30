@@ -9,7 +9,6 @@ export async function GET(
 ) {
   try {
     await connectDB();
-    console.log('Fetching hostel info for user:', params.userId);
 
     const user = await User.findOne({ userId: params.userId });
 
