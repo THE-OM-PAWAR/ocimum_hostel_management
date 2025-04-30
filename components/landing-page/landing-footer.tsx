@@ -61,8 +61,11 @@ export function LandingFooter() {
             <Link href="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Privacy
             </Link>
-            <Link href="/cookies" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Cookies
+            <Link href="/refund" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Refund
+            </Link>
+            <Link href="/return" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Return
             </Link>
           </div>
         </div>
