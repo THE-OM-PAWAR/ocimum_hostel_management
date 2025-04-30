@@ -31,13 +31,10 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET(req: Request) {
+export async function GET(req: Request, { params }: { params: { userId: string } }) {
   try {
     await connectDB();
-    const { searchParams } = new URL(req.url);
-    console.log("Search Params:", new URL(req.url));
-    const userId = searchParams.get('userId');
-    console.log("User ID:", userId);
+    const userId = params.userId;
 
     if (!userId) {
       return NextResponse.json(
@@ -47,7 +44,6 @@ export async function GET(req: Request) {
     }
 
     const blocks = await Block.find({ userId }).sort({ createdAt: -1 });
-    console.log("Fetched blocks:", blocks);
     return NextResponse.json(blocks);
   } catch (error) {
     console.error("Error fetching blocks:", error);

@@ -80,9 +80,8 @@ export default function DashboardPage() {
 
   const fetchBlocks = async () => {
     try {
-      const response = await fetch(`/api/users/${user?.id}/blocks?userId=${user?.id}`);
+      const response = await fetch(`/api/users/${user?.id}/blocks`);
       const data = await response.json();
-      console.log("Fetched blocks:", data);
       setBlocks(data);
     } catch (error) {
       console.error("Error fetching blocks:", error);
@@ -125,7 +124,6 @@ export default function DashboardPage() {
       </div>
     );
   }
-  console.log("Blocks:", blocks);
 
   return (
     <div className="space-y-8">
