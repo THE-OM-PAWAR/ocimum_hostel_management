@@ -136,7 +136,7 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         <CreateBlockCard onClick={() => setIsCreateDialogOpen(true)} />
-        {blocks.map((block, i) => (
+        {(blocks.length >= 1) && blocks.map((block, i) => (
           <BlockCard
             key={block._id}
             index={i}
