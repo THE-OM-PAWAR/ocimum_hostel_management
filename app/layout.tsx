@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   description: "Streamline your hostel and PG operations with our easy-to-use management system",
   manifest: "/manifest.json",
   icons: {
-    apple: "/public/maskable_icon_x192(1).png",
+    apple: "/maskable_icon_x192(1).png",
   },
   themeColor: "#1e40af",
 };
@@ -35,9 +35,9 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#1e40af" />
 
-        <link rel="apple-touch-icon" href="/public/maskable_icon_x192(1).png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/public/maskable_icon_x32.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/public/maskable_icon_x16.png" />
+        <link rel="apple-touch-icon" href="/maskable_icon_x192(1).png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/maskable_icon_x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/maskable_icon_x16.png" />
         <link rel="manifest" href="/manifest.json" />
         <link rel="shortcut icon" href="/favicon.ico" />
       </head>
