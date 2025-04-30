@@ -9,7 +9,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'HostelHub - Modern Hostel Management System',
+  title: 'OCIMUM - Modern Hostel Management System',
   description: 'Streamline your hostel and PG operations with our easy-to-use management system',
 };
 

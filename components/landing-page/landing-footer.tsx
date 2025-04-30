@@ -9,7 +9,7 @@ export function LandingFooter() {
           <div className="md:col-span-1">
             <Link href="/" className="flex items-center gap-2">
               <Building2 className="h-6 w-6" />
-              <span className="text-xl font-bold">HostelHub</span>
+              <span className="text-xl font-bold">OCIMUM</span>
             </Link>
             <p className="mt-3 text-sm text-muted-foreground">
               Modern hostel and PG management software that simplifies operations and enhances tenant experiences.
@@ -51,7 +51,7 @@ export function LandingFooter() {
         
         <div className="mt-16 pt-8 border-t flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} HostelHub. All rights reserved.
+            © {new Date().getFullYear()} OCIMUM. All rights reserved.
           </p>
           
           <div className="flex gap-6">

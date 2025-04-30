@@ -115,7 +115,7 @@ export default function DashboardLayout({
             <div className="flex items-center gap-2">
               <Building2 className="h-6 w-6 text-primary" />
               {!isSidebarCollapsed && (
-                <span className="text-xl font-bold">HostelHub</span>
+                <span className="text-xl font-bold">OCIMUM</span>
               )}
             </div>
           </div>
@@ -161,7 +161,7 @@ export default function DashboardLayout({
             <div className="flex h-16 items-center border-b px-4">
               <div className="flex items-center gap-2">
                 <Building2 className="h-6 w-6 text-primary" />
-                <span className="text-xl font-bold">HostelHub</span>
+                <span className="text-xl font-bold">OCIMUM</span>
               </div>
             </div>
             <nav className="flex-1 space-y-1 p-4">

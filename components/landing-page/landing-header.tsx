@@ -46,7 +46,7 @@ export function LandingHeader() {
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-2">
             <Building2 className="h-6 w-6" />
-            <span className="text-xl font-bold">HostelHub</span>
+            <span className="text-xl font-bold">OCIMUM</span>
           </Link>
           
           <div className="hidden md:flex">
