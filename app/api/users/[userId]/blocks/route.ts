@@ -35,6 +35,7 @@ export async function GET(req: Request) {
   try {
     await connectDB();
     const { searchParams } = new URL(req.url);
+    console.log("Search Params:", new URL(req.url));
     const userId = searchParams.get('userId');
     console.log("User ID:", userId);
 
