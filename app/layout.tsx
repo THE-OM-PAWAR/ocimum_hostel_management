@@ -11,8 +11,12 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "OCIMUM - Modern Hostel Management System",
-  description:
-    "Streamline your hostel and PG operations with our easy-to-use management system",
+  description: "Streamline your hostel and PG operations with our easy-to-use management system",
+  manifest: "/manifest.json",
+  icons: {
+    apple: "/public/maskable_icon_x192(1).png",
+  },
+  themeColor: "#1e40af",
 };
 
 export default function RootLayout({
@@ -22,12 +26,21 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <Head>
-        <link rel="manifest" href="/manifest.json" />
+      <head>
+        <meta name="application-name" content="OCIMUM" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="OCIMUM" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#1e40af" />
-        <link rel="icon" href="/public/Screenshot 2025-04-30 2254182.png" />
-        <link rel="apple-touch-icon" href="/public/Screenshot 2025-04-30 2254182.png" />
-      </Head>
+
+        <link rel="apple-touch-icon" href="/public/maskable_icon_x192(1).png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/public/maskable_icon_x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/public/maskable_icon_x16.png" />
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+      </head>
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"

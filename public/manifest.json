@@ -1,23 +1,73 @@
 {
-    "name": "Ocimum Hostel Management",
+    "name": "OCIMUM - Modern Hostel Management",
     "short_name": "OCIMUM",
-    "version": "1.0.0",
-    "description": "PWA version of the Ocimum Hostel Management system.",
+    "description": "Streamline your hostel management with OCIMUM's comprehensive solution",
     "start_url": "/dashboard",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#1e40af",
+    "orientation": "portrait",
+    "scope": "/",
     "icons": [
       {
-        "src": "/public/Screenshot 2025-04-30 2254182.png",
-        "sizes": "200x200",
-        "type": "image/png"
+        "src": "/public/maskable_icon_x72.png",
+        "sizes": "72x72",
+        "type": "image/png",
+        "purpose": "any maskable"
       },
       {
-        "src": "/public/Screenshot 2025-04-30 225418.png",
-        "sizes": "600x600",
-        "type": "image/png"
+        "src": "/public/maskable_icon_x96.png",
+        "sizes": "96x96",
+        "type": "image/png",
+        "purpose": "any maskable"
+      },
+      {
+        "src": "/public/maskable_icon_x128.png",
+        "sizes": "128x128",
+        "type": "image/png",
+        "purpose": "any maskable"
+      },
+      {
+        "src": "/public/maskable_icon_x144.png",
+        "sizes": "144x144",
+        "type": "image/png",
+        "purpose": "any maskable"
+      },
+      {
+        "src": "/public/maskable_icon_x152.png",
+        "sizes": "152x152",
+        "type": "image/png",
+        "purpose": "any maskable"
+      },
+      {
+        "src": "/public/maskable_icon_x192(1).png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "any maskable"
+      },
+      {
+        "src": "/public/maskable_icon_x384.png",
+        "sizes": "384x384",
+        "type": "image/png",
+        "purpose": "any maskable"
+      },
+      {
+        "src": "/public/maskable_icon_x512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any maskable"
+      }
+    ],
+    "shortcuts": [
+      {
+        "name": "Dashboard",
+        "url": "/dashboard",
+        "description": "View your hostel dashboard"
+      },
+      {
+        "name": "Tenants",
+        "url": "/tenants",
+        "description": "Manage your tenants"
       }
     ]
   }
-  
