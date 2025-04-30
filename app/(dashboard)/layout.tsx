@@ -1,6 +1,6 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
+import { useUser, useClerk } from "@clerk/nextjs";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import {
@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Settings,
   Users,
+  ArrowRight,
   CreditCard,
   Bell,
   BarChart3,
@@ -18,13 +19,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { OnboardingDialog } from "@/components/onboarding-dialog";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import {
+  Card,
+  CardContent,
+} from "@/components/ui/card";
 
 const navigationItems = [
   {
@@ -57,7 +58,13 @@ interface SidebarItemProps {
   collapsed?: boolean;
 }
 
-function SidebarItem({ icon, title, href, isActive, collapsed }: SidebarItemProps) {
+function SidebarItem({
+  icon,
+  title,
+  href,
+  isActive,
+  collapsed,
+}: SidebarItemProps) {
   return (
     <Link
       href={href}
@@ -74,7 +81,15 @@ function SidebarItem({ icon, title, href, isActive, collapsed }: SidebarItemProp
   );
 }
 
-function MobileNavItem({ icon, href, isActive }: { icon: React.ReactNode; href: string; isActive: boolean }) {
+function MobileNavItem({
+  icon,
+  href,
+  isActive,
+}: {
+  icon: React.ReactNode;
+  href: string;
+  isActive: boolean;
+}) {
   return (
     <Link
       href={href}
@@ -97,13 +112,24 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const { user } = useUser();
   const router = useRouter();
+  const { signOut } = useClerk();
+  const clerkData = useClerk();
+  console.log("Clerk Data:", clerkData);
+
+  const handleLogout = () => {
+    signOut(() => {
+      // Optional: redirect after logout
+      router.push(`/`);
+      console.log("User logged out");
+    });
+  };
 
   const mobileNavItems = navigationItems.slice(0, 5);
 
   return (
     <div className="flex min-h-screen">
       {/* Desktop Sidebar */}
-      <aside 
+      <aside
         className={cn(
           "hidden md:flex fixed h-screen border-r bg-card transition-all duration-300",
           isSidebarCollapsed ? "w-[80px]" : "w-[240px]"
@@ -133,26 +159,40 @@ export default function DashboardLayout({
           </nav>
 
           {/* User */}
-          <div className="border-t p-4">
-            <Button
-              onClick={() => user && router.push(`/profile/${user.id}`)}
-              variant="outline"
-              className={cn(
-                "w-full flex items-center gap-2",
-                isSidebarCollapsed && "justify-center p-2"
-              )}
-            >
-              <User className="h-4 w-4" />
-              {!isSidebarCollapsed && (user?.fullName || "User Profile")}
-            </Button>
-          </div>
+          <Card className="shadow-none border-t p-4">
+              <CardContent className="grid gap-2.5 p-4">
+                <Button
+                  onClick={() => user && router.push(`/profile/${user.id}`)}
+                  variant="outline"
+                  className="w-full flex items-center gap-2"
+                >
+                  <User className="h-4 w-4" />
+                  {user?.fullName || "Profile"}
+                </Button>
+                <Button
+                  onClick={handleLogout}
+                  variant="default"
+                  className={cn(
+                    "w-full flex items-center gap-2",
+                    isSidebarCollapsed && "justify-center p-2"
+                  )}
+                >
+                  <ArrowRight className="h-4 w-4" />
+                  {!isSidebarCollapsed && "Log Out"}
+                </Button>
+              </CardContent>
+          </Card>
         </div>
       </aside>
 
       {/* Mobile Sidebar */}
       <Sheet>
         <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="md:hidden fixed top-4 left-4 z-40">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden fixed top-4 left-4 z-40"
+          >
             <Menu className="h-5 w-5" />
           </Button>
         </SheetTrigger>
@@ -174,9 +214,24 @@ export default function DashboardLayout({
               ))}
             </nav>
             <div className="border-t p-4">
-              <Button onClick={() => user && router.push(`/profile/${user.id}`)} variant="outline" className="w-full flex items-center gap-2">
+              <Button
+                onClick={() => user && router.push(`/profile/${user.id}`)}
+                variant="outline"
+                className="w-full flex items-center gap-2"
+              >
                 <User className="h-4 w-4" />
-                {user?.fullName || "User Profile"}
+                {user?.fullName || "Profile"}
+              </Button>
+              <Button
+                onClick={handleLogout}
+                variant="default"
+                className={cn(
+                  "w-full flex items-center gap-2",
+                  isSidebarCollapsed && "justify-center p-2"
+                )}
+              >
+                <ArrowRight className="h-4 w-4" />
+                {!isSidebarCollapsed && "Log Out"}
               </Button>
             </div>
           </div>
@@ -184,10 +239,12 @@ export default function DashboardLayout({
       </Sheet>
 
       {/* Main Content */}
-      <div className={cn(
-        "flex-1 transition-all duration-300",
-        isSidebarCollapsed ? "md:ml-[80px]" : "md:ml-[240px]"
-      )}>
+      <div
+        className={cn(
+          "flex-1 transition-all duration-300",
+          isSidebarCollapsed ? "md:ml-[80px]" : "md:ml-[240px]"
+        )}
+      >
         <div className="min-h-screen overflow-y-auto">
           {/* Header with Toggle and Breadcrumbs */}
           <div className="h-16 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-30 flex items-center w-full">
@@ -197,19 +254,19 @@ export default function DashboardLayout({
               className="ml-4"
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
             >
-              <ChevronLeft className={cn(
-                "h-4 w-4 transition-transform duration-200",
-                isSidebarCollapsed && "rotate-180"
-              )} />
+              <ChevronLeft
+                className={cn(
+                  "h-4 w-4 transition-transform duration-200",
+                  isSidebarCollapsed && "rotate-180"
+                )}
+              />
             </Button>
             <div className="px-4">
               <Breadcrumbs />
             </div>
           </div>
 
-          <div className="container py-8 px-4 md:px-8">
-            {children}
-          </div>
+          <div className="container py-8 px-4 md:px-8">{children}</div>
         </div>
       </div>
 

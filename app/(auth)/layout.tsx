@@ -16,7 +16,7 @@ export default function AuthLayout({
         <div className="container flex h-16 items-center">
           <Link href="/" className="flex items-center gap-2">
             <Building2 className="h-6 w-6" />
-            <span className="text-xl font-bold">HostelHub</span>
+            <span className="text-xl font-bold">OCIMUM</span>
           </Link>
         </div>
       </header>
@@ -36,7 +36,7 @@ export default function AuthLayout({
       {/* Footer */}
       <footer className="border-t py-6">
         <div className="container text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} HostelHub. All rights reserved.
+          © {new Date().getFullYear()} OCIMUM. All rights reserved.
         </div>
       </footer>
     </div>
