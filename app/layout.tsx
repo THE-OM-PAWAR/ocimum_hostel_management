@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   icons: {
     apple: "/maskable_icon_x192(1).png",
   },
-  themeColor: "#1e40af",
+  themeColor: "#73ddb5",
 };
 
 export default function RootLayout({
@@ -33,7 +33,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="OCIMUM" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="theme-color" content="#1e40af" />
+        <meta name="theme-color" content="#73ddb5" />
 
         <link rel="apple-touch-icon" href="/maskable_icon_x192(1).png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/maskable_icon_x32.png" />
