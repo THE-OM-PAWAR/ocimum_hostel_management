@@ -1,0 +1,23 @@
+{
+    "name": "Ocimum Hostel Management",
+    "short_name": "OCIMUM",
+    "version": "1.0.0",
+    "description": "PWA version of the Ocimum Hostel Management system.",
+    "start_url": "/dashboard",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#1e40af",
+    "icons": [
+      {
+        "src": "/public/Screenshot 2025-04-30 2254182.png",
+        "sizes": "200x200",
+        "type": "image/png"
+      },
+      {
+        "src": "/public/Screenshot 2025-04-30 225418.png",
+        "sizes": "600x600",
+        "type": "image/png"
+      }
+    ]
+  }
+  
