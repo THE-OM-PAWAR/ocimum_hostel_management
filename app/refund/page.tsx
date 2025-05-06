@@ -96,6 +96,7 @@ export default function RefundPage() {
               <p>If you have any questions or concerns about this Refund & Cancellation Policy, please reach out to our support team:</p>
               <div className="mt-4">
                 <p><strong>Support Team</strong></p>
+                <p>Account Holder: Govind Pawar , Kavita Pawar</p>
                 <p>Email: om.pawar1512@gmail.com</p>
                 <p>Phone: +91-9522557828</p>
                 <p>Office Hours: Monday to Friday, 9:00 AM to 6:00 PM</p>
