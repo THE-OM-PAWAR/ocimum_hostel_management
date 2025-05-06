@@ -53,6 +53,9 @@ export function LandingFooter() {
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} OCIMUM. All rights reserved.
           </p>
+          <p className="text-sm text-muted-foreground">
+            developed by Omprakash Pawar
+          </p>
           
           <div className="flex gap-6">
             <Link href="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
