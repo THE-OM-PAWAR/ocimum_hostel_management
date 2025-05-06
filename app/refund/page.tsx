@@ -23,7 +23,7 @@ export default function RefundPage() {
             <p className="mt-4">
               We understand that sometimes plans may change. This Refund & Cancellation Policy 
               explains how we handle cancellations and refunds for services provided through 
-              our Hostel Management Software ("Service").
+              our Hostel Management Software (&quot;Service&quot;).
             </p>
             
             <p className="mt-2 mb-6">
@@ -46,7 +46,7 @@ export default function RefundPage() {
                 <li><strong>Subscription Cancellation within 7 Days:</strong> Full refund for the current billing period if cancelled within the first 7 days.</li>
                 <li><strong>Service Not Provided as Promised:</strong> If we fail to provide the services as per the terms agreed upon during the subscription.</li>
               </ul>
-              <p className="mt-2"><strong>Refund Processing:</strong> If eligible, refunds will be processed within <strong>7 days</strong> from the approval of your refund request.</p>
+              <p className="mt-2"><strong>Refund Processing:</strong> If eligible, refunds will be credited within <strong>7 days</strong> from the approval of your refund request.</p>
               <p><strong>Refund Method:</strong> Refunds will be issued to the original payment method used for the subscription, unless otherwise agreed upon.</p>
             </section>
 
@@ -64,7 +64,7 @@ export default function RefundPage() {
               <h2 className="text-2xl font-semibold mb-4">4. How to Request a Cancellation or Refund</h2>
               <p>To request a cancellation or refund:</p>
               <ul className="list-disc pl-6 space-y-2">
-                <li><strong>Contact Us:</strong> Email our support team at support@hostelhub.com with the subject line "Refund Request" or "Cancellation Request".</li>
+                <li><strong>Contact Us:</strong> Email our support team at support@hostelhub.com with the subject line &quot;Refund Request&quot; or &quot;Cancellation Request&quot;.</li>
                 <li><strong>Provide Information:</strong> Include your account details, the reason for the cancellation or refund request, and any relevant transaction details.</li>
                 <li><strong>Review Process:</strong> Once we receive your request, our team will review it and process it accordingly.</li>
               </ul>
