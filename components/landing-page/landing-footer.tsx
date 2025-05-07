@@ -17,7 +17,7 @@ export function LandingFooter() {
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 gap-8 md:col-span-3">
-            <div className="space-y-3">
+            {/* <div className="space-y-3">
               <h4 className="text-sm font-medium">Product</h4>
               <ul className="space-y-2 text-sm">
                 <li><Link href="/features" className="text-muted-foreground hover:text-foreground transition-colors">Features</Link></li>
@@ -45,7 +45,7 @@ export function LandingFooter() {
                 <li><Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">Contact</Link></li>
                 <li><Link href="/legal" className="text-muted-foreground hover:text-foreground transition-colors">Legal</Link></li>
               </ul>
-            </div>
+            </div> */}
           </div>
         </div>
         

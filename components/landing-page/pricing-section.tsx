@@ -64,7 +64,7 @@ export function PricingSection() {
             Simple, transparent pricing
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Choose the plan that's right for your hostel. All plans include a 14-day free trial.
+            Choose the plan that&apos;s right for your hostel. All plans include a 14-day free trial.
           </p>
         </div>
 
@@ -95,17 +95,17 @@ export function PricingSection() {
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">{tier.description}</p>
 
-                <Button
+                {/* <Button
                   className={`mt-6 w-full ${tier.popular ? "" : "bg-secondary hover:bg-secondary/80"}`}
                   asChild
                 >
                   <Link href={tier.name === "Enterprise" ? "/contact" : "/register"}>
                     {tier.cta}
                   </Link>
-                </Button>
+                </Button> */}
               </div>
               <div className="p-6 bg-muted/30 space-y-4">
-                <h4 className="text-sm font-medium">What's included:</h4>
+                <h4 className="text-sm font-medium">What&apos;s included:</h4>
                 <ul className="space-y-3">
                   {tier.features.map((feature, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm">

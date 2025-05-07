@@ -87,14 +87,14 @@ export default function LandingPage() {
           <TestimonialsSection />
         </motion.div>
         
-        {/* <motion.div
+        <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
           <PricingSection />
-        </motion.div> */}
+        </motion.div>
         
         <motion.div
           initial={{ opacity: 0 }}
