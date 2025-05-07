@@ -39,11 +39,11 @@ export function LandingHero() {
   const y = useSpring(mouseY, springConfig);
 
   return (
-    <section className="relative overflow-hidden pt-24 pb-16 md:pt-32 md:pb-24">
+    <section className="relative overflow-hidden min-h-screen pt-24 pb-16 md:pt-32 md:pb-24">
       {/* Background decoration */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <motion.div 
-          className="absolute right-0 top-0 -z-10 h-[500px] w-[500px] translate-x-1/2 -translate-y-1/4 rounded-full bg-accent/30 blur-3xl"
+          className="absolute right-0 top-0 -z-10 h-[500] w-[500px] translate-x-1/2 -translate-y-1/4 rounded-full bg-accent/30 blur-3xl"
           animate={{
             scale: [1, 1.2, 1],
             opacity: [0.3, 0.5, 0.3],

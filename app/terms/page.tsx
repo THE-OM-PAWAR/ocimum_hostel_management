@@ -21,12 +21,12 @@ export default function TermsPage() {
             <p className="font-medium">Effective Date: July 1, 2023</p>
             
             <p className="mt-4">
-              These Terms and Conditions ("Terms") govern your use of our <strong>Hostel Management Software</strong> ("Service") 
-              provided by HostelHub, located at Main Street, Tech Park, Bangalore, India (referred to as "we", "us", or "our").
+              These Terms and Conditions (&quot;Terms&quot;) govern your use of our <strong>Hostel Management Software</strong> (&quot;Service&quot;) 
+              provided by HostelHub, located at Main Street, Tech Park, Bangalore, India (referred to as &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;).
             </p>
             
             <p className="mt-2 mb-6">
-              By accessing, using, subscribing, or registering on our platform, you ("User", "you", "your") agree to be bound 
+              By accessing, using, subscribing, or registering on our platform, you (&quot;User&quot;, &quot;you&quot;, &quot;your&quot;) agree to be bound 
               by these Terms, including our <strong>Privacy Policy</strong>, <strong>Refund Policy</strong>, and any other applicable policies.
             </p>
             
@@ -135,7 +135,7 @@ export default function TermsPage() {
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold mb-4">12. Governing Law & Jurisdiction</h2>
-              <p>These terms are governed by the laws of <strong>India</strong>. Any disputes will be subject to the exclusive jurisdiction of the courts of <strong>Bangalore, Karnataka</strong>.</p>
+              <p>These terms are governed by the laws of <strong>India</strong>.</p>
             </section>
 
             <section className="mb-8">
