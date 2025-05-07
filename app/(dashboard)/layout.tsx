@@ -113,12 +113,9 @@ export default function DashboardLayout({
   const { user } = useUser();
   const router = useRouter();
   const { signOut } = useClerk();
-  const clerkData = useClerk();
-  console.log("Clerk Data:", clerkData);
 
   const handleLogout = () => {
     signOut(() => {
-      // Optional: redirect after logout
       router.push(`/`);
       console.log("User logged out");
     });
@@ -167,7 +164,7 @@ export default function DashboardLayout({
                   className="w-full flex items-center gap-2"
                 >
                   <User className="h-4 w-4" />
-                  {user?.fullName || "Profile"}
+                  {!isSidebarCollapsed && (user?.fullName || "Profile")}
                 </Button>
                 <Button
                   onClick={handleLogout}
@@ -185,59 +182,6 @@ export default function DashboardLayout({
         </div>
       </aside>
 
-      {/* Mobile Sidebar */}
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden fixed top-4 left-4 z-40"
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-[240px] p-0">
-          <div className="flex h-full flex-col">
-            <div className="flex h-16 items-center border-b px-4">
-              <div className="flex items-center gap-2">
-                <Building2 className="h-6 w-6 text-primary" />
-                <span className="text-xl font-bold">OCIMUM</span>
-              </div>
-            </div>
-            <nav className="flex-1 space-y-1 p-4">
-              {navigationItems.map((item) => (
-                <SidebarItem
-                  key={item.href}
-                  {...item}
-                  isActive={pathname === item.href}
-                />
-              ))}
-            </nav>
-            <div className="border-t p-4">
-              <Button
-                onClick={() => user && router.push(`/profile/${user.id}`)}
-                variant="outline"
-                className="w-full flex items-center gap-2"
-              >
-                <User className="h-4 w-4" />
-                {user?.fullName || "Profile"}
-              </Button>
-              <Button
-                onClick={handleLogout}
-                variant="default"
-                className={cn(
-                  "w-full flex items-center gap-2",
-                  isSidebarCollapsed && "justify-center p-2"
-                )}
-              >
-                <ArrowRight className="h-4 w-4" />
-                {!isSidebarCollapsed && "Log Out"}
-              </Button>
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
-
       {/* Main Content */}
       <div
         className={cn(
@@ -251,7 +195,7 @@ export default function DashboardLayout({
             <Button
               variant="ghost"
               size="icon"
-              className="ml-4"
+              className="ml-4 hidden md:flex"
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
             >
               <ChevronLeft
@@ -261,8 +205,13 @@ export default function DashboardLayout({
                 )}
               />
             </Button>
-            <div className="px-4">
+            <div className="px-4 hidden md:block">
               <Breadcrumbs />
+            </div>
+            {/* Mobile Logo */}
+            <div className="flex items-center gap-2 px-4 md:hidden">
+              <Building2 className="h-6 w-6 text-primary" />
+              <span className="text-xl font-bold">OCIMUM</span>
             </div>
           </div>
 
