@@ -52,7 +52,7 @@ export function LandingHeader() {
           <div className="hidden md:flex">
             <NavigationMenu>
               <NavigationMenuList>
-                <NavigationMenuItem>
+                {/* <NavigationMenuItem>
                   <NavigationMenuTrigger>Features</NavigationMenuTrigger>
                   <NavigationMenuContent>
                     <ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-2">
@@ -70,21 +70,21 @@ export function LandingHeader() {
                       </ListItem>
                     </ul>
                   </NavigationMenuContent>
-                </NavigationMenuItem>
-                <NavigationMenuItem>
+                </NavigationMenuItem> */}
+                {/* <NavigationMenuItem>
                   <Link href="/pricing" legacyBehavior passHref>
                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                       Pricing
                     </NavigationMenuLink>
                   </Link>
-                </NavigationMenuItem>
-                <NavigationMenuItem>
+                </NavigationMenuItem> */}
+                {/* <NavigationMenuItem>
                   <Link href="/about" legacyBehavior passHref>
                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                       About Us
                     </NavigationMenuLink>
                   </Link>
-                </NavigationMenuItem>
+                </NavigationMenuItem> */}
               </NavigationMenuList>
             </NavigationMenu>
           </div>
@@ -133,7 +133,7 @@ export function LandingHeader() {
       {isMobileMenuOpen && (
         <div className="md:hidden border-t border-border">
           <div className="container py-4 space-y-4">
-            <Link 
+            {/* <Link 
               href="/features" 
               className="flex items-center px-4 py-2 hover:bg-accent rounded-md"
               onClick={() => setIsMobileMenuOpen(false)}
@@ -153,7 +153,7 @@ export function LandingHeader() {
               onClick={() => setIsMobileMenuOpen(false)}
             >
               About Us
-            </Link>
+            </Link> */}
             <div className="pt-2 border-t border-border flex flex-col gap-2">
               {isSignedIn ? (
                 <Button asChild className="w-full" variant="outline">
