@@ -1,6 +1,6 @@
 "use client";
 
-import { AwaitedReactNode, JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useParams, useRouter } from "next/navigation";
 import { Plus, Settings, Search, Package2, ChevronDown, MoreVertical, RefreshCw } from "lucide-react";
@@ -25,6 +25,7 @@ import {
 import { cn } from "@/lib/utils";
 import { CreateTenantSheet } from "@/components/create-tenant-sheet";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface RentPayment {
   _id: string;
@@ -63,6 +64,7 @@ export default function BlockDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const fetchTenants = async () => {
     if (!isLoaded || !user || !params.blockId) return;
@@ -268,6 +270,7 @@ export default function BlockDetailsPage() {
           <CreateTenantSheet
             blockId={Array.isArray(params.blockId) ? params.blockId[0] : params.blockId}
             onSuccess={handleTenantCreated}
+            isMobile={isMobile}
           />
         </div>
       </div>
@@ -318,9 +321,19 @@ export default function BlockDetailsPage() {
                         size="sm"
                         data-trigger="rent-history"
                         onClick={(e) => e.stopPropagation()}
+                        className={cn(
+                          isMobile && "px-2",
+                          "flex items-center gap-2"
+                        )}
                       >
-                        Rent History
-                        <ChevronDown className="ml-2 h-4 w-4" />
+                        {isMobile ? (
+                          <ChevronDown className="h-4 w-4" />
+                        ) : (
+                          <>
+                            Rent History
+                            <ChevronDown className="h-4 w-4" />
+                          </>
+                        )}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent 

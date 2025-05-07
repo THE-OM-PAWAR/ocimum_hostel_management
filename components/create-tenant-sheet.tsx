@@ -16,9 +16,10 @@ import { useUser } from "@clerk/nextjs";
 interface CreateTenantSheetProps {
   blockId: string;
   onSuccess: () => void;
+  isMobile?: boolean;
 }
 
-export function CreateTenantSheet({ blockId, onSuccess }: CreateTenantSheetProps) {
+export function CreateTenantSheet({ blockId, onSuccess, isMobile }: CreateTenantSheetProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -112,8 +113,8 @@ export function CreateTenantSheet({ blockId, onSuccess }: CreateTenantSheetProps
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Create Tenant
+          <Plus className="h-4 w-4" />
+          {!isMobile && <span className="ml-2">Create Tenant</span>}
         </Button>
       </SheetTrigger>
       <SheetContent className="w-full sm:w-[50%] max-w-full sm:max-w-full overflow-y-auto">
