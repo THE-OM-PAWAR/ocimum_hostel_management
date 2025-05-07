@@ -27,14 +27,14 @@ export function CtaSection() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="text-base" asChild>
+              {/* <Button size="lg" className="text-base" asChild>
                 <Link href="/register">
                   Start Your Free Trial <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
               <Button size="lg" variant="outline" className="text-base" asChild>
                 <Link href="/demo">Schedule a Demo</Link>
-              </Button>
+              </Button> */}
             </div>
             
             <p className="mt-6 text-sm text-muted-foreground">
