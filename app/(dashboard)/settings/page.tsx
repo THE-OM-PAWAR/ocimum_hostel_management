@@ -3,9 +3,11 @@
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Phone, Mail, MapPin, Building2 } from "lucide-react";
+import { ArrowRight, Phone, Mail, MapPin, Building2, Sun, Moon, Laptop } from "lucide-react";
 import { useEffect, useState } from "react";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
+import { useTheme } from "next-themes";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Owner {
   _id: string;
@@ -28,6 +30,7 @@ export default function SettingsPage() {
   const { user } = useUser();
   const { signOut } = useClerk();
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
   const [owner, setOwner] = useState<Owner | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -154,6 +157,45 @@ export default function SettingsPage() {
                 <p className="text-muted-foreground">{owner?.pan || 'Not provided'}</p>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+      <div className="bg-card p-6 rounded-lg border shadow-sm">
+        <h2 className="text-xl font-semibold mb-4">Appearance</h2>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-medium">Theme</h3>
+              <p className="text-sm text-muted-foreground">Choose your preferred theme</p>
+            </div>
+            <Select
+              value={theme}
+              onValueChange={(value) => setTheme(value)}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select theme" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="light">
+                  <div className="flex items-center gap-2">
+                    <Sun className="h-4 w-4" />
+                    <span>Light</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="dark">
+                  <div className="flex items-center gap-2">
+                    <Moon className="h-4 w-4" />
+                    <span>Dark</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="system">
+                  <div className="flex items-center gap-2">
+                    <Laptop className="h-4 w-4" />
+                    <span>System</span>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>
