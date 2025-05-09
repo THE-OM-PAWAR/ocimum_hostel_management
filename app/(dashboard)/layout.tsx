@@ -1,7 +1,7 @@
 "use client";
 
 import { useUser, useClerk } from "@clerk/nextjs";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useParams } from "next/navigation";
 import Link from "next/link";
 import {
   Building2,
@@ -15,17 +15,24 @@ import {
   Menu,
   ChevronLeft,
   User,
+  MoreVertical,
+  FileText,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { OnboardingDialog } from "@/components/onboarding-dialog";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import {
   Card,
   CardContent,
 } from "@/components/ui/card";
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { openDrawer, closeDrawer } from '@/store/slices/drawerSlice';
+import { DrawerContent as CustomDrawerContent } from "@/components/drawer-content";
+import { RootState } from "@/store";
 
 const navigationItems = [
   {
@@ -113,6 +120,82 @@ export default function DashboardLayout({
   const { user } = useUser();
   const router = useRouter();
   const { signOut } = useClerk();
+  const [pageTitle, setPageTitle] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+  const dispatch = useAppDispatch();
+  const { isOpen, page } = useAppSelector((state: RootState) => state.drawer);
+  const params = useParams();
+
+  const getPageTitle = async (path: string) => {
+    // Remove leading slash and split the path
+    const pathParts = path.slice(1).split('/');
+    
+    // Handle main navigation items
+    const mainNavItem = navigationItems.find(item => item.href === path);
+    if (mainNavItem) return mainNavItem.title;
+
+    // Handle sub-pages
+    if (pathParts[0] === 'dashboard') {
+      if (pathParts.length === 1) return 'Dashboard';
+      
+      // Handle block pages
+      if (pathParts[1] && pathParts[1] !== 'settings') {
+        try {
+          const response = await fetch(`/api/users/${user?.id}/block/${pathParts[1]}`);
+          if (response.ok) {
+            const block = await response.json();
+            if (pathParts[2] === 'settings') return `${block.name} Settings`;
+            if (pathParts[2] === 'tenants' && pathParts[3]) {
+              const tenantResponse = await fetch(`/api/users/${user?.id}/tenants/${pathParts[3]}`);
+              if (tenantResponse.ok) {
+                const tenant = await tenantResponse.json();
+                return tenant.name;
+              }
+            }
+            return block.name;
+          }
+        } catch (error) {
+          console.error('Error fetching block details:', error);
+        }
+      }
+    }
+    
+    if (pathParts[0] === 'blocks') {
+      if (pathParts.length === 1) return 'Blocks';
+      if (pathParts[2] === 'settings') return 'Block Settings';
+      return 'Block Details';
+    }
+    if (pathParts[0] === 'tenants') {
+      if (pathParts.length === 1) return 'Tenants';
+      return 'Tenant Details';
+    }
+    if (pathParts[0] === 'payments') {
+      if (pathParts.length === 1) return 'Payments';
+      return 'Payment Details';
+    }
+    if (pathParts[0] === 'settings') {
+      return 'Settings';
+    }
+    if (pathParts[0] === 'profile') {
+      return 'Profile';
+    }
+
+    // Default case
+    return pathParts[pathParts.length - 1]
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
+  useEffect(() => {
+    const fetchTitle = async () => {
+      setLoading(true);
+      const title = await getPageTitle(pathname);
+      setPageTitle(title);
+      setLoading(false);
+    };
+    fetchTitle();
+  }, [pathname, user?.id]);
 
   const handleLogout = () => {
     signOut(() => {
@@ -122,6 +205,46 @@ export default function DashboardLayout({
   };
 
   const mobileNavItems = navigationItems.slice(0, 5);
+
+  const handleDrawerOpen = () => {
+    if (pathname.includes('/blocks')) {
+      dispatch(openDrawer({
+        page: 'blocks',
+        content: {
+          type: 'action',
+          title: 'Block Actions',
+          actions: [
+            {
+              label: 'Block Settings',
+              onClick: () => router.push(`/blocks/${params.blockId}/settings`),
+            },
+            {
+              label: 'Manage Tenants',
+              onClick: () => router.push(`/blocks/${params.blockId}/tenants`),
+            },
+          ],
+        },
+      }));
+    } else if (pathname.includes('/tenants')) {
+      dispatch(openDrawer({
+        page: 'tenants',
+        content: {
+          type: 'action',
+          title: 'Tenant Actions',
+          actions: [
+            {
+              label: 'View Documents',
+              onClick: () => router.push(`/tenants/${params.tenantId}/documents`),
+            },
+            {
+              label: 'Tenant Settings',
+              onClick: () => router.push(`/tenants/${params.tenantId}/settings`),
+            },
+          ],
+        },
+      }));
+    }
+  };
 
   return (
     <div className="flex min-h-screen">
@@ -208,10 +331,40 @@ export default function DashboardLayout({
             <div className="px-4 hidden md:block">
               <Breadcrumbs />
             </div>
-            {/* Mobile Logo */}
-            <div className="flex items-center gap-2 px-4 md:hidden">
-              <Building2 className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold">OCIMUM</span>
+            {/* Mobile Header */}
+            <div className="flex items-center justify-between w-full px-4 md:hidden">
+              {pathname === "/dashboard" ? (
+                <div className="flex items-center gap-2">
+                  <Building2 className="h-6 w-6 text-primary" />
+                  <span className="text-xl font-bold">OCIMUM</span>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => router.back()}
+                      className="mr-2"
+                    >
+                      <ChevronLeft className="h-5 w-5" />
+                    </Button>
+                    <span className="text-lg font-semibold">
+                      {loading ? "Loading..." : pageTitle}
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <Drawer open={isOpen} onOpenChange={(open) => !open && dispatch(closeDrawer())}>
+                      <DrawerTrigger asChild>
+                        <Button variant="ghost" size="icon" className="ml-auto" onClick={handleDrawerOpen}>
+                          <MoreVertical className="h-5 w-5" />
+                        </Button>
+                      </DrawerTrigger>
+
+                    </Drawer>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -233,6 +386,9 @@ export default function DashboardLayout({
         </nav>
       </div>
       <OnboardingDialog />
+      <Drawer open={isOpen} onOpenChange={(open) => !open && dispatch(closeDrawer())}>
+        <DrawerContent />
+      </Drawer>
     </div>
   );
 }

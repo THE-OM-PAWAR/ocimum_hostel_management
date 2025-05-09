@@ -239,10 +239,10 @@ export default function TenantDetailsPage() {
   const RentPaymentCard = ({ payment }: { payment: RentPayment }) => (
     <div className="relative flex items-start gap-4 pb-8">
       <div className="flex-1">
-        <div className="bg-card border-2 rounded-lg p-6 hover:shadow-md transition-all">
-          <div className="flex items-start justify-between">
+        <div className="bg-card border-2 rounded-lg p-4 sm:p-6 hover:shadow-md transition-all">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div className="space-y-1">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                 <h4 className="font-medium text-lg">
                   {payment.type === 'monthly' ? "Monthly Rent" : payment.label}
                 </h4>
@@ -257,7 +257,7 @@ export default function TenantDetailsPage() {
                 ₹{payment.amount.toLocaleString()}
               </div>
 
-              <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="text-muted-foreground">Room Type:</span>
                   <div className="font-medium">{payment.roomType}</div>
@@ -292,7 +292,7 @@ export default function TenantDetailsPage() {
               )}
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center justify-end sm:justify-start gap-4">
               <PaymentActions
                 payment={payment}
                 onSuccess={handlePaymentSuccess}
@@ -356,13 +356,14 @@ export default function TenantDetailsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">{tenant.name}</h1>
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold">{tenant.name}</h1>
+        <div className="flex items-center gap-2 sm:gap-4">
           {getStatusBadge(tenant.status)}
           <Button 
             variant="outline"
             onClick={() => setIsChangeStatusDialogOpen(true)}
+            className="w-full sm:w-auto"
           >
             Change Status
           </Button>
@@ -370,10 +371,10 @@ export default function TenantDetailsPage() {
       </div>
 
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList>
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
-          <TabsTrigger value="payments">Payments</TabsTrigger>
+        <TabsList className="w-full sm:w-auto">
+          <TabsTrigger value="profile" className="flex-1 sm:flex-none">Profile</TabsTrigger>
+          <TabsTrigger value="documents" className="flex-1 sm:flex-none">Documents</TabsTrigger>
+          <TabsTrigger value="payments" className="flex-1 sm:flex-none">Payments</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6">
@@ -408,12 +409,13 @@ export default function TenantDetailsPage() {
         </TabsContent>
 
         <TabsContent value="payments" className="space-y-8">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Payment History</h2>
-            <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <h2 className="text-xl sm:text-2xl font-bold">Payment History</h2>
+            <div className="flex flex-col sm:flex-row gap-2">
               <Button 
                 onClick={() => setIsAddPaymentOpen(true)}
                 disabled={!isActive}
+                className="w-full sm:w-auto"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Monthly Payment
@@ -422,6 +424,7 @@ export default function TenantDetailsPage() {
                 onClick={() => setIsAddAdditionalPaymentOpen(true)}
                 variant="outline"
                 disabled={!isActive}
+                className="w-full sm:w-auto"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Additional Payment
@@ -429,7 +432,7 @@ export default function TenantDetailsPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium">
@@ -485,7 +488,7 @@ export default function TenantDetailsPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="sm:col-span-2 lg:col-span-1">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium">
                   Payment Due
@@ -507,7 +510,7 @@ export default function TenantDetailsPage() {
             </Card>
           </div>
 
-          <div className="space-y-1">
+          <div className="space-y-4">
             {rentPayments.map((payment) => (
               <RentPaymentCard key={payment._id} payment={payment} />
             ))}
