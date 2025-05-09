@@ -35,6 +35,7 @@ import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { useAppDispatch } from "@/store/hooks";
 import { openDrawer } from "@/store/slices/drawerSlice";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { useTheme } from "next-themes";
 
 interface RentPayment {
   _id: string;
@@ -74,6 +75,8 @@ export default function TenantDetailsPage() {
   const router = useRouter();
   const { user } = useUser();
   const dispatch = useAppDispatch();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [tenant, setTenant] = useState<Tenant | null>(null);
   const [rentPayments, setRentPayments] = useState<RentPayment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -187,6 +190,10 @@ export default function TenantDetailsPage() {
       initializeData();
     }
   }, [user?.id, params.tenantId, fetchTenantDetails, fetchRentPayments, fetchRoomTypes]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handlePaymentSuccess = async () => {
     await fetchRentPayments();
@@ -378,9 +385,13 @@ export default function TenantDetailsPage() {
     }));
   };
 
+  if (!mounted) {
+    return null;
+  }
+
   if (loading) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-8" data-theme={theme}>
         <div className="flex items-center justify-between">
           <LoadingSkeleton className="h-10 w-64" />
           <LoadingSkeleton className="h-10 w-32" />
@@ -414,7 +425,7 @@ export default function TenantDetailsPage() {
 
   if (error || !tenant) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4" data-theme={theme}>
         <div className="text-lg text-destructive">
           {error || "Tenant not found"}
         </div>
@@ -428,17 +439,7 @@ export default function TenantDetailsPage() {
   const isActive = tenant.status === 'active';
 
   return (
-    <div className="space-y-6">
-      {/* <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-bold">{tenant.name}</h1>
-            {getStatusBadge(tenant.status)}
-          </div>
-
-        </div>
-      </div> */}
-
+    <div className="space-y-6" data-theme={theme}>
       <Tabs defaultValue="profile" className="w-full">
         <TabsList className="w-full sm:w-auto">
           <TabsTrigger value="profile" className="flex-1 sm:flex-none">Profile</TabsTrigger>

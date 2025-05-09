@@ -327,7 +327,7 @@ export default function DashboardLayout({
             </div>
           </div>
 
-          <div className="container py-8 px-4 md:px-8">{children}</div>
+          <div className="container max-sm:mb-8 py-8 px-4 md:px-8">{children}</div>
         </div>
       </div>
 
