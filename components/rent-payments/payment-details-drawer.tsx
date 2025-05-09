@@ -45,9 +45,6 @@ export function PaymentDetailsDrawer({
   const [hostelData, setHostelData] = useState<HostelData | null>(null);
   const { toast } = useToast();
 
-  // Add state for print window
-  const [printWindow, setPrintWindow] = useState<Window | null>(null);
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -78,15 +75,6 @@ export function PaymentDetailsDrawer({
     }
   }, [isOpen, payment._id, toast, user?.id]);
 
-  // Cleanup print window on unmount
-  useEffect(() => {
-    return () => {
-      if (printWindow) {
-        printWindow.close();
-      }
-    };
-  }, [printWindow]);
-
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "paid":
@@ -103,267 +91,213 @@ export function PaymentDetailsDrawer({
   };
 
   const handlePrint = () => {
-    try {
-      const newPrintWindow = window.open('', '_blank');
-      if (!newPrintWindow) {
-        toast({
-          title: "Error",
-          description: "Please allow popups for this website",
-          variant: "destructive",
-        });
-        return;
-      }
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
 
-      setPrintWindow(newPrintWindow);
-
-      const content = `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>Payment Receipt</title>
-            <style>
-              :root {
-                --primary: hsl(157, 61%, 66%);
-                --primary-foreground: hsl(157, 25%, 16%);
-                --muted: hsl(157, 10%, 96.1%);
-                --muted-foreground: hsl(157, 5%, 45.1%);
-              }
+    const content = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Payment Receipt</title>
+          <style>
+            :root {
+              --primary: hsl(157, 61%, 66%);
+              --primary-foreground: hsl(157, 25%, 16%);
+              --muted: hsl(157, 10%, 96.1%);
+              --muted-foreground: hsl(157, 5%, 45.1%);
+            }
+            body {
+              font-family: Arial, sans-serif;
+              padding: 40px;
+              max-width: 800px;
+              margin: 0 auto;
+              color: #000;
+              background: white;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 40px;
+              padding-bottom: 20px;
+              border-bottom: 2px solid #000;
+            }
+            .hostel-name {
+              font-size: 28px;
+              font-weight: bold;
+              color: #000;
+              margin-bottom: 8px;
+            }
+            .receipt-title {
+              font-size: 14px;
+              font-weight: bold;
+              margin-bottom: 10px;
+              color: #000;
+            }
+            .owner-info {
+              font-size: 14px;
+              color: #666;
+              margin-top: 8px;
+            }
+            .section {
+              margin-bottom: 30px;
+              background: #f8f8f8;
+              padding: 20px;
+              border-radius: 8px;
+            }
+            .section-title {
+              font-size: 18px;
+              font-weight: bold;
+              margin-bottom: 15px;
+              color: #000;
+              border-bottom: 1px solid #ddd;
+              padding-bottom: 8px;
+            }
+            .grid {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 15px;
+            }
+            .label {
+              color: #666;
+              font-size: 14px;
+              margin-bottom: 4px;
+            }
+            .value {
+              font-weight: 500;
+              font-size: 16px;
+              color: #000;
+            }
+            .amount {
+              font-size: 24px;
+              font-weight: bold;
+              color: #000;
+            }
+            .status {
+              display: inline-block;
+              padding: 4px 12px;
+              border-radius: 4px;
+              font-size: 14px;
+              font-weight: 500;
+              background: var(--primary);
+              color: #000;
+            }
+            .footer {
+              margin-top: 40px;
+              text-align: center;
+              font-size: 12px;
+              color: #666;
+              padding-top: 20px;
+              border-top: 1px solid #ddd;
+            }
+            .contact-info {
+              margin-top: 20px;
+              font-size: 14px;
+              color: #666;
+            }
+            .address-block {
+              margin-top: 10px;
+              line-height: 1.5;
+            }
+            @media print {
               body {
-                font-family: Arial, sans-serif;
-                padding: 40px;
-                max-width: 800px;
-                margin: 0 auto;
-                color: #000;
-                background: white;
-              }
-              .header {
-                text-align: center;
-                margin-bottom: 40px;
-                padding-bottom: 20px;
-                border-bottom: 2px solid #000;
-              }
-              .hostel-name {
-                font-size: 28px;
-                font-weight: bold;
-                color: #000;
-                margin-bottom: 8px;
-              }
-              .receipt-title {
-                font-size: 14px;
-                font-weight: bold;
-                margin-bottom: 10px;
-                color: #000;
-              }
-              .owner-info {
-                font-size: 14px;
-                color: #666;
-                margin-top: 8px;
+                padding: 20px;
               }
               .section {
-                margin-bottom: 30px;
-                background: #f8f8f8;
-                padding: 20px;
-                border-radius: 8px;
+                break-inside: avoid;
               }
-              .section-title {
-                font-size: 18px;
-                font-weight: bold;
-                margin-bottom: 15px;
-                color: #000;
-                border-bottom: 1px solid #ddd;
-                padding-bottom: 8px;
-              }
-              .grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 15px;
-              }
-              .label {
-                color: #666;
-                font-size: 14px;
-                margin-bottom: 4px;
-              }
-              .value {
-                font-weight: 500;
-                font-size: 16px;
-                color: #000;
-              }
-              .amount {
-                font-size: 24px;
-                font-weight: bold;
-                color: #000;
-              }
-              .status {
-                display: inline-block;
-                padding: 4px 12px;
-                border-radius: 4px;
-                font-size: 14px;
-                font-weight: 500;
-                background: var(--primary);
-                color: #000;
-              }
-              .footer {
-                margin-top: 40px;
-                text-align: center;
-                font-size: 12px;
-                color: #666;
-                padding-top: 20px;
-                border-top: 1px solid #ddd;
-              }
-              .contact-info {
-                margin-top: 20px;
-                font-size: 14px;
-                color: #666;
-              }
-              .address-block {
-                margin-top: 10px;
-                line-height: 1.5;
-              }
-              @media print {
-                body {
-                  padding: 20px;
-                }
-                .section {
-                  break-inside: avoid;
-                }
-              }
-            </style>
-          </head>
-          <body>
-            <div class="header">
-              <div class="hostel-name">${hostelData?.hostelName || 'Hostel Management System'}</div>
-              <div class="receipt-title">Payment Receipt</div>
-              <div class="owner-info">
-                ${hostelData?.ownerName ? `Owner: ${hostelData.ownerName}` : ''}
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="hostel-name">${hostelData?.hostelName || 'Hostel Management System'}</div>
+            <div class="receipt-title">Payment Receipt</div>
+            <div class="owner-info">
+              ${hostelData?.ownerName ? `Owner: ${hostelData.ownerName}` : ''}
+            </div>
+            <div class="address-block">
+              ${hostelData?.address ? `${hostelData.address},` : ''}
+              ${hostelData?.city ? `${hostelData.city},` : ''}
+              ${hostelData?.state ? `${hostelData.state} -` : ''}
+              ${hostelData?.pincode ? `${hostelData.pincode}` : ''}
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Payment Information</div>
+            <div class="grid">
+              <div>
+                <div class="label">Amount</div>
+                <div class="amount">₹${paymentDetails.amount.toLocaleString()}</div>
               </div>
-              <div class="address-block">
-                ${hostelData?.address ? `${hostelData.address},` : ''}
-                ${hostelData?.city ? `${hostelData.city},` : ''}
-                ${hostelData?.state ? `${hostelData.state} -` : ''}
-                ${hostelData?.pincode ? `${hostelData.pincode}` : ''}
+              <div>
+                <div class="label">Status</div>
+                <div class="status">${paymentDetails.status.toUpperCase()}</div>
+              </div>
+              <div>
+                <div class="label">Month</div>
+                <div class="value">${paymentDetails.month} ${paymentDetails.year}</div>
+              </div>
+              <div>
+                <div class="label">Payment Type</div>
+                <div class="value">${paymentDetails.type}</div>
               </div>
             </div>
+          </div>
 
-            <div class="section">
-              <div class="section-title">Payment Information</div>
-              <div class="grid">
-                <div>
-                  <div class="label">Amount</div>
-                  <div class="amount">₹${paymentDetails.amount.toLocaleString()}</div>
-                </div>
-                <div>
-                  <div class="label">Status</div>
-                  <div class="status">${paymentDetails.status.toUpperCase()}</div>
-                </div>
-                <div>
-                  <div class="label">Month</div>
-                  <div class="value">${paymentDetails.month} ${paymentDetails.year}</div>
-                </div>
-                <div>
-                  <div class="label">Payment Type</div>
-                  <div class="value">${paymentDetails.type}</div>
-                </div>
+          <div class="section">
+            <div class="section-title">Room Details</div>
+            <div class="grid">
+              <div>
+                <div class="label">Room Number</div>
+                <div class="value">${paymentDetails.roomNumber}</div>
+              </div>
+              <div>
+                <div class="label">Room Type</div>
+                <div class="value">${paymentDetails.roomType}</div>
               </div>
             </div>
+          </div>
 
-            <div class="section">
-              <div class="section-title">Room Details</div>
-              <div class="grid">
-                <div>
-                  <div class="label">Room Number</div>
-                  <div class="value">${paymentDetails.roomNumber}</div>
-                </div>
-                <div>
-                  <div class="label">Room Type</div>
-                  <div class="value">${paymentDetails.roomType}</div>
-                </div>
+          <div class="section">
+            <div class="section-title">Payment Schedule</div>
+            <div class="grid">
+              <div>
+                <div class="label">Due Date</div>
+                <div class="value">${format(new Date(paymentDetails.dueDate), "PPP")}</div>
               </div>
-            </div>
-
-            <div class="section">
-              <div class="section-title">Payment Schedule</div>
-              <div class="grid">
+              ${paymentDetails.paidDate ? `
                 <div>
-                  <div class="label">Due Date</div>
-                  <div class="value">${format(new Date(paymentDetails.dueDate), "PPP")}</div>
+                  <div class="label">Paid Date</div>
+                  <div class="value">${format(new Date(paymentDetails.paidDate), "PPP")}</div>
                 </div>
-                ${paymentDetails.paidDate ? `
-                  <div>
-                    <div class="label">Paid Date</div>
-                    <div class="value">${format(new Date(paymentDetails.paidDate), "PPP")}</div>
-                  </div>
-                ` : ''}
-                ${paymentDetails.paymentMethod ? `
-                  <div>
-                    <div class="label">Payment Method</div>
-                    <div class="value">${paymentDetails.paymentMethod.replace('_', ' ')}</div>
-                  </div>
-                ` : ''}
-              </div>
+              ` : ''}
+              ${paymentDetails.paymentMethod ? `
+                <div>
+                  <div class="label">Payment Method</div>
+                  <div class="value">${paymentDetails.paymentMethod.replace('_', ' ')}</div>
+                </div>
+              ` : ''}
             </div>
+          </div>
 
-            <div class="contact-info">
-              <div>Phone: ${hostelData?.phoneNumber || 'Not provided'}</div>
-              <div>Email: ${hostelData?.email || 'Not provided'}</div>
-            </div>
+          <div class="contact-info">
+            <div>Phone: ${hostelData?.phoneNumber || 'Not provided'}</div>
+            <div>Email: ${hostelData?.email || 'Not provided'}</div>
+          </div>
 
-            <div class="footer">
-              <div>Generated on ${format(new Date(), "PPP")}</div>
-              <div>This is a computer-generated receipt and does not require a signature.</div>
-              ${hostelData?.gstin ? `<div>GSTIN: ${hostelData.gstin}</div>` : ''}
-              ${hostelData?.pan ? `<div>PAN: ${hostelData.pan}</div>` : ''}
-            </div>
-          </body>
-        </html>
-      `;
+          <div class="footer">
+            <div>Generated on ${format(new Date(), "PPP")}</div>
+            <div>This is a computer-generated receipt and does not require a signature.</div>
+            ${hostelData?.gstin ? `<div>GSTIN: ${hostelData.gstin}</div>` : ''}
+            ${hostelData?.pan ? `<div>PAN: ${hostelData.pan}</div>` : ''}
+          </div>
+        </body>
+      </html>
+    `;
 
-      newPrintWindow.document.write(content);
-      newPrintWindow.document.close();
-
-      // Add event listener for print completion
-      newPrintWindow.addEventListener('afterprint', () => {
-        newPrintWindow.close();
-        setPrintWindow(null);
-      });
-
-      // Trigger print
-      newPrintWindow.print();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to print receipt",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // Handle payment status change
-  const handleStatusChange = async (newStatus: string) => {
-    try {
-      const response = await fetch(`/api/rent-payments/${payment._id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
-
-      if (!response.ok) throw new Error('Failed to update payment status');
-
-      // Close the drawer after successful update
-      onClose();
-      
-      toast({
-        title: "Success",
-        description: "Payment status updated successfully",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update payment status",
-        variant: "destructive",
-      });
-    }
+    printWindow.document.write(content);
+    printWindow.document.close();
+    printWindow.print();
   };
 
   if (!paymentDetails) return null;
