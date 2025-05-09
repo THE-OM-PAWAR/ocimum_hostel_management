@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Plus } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Plus, Calendar as CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -22,6 +21,10 @@ interface CreateTenantSheetProps {
 export function CreateTenantSheet({ blockId, onSuccess, isMobile }: CreateTenantSheetProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [isRoomTypeOpen, setIsRoomTypeOpen] = useState(false);
+  const datePickerRef = useRef<HTMLDivElement>(null);
+  const roomTypeRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { user } = useUser();
   const [roomTypes, setRoomTypes] = useState<any[]>([]);
@@ -109,6 +112,22 @@ export function CreateTenantSheet({ blockId, onSuccess, isMobile }: CreateTenant
     }
   };
 
+  const handleClickOutside = (event: MouseEvent) => {
+    if (datePickerRef.current && !datePickerRef.current.contains(event.target as Node)) {
+      setIsDatePickerOpen(false);
+    }
+    if (roomTypeRef.current && !roomTypeRef.current.contains(event.target as Node)) {
+      setIsRoomTypeOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
@@ -186,31 +205,40 @@ export function CreateTenantSheet({ blockId, onSuccess, isMobile }: CreateTenant
 
             <div className="space-y-2">
               <Label>Join Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !formData.joinDate && "text-muted-foreground"
-                    )}
-                  >
-                    {formData.joinDate ? (
-                      format(formData.joinDate, "PPP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={formData.joinDate}
-                    onSelect={(date) => date && setFormData(prev => ({ ...prev, joinDate: date }))}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <div className="relative" ref={datePickerRef}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !formData.joinDate && "text-muted-foreground"
+                  )}
+                  onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {formData.joinDate ? (
+                    format(formData.joinDate, "PPP")
+                  ) : (
+                    <span>Pick a date</span>
+                  )}
+                </Button>
+
+                {isDatePickerOpen && (
+                  <div className="absolute z-50 mt-1 bg-popover border rounded-md shadow-md">
+                    <Calendar
+                      mode="single"
+                      selected={formData.joinDate}
+                      onSelect={(date) => {
+                        if (date) {
+                          setFormData(prev => ({ ...prev, joinDate: date }));
+                          setIsDatePickerOpen(false);
+                        }
+                      }}
+                      initialFocus
+                    />
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -226,26 +254,37 @@ export function CreateTenantSheet({ blockId, onSuccess, isMobile }: CreateTenant
 
             <div className="space-y-2">
               <Label htmlFor="roomType">Room Type</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start">
-                    {formData.roomType || "Select room type"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0">
-                  <div className="p-2">
-                    {roomTypes.map((type) => (
-                      <div
-                        key={type._id}
-                        className="px-2 py-1 cursor-pointer hover:bg-accent rounded-md"
-                        onClick={() => setFormData(prev => ({ ...prev, roomType: type.name }))}
-                      >
-                        {type.name}
-                      </div>
-                    ))}
+              <div className="relative" ref={roomTypeRef}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => setIsRoomTypeOpen(!isRoomTypeOpen)}
+                >
+                  {formData.roomType || "Select room type"}
+                </Button>
+
+                {isRoomTypeOpen && (
+                  <div className="absolute z-50 w-full mt-1 bg-popover border rounded-md shadow-md">
+                    <div className="p-2">
+                      {roomTypes.map((type) => (
+                        <button
+                          key={type._id}
+                          type="button"
+                          className="w-full px-2 py-1 text-left cursor-pointer hover:bg-accent rounded-md"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setFormData(prev => ({ ...prev, roomType: type.name }));
+                            setIsRoomTypeOpen(false);
+                          }}
+                        >
+                          {type.name}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </PopoverContent>
-              </Popover>
+                )}
+              </div>
             </div>
           </div>
 

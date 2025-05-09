@@ -174,13 +174,17 @@ export default function RoomTypesPage() {
             className="pl-9 bg-background"
           />
         </div>
-        <Button className="hidden sm:block" onClick={() => setIsCreateDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Create Room Type
-        </Button>
-        <Button className="sm:hidden" onClick={() => setIsCreateDialogOpen(true)}>
-          <Plus className="h-4 w-4 " />
-        </Button>
+        <div className="hidden sm:block">
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Create Room Type
+          </Button>
+        </div>
+        <div className="sm:hidden">
+          <Button size="icon" onClick={() => setIsCreateDialogOpen(true)}>
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       {loading ? (
