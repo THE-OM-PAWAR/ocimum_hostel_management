@@ -111,6 +111,27 @@
   }
 }
 
+/* Custom selection colors */
+::selection {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+::-moz-selection {
+  background: hsl(var(--primary) );
+  color: hsl(var(--primary-foreground));
+}
+
+/* Mobile-only user-select */
+@media (max-width: 768px) {
+  * {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+}
+
 /* Animation classes */
 @layer utilities {
   .animate-fade-in {
