@@ -204,7 +204,7 @@ export default function DashboardLayout({
                   isSidebarCollapsed && "rotate-180"
                 )}
               />
-            </Button>
+            </Button> 
             <div className="px-4 hidden md:block">
               <Breadcrumbs />
             </div>
