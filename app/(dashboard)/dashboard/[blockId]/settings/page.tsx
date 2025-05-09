@@ -21,21 +21,21 @@ const settingsOptions = [
     description: "Set up payment schedules, late fees, and payment methods",
     href: "payment-settings",
   },
-  {
-    title: "Maintenance",
-    description: "Configure maintenance request types and response times",
-    href: "maintenance",
-  },
-  {
-    title: "Notifications",
-    description: "Set up automated notifications and reminders",
-    href: "notifications",
-  },
-  {
-    title: "Access Control",
-    description: "Manage staff access and permissions",
-    href: "access-control",
-  },
+  // {
+  //   title: "Maintenance",
+  //   description: "Configure maintenance request types and response times",
+  //   href: "maintenance",
+  // },
+  // {
+  //   title: "Notifications",
+  //   description: "Set up automated notifications and reminders",
+  //   href: "notifications",
+  // },
+  // {
+  //   title: "Access Control",
+  //   description: "Manage staff access and permissions",
+  //   href: "access-control",
+  // },
 ];
 
 export default function BlockSettingsPage() {

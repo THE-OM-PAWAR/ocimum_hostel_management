@@ -149,10 +149,17 @@ export default function RoomComponentsPage() {
             className="pl-9 bg-background"
           />
         </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Create Component
-        </Button>
+        <div className="hidden sm:block">
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Create Component
+          </Button>
+        </div>
+        <div className="sm:hidden">
+          <Button size="icon" onClick={() => setIsCreateDialogOpen(true)}>
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       {loading ? (

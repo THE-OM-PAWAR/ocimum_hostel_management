@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,6 +23,7 @@ import {
   MoreVertical,
   Plus,
   Construction,
+  UserCog,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AddRentPaymentDialog } from "@/components/rent-payments/add-rent-payment-dialog";
@@ -31,6 +32,9 @@ import { PaymentActions } from "@/components/rent-payments/payment-actions";
 import { ChangeStatusDialog } from "@/components/tenants/change-status-dialog";
 import { EditTenantDetails } from "@/components/tenants/edit-tenant-details";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
+import { useAppDispatch } from "@/store/hooks";
+import { openDrawer } from "@/store/slices/drawerSlice";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 interface RentPayment {
   _id: string;
@@ -67,7 +71,9 @@ interface Tenant {
 
 export default function TenantDetailsPage() {
   const params = useParams();
+  const router = useRouter();
   const { user } = useUser();
+  const dispatch = useAppDispatch();
   const [tenant, setTenant] = useState<Tenant | null>(null);
   const [rentPayments, setRentPayments] = useState<RentPayment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,6 +82,8 @@ export default function TenantDetailsPage() {
   const [isAddPaymentOpen, setIsAddPaymentOpen] = useState(false);
   const [isAddAdditionalPaymentOpen, setIsAddAdditionalPaymentOpen] = useState(false);
   const [isChangeStatusDialogOpen, setIsChangeStatusDialogOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [activeTab, setActiveTab] = useState('profile');
   const [roomTypes, setRoomTypes] = useState([]);
 
   const calculatePaymentStats = () => {
@@ -93,7 +101,7 @@ export default function TenantDetailsPage() {
         acc.totalPaid += payment.amount;
         acc.paidCount += 1;
       }
-      
+
       // Calculate payment due (pending + overdue)
       if (payment.status === 'pending' || payment.status === 'overdue') {
         acc.paymentDue += payment.amount;
@@ -237,62 +245,70 @@ export default function TenantDetailsPage() {
   };
 
   const RentPaymentCard = ({ payment }: { payment: RentPayment }) => (
-    <div className="relative flex items-start gap-4 pb-8">
+    <div className="relative flex items-start gap-2 pb-4">
       <div className="flex-1">
-        <div className="bg-card border-2 rounded-lg p-6 hover:shadow-md transition-all">
-          <div className="flex items-start justify-between">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <h4 className="font-medium text-lg">
-                  {payment.type === 'monthly' ? "Monthly Rent" : payment.label}
-                </h4>
-                {getPaymentStatusBadge(payment.status)}
-              </div>
-
-              <div className="text-sm text-muted-foreground">
-                {payment.month} {payment.year}
-              </div>
-
-              <div className="mt-4 text-2xl font-bold">
-                ₹{payment.amount.toLocaleString()}
-              </div>
-
-              <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Room Type:</span>
-                  <div className="font-medium">{payment.roomType}</div>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Room Number:</span>
-                  <div className="font-medium">{payment.roomNumber}</div>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Due Date:</span>
-                  <div className="font-medium">
-                    {format(new Date(payment.dueDate), "PPP")}
+        <div className="bg-card border-2 rounded-lg p-4 sm:p-6 hover:shadow-md transition-all">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+            <div className="space-y-3 flex-1">
+              {/* Header Section */}
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h4 className="font-medium text-base">
+                    {payment.type === 'monthly' ? "Monthly Rent" : payment.label}
+                  </h4>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {getPaymentStatusBadge(payment.status)}
+                    {payment.paymentMethod && (
+                      <Badge variant="secondary" className="text-xs">
+                        {payment.paymentMethod}
+                      </Badge>
+                    )}
                   </div>
                 </div>
+                <div className="sm:hidden">
+                  <PaymentActions
+                    payment={payment}
+                    onSuccess={handlePaymentSuccess}
+                    disabled={tenant?.status !== 'active'}
+                  />
+                </div>
+              </div>
+
+              {/* Amount and Month */}
+              <div className="flex flex-col sm:flex-row sm:items-baseline gap-2">
+                <div className="text-2xl font-bold">
+                  ₹{payment.amount.toLocaleString()}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {payment.month} {payment.year}
+                </div>
+              </div>
+
+              {/* Details Section */}
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                <div className="flex items-center gap-1.5">
+                  <Building2 className="h-4 w-4 text-muted-foreground" />
+                  <span className="font-medium text-foreground">{payment.roomType}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Bed className="h-4 w-4 text-muted-foreground" />
+                  <span>Room {payment.roomNumber}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <span>Due {format(new Date(payment.dueDate), "MMM d, yyyy")}</span>
+                </div>
                 {payment.paidDate && (
-                  <div>
-                    <span className="text-muted-foreground">Paid Date:</span>
-                    <div className="font-medium">
-                      {format(new Date(payment.paidDate), "PPP")}
-                    </div>
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span>Paid {format(new Date(payment.paidDate), "MMM d, yyyy")}</span>
                   </div>
                 )}
               </div>
-
-              {payment.paymentMethod && (
-                <div className="mt-2 flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
-                    Paid via
-                  </span>
-                  <Badge variant="secondary">{payment.paymentMethod}</Badge>
-                </div>
-              )}
             </div>
 
-            <div className="flex items-center gap-4">
+            {/* Actions Section - Desktop */}
+            <div className="hidden sm:flex items-center justify-end sm:justify-start gap-4">
               <PaymentActions
                 payment={payment}
                 onSuccess={handlePaymentSuccess}
@@ -304,6 +320,63 @@ export default function TenantDetailsPage() {
       </div>
     </div>
   );
+
+  const handleOpenDrawer = () => {
+    dispatch(openDrawer({
+      page: 'tenants-details',
+      content: {
+        type: 'action',
+        title: tenant?.name || 'Tenant Actions',
+        description: `Room ${tenant?.roomNumber} - ${tenant?.roomType}`,
+        actions: [
+          {
+            label: 'Change Status',
+            icon: 'UserCog',
+            onClick: () => setIsChangeStatusDialogOpen(true),
+            description: 'Update tenant status',
+            disabled: !isActive
+          },
+          {
+            label: 'Add Monthly Payment',
+            icon: 'CreditCard',
+            onClick: () => setIsAddPaymentOpen(true),
+            description: 'Record monthly rent payment',
+            disabled: !isActive
+          },
+          {
+            label: 'Add Additional Payment',
+            icon: 'PlusCircle',
+            onClick: () => setIsAddAdditionalPaymentOpen(true),
+            description: 'Record additional payment',
+            disabled: !isActive
+          },
+          {
+            label: 'View Documents',
+            icon: 'FileText',
+            onClick: () => router.push(`/tenants/${params.tenantId}/documents`),
+            description: 'Access tenant documents'
+          },
+          {
+            label: 'Edit Details',
+            icon: 'Edit',
+            onClick: () => setIsEditMode(true),
+            description: 'Update tenant information'
+          },
+          {
+            label: 'Payment History',
+            icon: 'History',
+            onClick: () => setActiveTab('payments'),
+            description: 'View payment records'
+          }
+        ],
+        data: {
+          tenant,
+          paymentStats,
+          isActive
+        }
+      }
+    }));
+  };
 
   if (loading) {
     return (
@@ -356,30 +429,27 @@ export default function TenantDetailsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">{tenant.name}</h1>
-        <div className="flex items-center gap-4">
-          {getStatusBadge(tenant.status)}
-          <Button 
-            variant="outline"
-            onClick={() => setIsChangeStatusDialogOpen(true)}
-          >
-            Change Status
-          </Button>
+      {/* <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-bold">{tenant.name}</h1>
+            {getStatusBadge(tenant.status)}
+          </div>
+
         </div>
-      </div>
+      </div> */}
 
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList>
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
-          <TabsTrigger value="payments">Payments</TabsTrigger>
+        <TabsList className="w-full sm:w-auto">
+          <TabsTrigger value="profile" className="flex-1 sm:flex-none">Profile</TabsTrigger>
+          <TabsTrigger value="documents" className="flex-1 sm:flex-none">Documents</TabsTrigger>
+          <TabsTrigger value="payments" className="flex-1 sm:flex-none">Payments</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6">
           <Card>
             <CardContent className="pt-6">
-              <EditTenantDetails 
+              <EditTenantDetails
                 tenant={tenant}
                 roomTypes={roomTypes}
                 onSuccess={handleTenantUpdate}
@@ -408,12 +478,15 @@ export default function TenantDetailsPage() {
         </TabsContent>
 
         <TabsContent value="payments" className="space-y-8">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Payment History</h2>
-            <div className="flex gap-2">
-              <Button 
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="text-xl sm:text-2xl mb-2 mt-4 font-bold">Payment History</h2>
+
+            {/* Desktop view */}
+            <div className="hidden sm:flex gap-2">
+              <Button
                 onClick={() => setIsAddPaymentOpen(true)}
                 disabled={!isActive}
+                className="w-auto"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Monthly Payment
@@ -422,14 +495,61 @@ export default function TenantDetailsPage() {
                 onClick={() => setIsAddAdditionalPaymentOpen(true)}
                 variant="outline"
                 disabled={!isActive}
+                className="w-auto"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Additional Payment
               </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setIsChangeStatusDialogOpen(true)}
+              >
+                <UserCog className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Mobile view */}
+            <div className="sm:hidden flex items-center justify-between gap-2">
+            <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setIsChangeStatusDialogOpen(true)}
+              >
+                <UserCog className="h-4 w-4" />
+              </Button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-100" align="end">
+                  <div className="flex flex-col">
+                    <button
+                      onClick={() => setIsAddPaymentOpen(true)}
+                      disabled={!isActive}
+                      className="flex items-center gap-2 px-3 py-2 hover:bg-accent rounded-sm text-sm"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Add Monthly Payment
+                    </button>
+                    <div className="h-px w-full bg-border" />
+                    <button
+                      onClick={() => setIsAddAdditionalPaymentOpen(true)}
+                      disabled={!isActive}
+                      className="flex items-center gap-2 px-3 py-2 hover:bg-accent rounded-sm text-sm"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Add Additional Payment
+                    </button>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium">
@@ -485,7 +605,7 @@ export default function TenantDetailsPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="sm:col-span-2 lg:col-span-1">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium">
                   Payment Due
@@ -496,8 +616,8 @@ export default function TenantDetailsPage() {
                 <p className="text-xs text-muted-foreground">
                   Total pending and overdue payments
                 </p>
-                <Button 
-                  className="w-full mt-4" 
+                <Button
+                  className="w-full mt-4"
                   size="sm"
                   disabled={!isActive || paymentStats.paymentDue === 0}
                 >
@@ -507,7 +627,7 @@ export default function TenantDetailsPage() {
             </Card>
           </div>
 
-          <div className="space-y-1">
+          <div className="space-y-2">
             {rentPayments.map((payment) => (
               <RentPaymentCard key={payment._id} payment={payment} />
             ))}

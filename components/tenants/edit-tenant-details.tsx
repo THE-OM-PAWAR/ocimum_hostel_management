@@ -15,7 +15,30 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Bed, Users, Calendar, DoorClosed, Home, Wifi, Fan, ShowerHead as Shower, BookOpen, Armchair, PlusCircle } from "lucide-react";
+import { 
+  Bed, 
+  Users, 
+  Calendar, 
+  DoorClosed, 
+  Home, 
+  Wifi, 
+  Fan, 
+  ShowerHead as Shower, 
+  BookOpen, 
+  Armchair, 
+  PlusCircle,
+  User,
+  Phone,
+  Mail,
+  MapPin,
+  Hash,
+  PhoneCall,
+  Building2,
+  Pencil,
+  X,
+  Loader2,
+  Check
+} from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 interface EditTenantDetailsProps {
@@ -98,35 +121,56 @@ export function EditTenantDetails({ tenant, roomTypes, onSuccess }: EditTenantDe
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold">Personal Information</h3>
-          <Button onClick={() => setIsEditing(true)} variant="outline" size="sm">
-            Edit Details
+          <Button onClick={() => setIsEditing(true)} variant="outline" size="sm" className="sm:flex sm:gap-2">
+            <Pencil className="h-4 w-4" />
+            <span className="hidden sm:inline">Edit Details</span>
           </Button>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="space-y-1">
-            <Label>Full Name</Label>
-            <p>{formData.name}</p>
-          </div>
-          <div className="space-y-1">
-            <Label>Phone Number</Label>
-            <p>{formData.phone}</p>
-          </div>
-          <div className="space-y-1">
-            <Label>Email</Label>
-            <p>{formData.email || "Not provided"}</p>
-          </div>
-          <div className="space-y-1">
-            <Label>Emergency Contact</Label>
-            <p>{formData.emergencyContact}</p>
-          </div>
-          <div className="space-y-1">
-            <Label>Address</Label>
-            <p>{formData.address || "Not provided"}</p>
-          </div>
-          <div className="space-y-1">
-            <Label>PIN Code</Label>
-            <p>{formData.pinCode || "Not provided"}</p>
+        <div className="m-2 grid gap-6">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="flex items-start gap-3">
+              <User className="h-5 w-5 text-primary mt-1" />
+              <div className="space-y-1">
+                <Label className="text-muted-foreground">Full Name</Label>
+                <p className="font-medium">{formData.name}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Phone className="h-5 w-5 text-primary mt-1" />
+              <div className="space-y-1">
+                <Label className="text-muted-foreground">Phone Number</Label>
+                <p className="font-medium">{formData.phone}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Mail className="h-5 w-5 text-primary mt-1" />
+              <div className="space-y-1">
+                <Label className="text-muted-foreground">Email</Label>
+                <p className="font-medium">{formData.email || "Not provided"}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <PhoneCall className="h-5 w-5 text-primary mt-1" />
+              <div className="space-y-1">
+                <Label className="text-muted-foreground">Emergency Contact</Label>
+                <p className="font-medium">{formData.emergencyContact}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <MapPin className="h-5 w-5 text-primary mt-1" />
+              <div className="space-y-1">
+                <Label className="text-muted-foreground">Address</Label>
+                <p className="font-medium">{formData.address || "Not provided"}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Hash className="h-5 w-5 text-primary mt-1" />
+              <div className="space-y-1">
+                <Label className="text-muted-foreground">PIN Code</Label>
+                <p className="font-medium">{formData.pinCode || "Not provided"}</p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -136,7 +180,7 @@ export function EditTenantDetails({ tenant, roomTypes, onSuccess }: EditTenantDe
             <div className="grid md:grid-cols-2 gap-6">
               <Card className="p-4 space-y-4">
                 <div className="flex items-center gap-2">
-                  <DoorClosed className="h-5 w-5 text-primary" />
+                  <Building2 className="h-5 w-5 text-primary" />
                   <h4 className="font-medium">Room Details</h4>
                 </div>
                 <div className="space-y-2">
@@ -207,79 +251,124 @@ export function EditTenantDetails({ tenant, roomTypes, onSuccess }: EditTenantDe
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Edit Personal Information</h3>
+        <h3 className="text-lg font-semibold">Edit Information</h3>
         <div className="flex gap-2">
           <Button 
             type="button" 
             variant="outline" 
             onClick={() => setIsEditing(false)}
             disabled={isSubmitting}
+            className="sm:flex hidden"
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
+          <Button 
+            type="button"
+            variant="outline"
+            onClick={() => setIsEditing(false)} 
+            disabled={isSubmitting}
+            className="sm:hidden flex"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+          <Button 
+            type="submit" 
+            disabled={isSubmitting}
+            className="sm:flex hidden"
+          >
             {isSubmitting ? "Saving..." : "Save Changes"}
+          </Button>
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="sm:hidden flex"
+          >
+            {isSubmitting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Check className="h-4 w-4" />
+            )}
           </Button>
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="name">Full Name</Label>
-          <Input
-            id="name"
-            value={formData.name}
-            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-            required
-          />
-        </div>
+      <div className="grid gap-6">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <User className="h-5 w-5 text-primary" />
+              <Label htmlFor="name">Full Name</Label>
+            </div>
+            <Input
+              id="name"
+              value={formData.name}
+              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+              required
+            />
+          </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="phone">Phone Number</Label>
-          <Input
-            id="phone"
-            value={formData.phone}
-            onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-            required
-          />
-        </div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Phone className="h-5 w-5 text-primary" />
+              <Label htmlFor="phone">Phone Number</Label>
+            </div>
+            <Input
+              id="phone"
+              value={formData.phone}
+              onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+              required
+            />
+          </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            value={formData.email}
-            onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-          />
-        </div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Mail className="h-5 w-5 text-primary" />
+              <Label htmlFor="email">Email</Label>
+            </div>
+            <Input
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+            />
+          </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="emergencyContact">Emergency Contact</Label>
-          <Input
-            id="emergencyContact"
-            value={formData.emergencyContact}
-            onChange={(e) => setFormData(prev => ({ ...prev, emergencyContact: e.target.value }))}
-            required
-          />
-        </div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <PhoneCall className="h-5 w-5 text-primary" />
+              <Label htmlFor="emergencyContact">Emergency Contact</Label>
+            </div>
+            <Input
+              id="emergencyContact"
+              value={formData.emergencyContact}
+              onChange={(e) => setFormData(prev => ({ ...prev, emergencyContact: e.target.value }))}
+              required
+            />
+          </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="address">Address</Label>
-          <Input
-            id="address"
-            value={formData.address}
-            onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-          />
-        </div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-primary" />
+              <Label htmlFor="address">Address</Label>
+            </div>
+            <Input
+              id="address"
+              value={formData.address}
+              onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+            />
+          </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="pinCode">PIN Code</Label>
-          <Input
-            id="pinCode"
-            value={formData.pinCode}
-            onChange={(e) => setFormData(prev => ({ ...prev, pinCode: e.target.value }))}
-          />
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Hash className="h-5 w-5 text-primary" />
+              <Label htmlFor="pinCode">PIN Code</Label>
+            </div>
+            <Input
+              id="pinCode"
+              value={formData.pinCode}
+              onChange={(e) => setFormData(prev => ({ ...prev, pinCode: e.target.value }))}
+            />
+          </div>
         </div>
       </div>
 
