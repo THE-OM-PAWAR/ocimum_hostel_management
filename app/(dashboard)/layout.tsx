@@ -18,6 +18,7 @@ import {
   MoreVertical,
   FileText,
   LogOut,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -77,13 +78,18 @@ function SidebarItem({
       href={href}
       className={cn(
         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-        "hover:bg-accent hover:text-accent-foreground",
-        isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground",
+        "hover:text-primary",
+        isActive ? "text-primary" : "text-muted-foreground",
         collapsed && "justify-center px-2"
       )}
     >
-      {icon}
-      {!collapsed && <span>{title}</span>}
+      <div className={cn(
+        "flex items-center gap-3",
+        isActive && "text-primary"
+      )}>
+        {icon}
+        {!collapsed && <span>{title}</span>}
+      </div>
     </Link>
   );
 }
@@ -101,11 +107,12 @@ function MobileNavItem({
     <Link
       href={href}
       className={cn(
-        "flex flex-1 justify-center p-3 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
-        isActive && "bg-accent/50 text-accent-foreground"
+        "flex flex-col items-center justify-center p-3 text-muted-foreground transition-colors hover:text-primary",
+        isActive && "text-primary"
       )}
     >
       {icon}
+      <span className="text-xs mt-1">{navigationItems.find(item => item.href === href)?.title}</span>
     </Link>
   );
 }
@@ -216,14 +223,24 @@ export default function DashboardLayout({
           actions: [
             {
               label: 'Block Settings',
+              icon: 'Settings',
               onClick: () => router.push(`/blocks/${params.blockId}/settings`),
+              description: 'Manage block configuration'
             },
             {
               label: 'Manage Tenants',
+              icon: 'Users',
               onClick: () => router.push(`/blocks/${params.blockId}/tenants`),
+              description: 'View and manage block tenants'
             },
-          ],
-        },
+            {
+              label: 'View Reports',
+              icon: 'BarChart3',
+              onClick: () => router.push(`/blocks/${params.blockId}/reports`),
+              description: 'View block performance reports'
+            }
+          ]
+        }
       }));
     } else if (pathname.includes('/tenants')) {
       dispatch(openDrawer({
@@ -234,14 +251,80 @@ export default function DashboardLayout({
           actions: [
             {
               label: 'View Documents',
+              icon: 'FileText',
               onClick: () => router.push(`/tenants/${params.tenantId}/documents`),
+              description: 'Access tenant documents'
             },
             {
               label: 'Tenant Settings',
+              icon: 'Settings',
               onClick: () => router.push(`/tenants/${params.tenantId}/settings`),
+              description: 'Manage tenant settings'
             },
-          ],
-        },
+            {
+              label: 'Payment History',
+              icon: 'CreditCard',
+              onClick: () => router.push(`/tenants/${params.tenantId}/payments`),
+              description: 'View payment records'
+            }
+          ]
+        }
+      }));
+    } else if (pathname === '/dashboard') {
+      dispatch(openDrawer({
+        page: 'dashboard',
+        content: {
+          type: 'action',
+          title: 'Quick Actions',
+          actions: [
+            {
+              label: 'Add New Block',
+              icon: 'Building2',
+              onClick: () => router.push('/blocks/new'),
+              description: 'Create a new block'
+            },
+            {
+              label: 'Add New Tenant',
+              icon: 'UserPlus',
+              onClick: () => router.push('/tenants/new'),
+              description: 'Register a new tenant'
+            },
+            {
+              label: 'View Reports',
+              icon: 'BarChart3',
+              onClick: () => router.push('/reports'),
+              description: 'View system reports'
+            }
+          ]
+        }
+      }));
+    } else if (pathname === '/settings') {
+      dispatch(openDrawer({
+        page: 'settings',
+        content: {
+          type: 'action',
+          title: 'Settings',
+          actions: [
+            {
+              label: 'Account Settings',
+              icon: 'User',
+              onClick: () => router.push('/settings/account'),
+              description: 'Manage your account'
+            },
+            {
+              label: 'Notifications',
+              icon: 'Bell',
+              onClick: () => router.push('/settings/notifications'),
+              description: 'Configure notifications'
+            },
+            {
+              label: 'System Settings',
+              icon: 'Settings',
+              onClick: () => router.push('/settings/system'),
+              description: 'Manage system settings'
+            }
+          ]
+        }
       }));
     }
   };
@@ -353,16 +436,6 @@ export default function DashboardLayout({
                       {loading ? "Loading..." : pageTitle}
                     </span>
                   </div>
-                  <div className="flex items-center">
-                    <Drawer open={isOpen} onOpenChange={(open) => !open && dispatch(closeDrawer())}>
-                      <DrawerTrigger asChild>
-                        <Button variant="ghost" size="icon" className="ml-auto" onClick={handleDrawerOpen}>
-                          <MoreVertical className="h-5 w-5" />
-                        </Button>
-                      </DrawerTrigger>
-
-                    </Drawer>
-                  </div>
                 </div>
               )}
             </div>
@@ -373,8 +446,8 @@ export default function DashboardLayout({
       </div>
 
       {/* Mobile Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 border-t bg-background md:hidden">
-        <nav className="flex items-center">
+      <div className="fixed bottom-0 left-0 right-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:hidden">
+        <nav className="flex items-center justify-around">
           {mobileNavItems.map((item) => (
             <MobileNavItem
               key={item.href}
@@ -385,10 +458,15 @@ export default function DashboardLayout({
           ))}
         </nav>
       </div>
-      <OnboardingDialog />
+
+      {/* Global Drawer */}
       <Drawer open={isOpen} onOpenChange={(open) => !open && dispatch(closeDrawer())}>
-        <DrawerContent />
+        <DrawerContent>
+          <CustomDrawerContent />
+        </DrawerContent>
       </Drawer>
+
+      <OnboardingDialog />
     </div>
   );
 }

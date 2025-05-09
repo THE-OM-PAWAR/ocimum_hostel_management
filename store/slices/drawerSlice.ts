@@ -1,19 +1,33 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-type PageType = 'blocks' | 'tenants' | 'payments' | 'settings';
+// Define all possible page types
+type PageType = 'blocks' | 'tenants' | 'settings' | 'dashboard' | 'tenants-details' | 'default';
+
+// Define action types
+type ActionType = 'navigation' | 'action' | 'info';
+
+// Define action variants
+type ActionVariant = 'default' | 'destructive' | 'outline' | 'ghost';
+
+// Define action structure
+interface DrawerAction {
+  label: string;
+  icon?: string;
+  onClick: () => void;
+  variant?: ActionVariant;
+  disabled?: boolean;
+  description?: string;
+}
 
 interface DrawerState {
   isOpen: boolean;
   page: PageType | null;
   content: {
-    type: 'action' | 'info' | null;
+    type: ActionType | null;
     title: string;
     description?: string;
-    actions?: {
-      label: string;
-      onClick: () => void;
-      variant?: 'default' | 'destructive' | 'outline';
-    }[];
+    actions?: DrawerAction[];
+    data?: any; // For storing any additional data needed by the drawer
   };
 }
 
@@ -25,6 +39,7 @@ const initialState: DrawerState = {
     title: '',
     description: '',
     actions: [],
+    data: null,
   },
 };
 
@@ -35,14 +50,11 @@ const drawerSlice = createSlice({
     openDrawer: (state, action: PayloadAction<{
       page: PageType;
       content: {
-        type: 'action' | 'info';
+        type: ActionType;
         title: string;
         description?: string;
-        actions?: {
-          label: string;
-          onClick: () => void;
-          variant?: 'default' | 'destructive' | 'outline';
-        }[];
+        actions?: DrawerAction[];
+        data?: any;
       };
     }>) => {
       state.isOpen = true;
@@ -57,10 +69,22 @@ const drawerSlice = createSlice({
         title: '',
         description: '',
         actions: [],
+        data: null,
       };
+    },
+    updateDrawerContent: (state, action: PayloadAction<{
+      title?: string;
+      description?: string;
+      actions?: DrawerAction[];
+      data?: any;
+    }>) => {
+      if (action.payload.title) state.content.title = action.payload.title;
+      if (action.payload.description) state.content.description = action.payload.description;
+      if (action.payload.actions) state.content.actions = action.payload.actions;
+      if (action.payload.data) state.content.data = action.payload.data;
     },
   },
 });
 
-export const { openDrawer, closeDrawer } = drawerSlice.actions;
+export const { openDrawer, closeDrawer, updateDrawerContent } = drawerSlice.actions;
 export default drawerSlice.reducer; 
