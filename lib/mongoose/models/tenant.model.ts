@@ -1,5 +1,10 @@
 import mongoose, { Document, Model, Schema } from 'mongoose';
 
+interface TenantDocument {
+  type: string;
+  url: string;
+}
+
 export interface ITenant extends Document {
   name: string;
   phone: string;
@@ -17,9 +22,21 @@ export interface ITenant extends Document {
   address?: string;
   pinCode?: string;
   profileImage?: string;
+  documents?: TenantDocument[];
   createdAt: Date;
   updatedAt: Date;
 }
+
+const documentSchema = new Schema({
+  type: {
+    type: String,
+    required: true,
+  },
+  url: {
+    type: String,
+    required: true,
+  }
+}, { timestamps: true });
 
 const tenantSchema = new Schema<ITenant>(
   {
@@ -92,6 +109,7 @@ const tenantSchema = new Schema<ITenant>(
       type: String,
       trim: true,
     },
+    documents: [documentSchema],
   },
   {
     timestamps: true,

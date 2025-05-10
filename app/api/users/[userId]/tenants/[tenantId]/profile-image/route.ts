@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb/client";
 import { Tenant } from "@/lib/mongoose/models/tenant.model";
+import { deleteFromCloudinary } from "@/lib/cloudinary/utils";
 
 export async function PUT(
   request: Request,
@@ -9,8 +10,6 @@ export async function PUT(
   try {
     const { tenantId } = params;
     const { imageUrl } = await request.json();
-
-    console.log("Received data:", { tenantId, imageUrl });
 
     if (!imageUrl) {
       return NextResponse.json(
@@ -30,14 +29,19 @@ export async function PUT(
       );
     }
 
+    // If there's an existing profile image, delete it from Cloudinary
+    if (existingTenant.profileImage) {
+      console.log("tenantId", existingTenant.profileImage);
+      const deleted = await deleteFromCloudinary(existingTenant.profileImage);
+      console.log("Deleted from Cloudinary", deleted);
+    }
+
     // Update the tenant's profile image
     const updatedTenant = await Tenant.findByIdAndUpdate(
       tenantId,
       { profileImage: imageUrl },
-      { new: true, runValidators: true }
+      { new: true }
     );
-
-    console.log("Updated tenant:", updatedTenant);
 
     if (!updatedTenant) {
       return NextResponse.json(

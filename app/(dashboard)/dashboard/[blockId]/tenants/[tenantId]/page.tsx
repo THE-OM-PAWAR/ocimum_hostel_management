@@ -24,6 +24,8 @@ import {
   Plus,
   Construction,
   UserCog,
+  FileText,
+  Upload,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AddRentPaymentDialog } from "@/components/rent-payments/add-rent-payment-dialog";
@@ -36,6 +38,8 @@ import { useAppDispatch } from "@/store/hooks";
 import { openDrawer } from "@/store/slices/drawerSlice";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { useTheme } from "next-themes";
+import { DocumentList } from "@/components/tenants/document-list";
+import { UploadDocumentDialog } from "@/components/tenants/upload-document-dialog";
 
 interface RentPayment {
   _id: string;
@@ -88,6 +92,7 @@ export default function TenantDetailsPage() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
   const [roomTypes, setRoomTypes] = useState([]);
+  const [isUploadDocumentDialogOpen, setIsUploadDocumentDialogOpen] = useState(false);
 
   const calculatePaymentStats = () => {
     if (!rentPayments?.length) return {
@@ -204,6 +209,10 @@ export default function TenantDetailsPage() {
   };
 
   const handleTenantUpdate = async () => {
+    await fetchTenantDetails();
+  };
+
+  const handleDocumentUploaded = async () => {
     await fetchTenantDetails();
   };
 
@@ -447,38 +456,52 @@ export default function TenantDetailsPage() {
           <TabsTrigger value="payments" className="flex-1 sm:flex-none">Payments</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="profile" className="space-y-6">
-          <Card>
-            <CardContent className="pt-6">
-              <EditTenantDetails
-                tenant={tenant}
-                roomTypes={roomTypes}
-                onSuccess={handleTenantUpdate}
-              />
-            </CardContent>
-          </Card>
+        <TabsContent value="profile" className="space-y-6 w-full px-2">
+          <EditTenantDetails
+            tenant={tenant}
+            roomTypes={roomTypes}
+            onSuccess={handleTenantUpdate}
+          />
         </TabsContent>
 
-        <TabsContent value="documents" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Documents</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col items-center justify-center py-12 text-center space-y-4">
-                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Construction className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-lg font-medium">Coming Soon!</h3>
-                <p className="text-muted-foreground max-w-sm">
-                  Document management features are currently under development. Stay tuned for updates!
-                </p>
+        <TabsContent value="documents" className="space-y-6 px-2">
+          <div className="flex flex-row items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">Documents</h3>
+            <Button 
+              onClick={() => setIsUploadDocumentDialogOpen(true)}
+              size="sm"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Upload Document
+            </Button>
+          </div>
+          {tenant.documents && tenant.documents.length > 0 ? (
+            <DocumentList 
+              documents={tenant.documents} 
+              tenantId={tenant._id}
+              onDocumentDeleted={handleDocumentUploaded} 
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 text-center space-y-4">
+              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <FileText className="h-6 w-6 text-primary" />
               </div>
-            </CardContent>
-          </Card>
+              <h3 className="text-lg font-medium">No Documents Yet</h3>
+              <p className="text-muted-foreground max-w-sm">
+                Upload important documents like ID cards, lease agreements, and other tenant-related files.
+              </p>
+              <Button 
+                onClick={() => setIsUploadDocumentDialogOpen(true)}
+                variant="outline"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Upload First Document
+              </Button>
+            </div>
+          )}
         </TabsContent>
 
-        <TabsContent value="payments" className="space-y-8">
+        <TabsContent value="payments" className="space-y-8 px-2">
           <div className="flex items-center justify-between gap-4">
             <h2 className="text-xl sm:text-2xl mb-2 mt-4 font-bold">Payment History</h2>
 
@@ -665,6 +688,13 @@ export default function TenantDetailsPage() {
           currentStatus={tenant.status}
         />
       )}
+
+      <UploadDocumentDialog
+        isOpen={isUploadDocumentDialogOpen}
+        onClose={() => setIsUploadDocumentDialogOpen(false)}
+        onSuccess={handleDocumentUploaded}
+        tenantId={tenant._id}
+      />
     </div>
   );
 }

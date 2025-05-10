@@ -130,14 +130,15 @@ export function EditTenantDetails({ tenant, roomTypes, onSuccess }: EditTenantDe
         </div>
 
         <Card className="p-6 relative">
-          <EditProfileImage tenant={tenant} onSuccess={onSuccess} />
           <div className="flex items-center gap-4 mb-6">
-            <Avatar className="h-20 w-20">
-              <AvatarImage src={tenant.imageUrl} alt={formData.name} />
-              <AvatarFallback className="bg-primary/10">
-                <User className="h-10 w-10 text-primary" />
-              </AvatarFallback>
-            </Avatar>
+            <EditProfileImage tenant={tenant} onSuccess={onSuccess}>
+              <Avatar className="h-20 w-20 cursor-pointer">
+                <AvatarImage className="object-cover" src={tenant.profileImage} alt={formData.name} />
+                <AvatarFallback className="bg-primary/10">
+                  <User className="h-10 w-10 text-primary" />
+                </AvatarFallback>
+              </Avatar>
+            </EditProfileImage>
             <div>
               <h2 className="text-2xl font-semibold">{formData.name}</h2>
               {/* <p className="text-muted-foreground">Tenant ID: {tenant._id}</p> */}
