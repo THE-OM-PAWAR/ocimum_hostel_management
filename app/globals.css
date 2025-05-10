@@ -111,6 +111,17 @@
   }
 }
 
+/* Custom selection colors */
+::selection {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+::-moz-selection {
+  background: hsl(var(--primary) );
+  color: hsl(var(--primary-foreground));
+}
+
 /* Hide scrollbar for Chrome, Safari and Opera */
 ::-webkit-scrollbar {
   display: none;
@@ -122,25 +133,137 @@
   scrollbar-width: none;  /* Firefox */
 }
 
-/* Custom selection colors */
-::selection {
-  background: hsl(var(--primary));
-  color: hsl(var(--primary-foreground));
+/* User select rules */
+* {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
-::-moz-selection {
-  background: hsl(var(--primary));
-  color: hsl(var(--primary-foreground));
+/* Allow selection in interactive elements */
+input,
+textarea,
+[contenteditable="true"],
+select,
+button,
+[role="button"],
+[role="combobox"],
+[role="listbox"],
+[role="option"],
+[role="menuitem"],
+[role="menuitemcheckbox"],
+[role="menuitemradio"],
+[role="checkbox"],
+[role="radio"],
+[role="switch"],
+[role="tab"],
+[role="tabpanel"],
+[role="treeitem"],
+[role="treegrid"],
+[role="gridcell"],
+[role="columnheader"],
+[role="rowheader"],
+[role="row"],
+[role="cell"],
+[role="grid"],
+[role="list"],
+[role="listitem"],
+[role="menubar"],
+[role="menu"],
+[role="dialog"],
+[role="alertdialog"],
+[role="tooltip"],
+[role="toolbar"],
+[role="status"],
+[role="log"],
+[role="marquee"],
+[role="timer"],
+[role="progressbar"],
+[role="scrollbar"],
+[role="searchbox"],
+[role="spinbutton"],
+[role="slider"],
+[role="textbox"],
+[role="combobox"],
+[role="listbox"],
+[role="option"],
+[role="menuitem"],
+[role="menuitemcheckbox"],
+[role="menuitemradio"],
+[role="checkbox"],
+[role="radio"],
+[role="switch"],
+[role="tab"],
+[role="tabpanel"],
+[role="treeitem"],
+[role="treegrid"],
+[role="gridcell"],
+[role="columnheader"],
+[role="rowheader"],
+[role="row"],
+[role="cell"],
+[role="grid"],
+[role="list"],
+[role="listitem"],
+[role="menubar"],
+[role="menu"],
+[role="dialog"],
+[role="alertdialog"],
+[role="tooltip"],
+[role="toolbar"],
+[role="status"],
+[role="log"],
+[role="marquee"],
+[role="timer"],
+[role="progressbar"],
+[role="scrollbar"],
+[role="searchbox"],
+[role="spinbutton"],
+[role="slider"],
+[role="textbox"] {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
 }
 
-/* Mobile-only user-select */
-@media (max-width: 768px) {
-  * {
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-  }
+/* Allow selection in code blocks and pre elements */
+pre,
+code {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* Allow selection in links */
+a {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* Allow selection in form elements */
+form * {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* Allow selection in popover content */
+[role="dialog"] *,
+[role="alertdialog"] *,
+[role="tooltip"] *,
+[role="menu"] *,
+[role="listbox"] *,
+[role="combobox"] * {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
 }
 
 /* Animation classes */
