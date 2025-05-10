@@ -15,6 +15,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { EditProfileImage } from "./edit-profile-image";
 import { 
   Bed, 
   Users, 
@@ -127,52 +129,61 @@ export function EditTenantDetails({ tenant, roomTypes, onSuccess }: EditTenantDe
           </Button>
         </div>
 
-        <div className="m-2 grid gap-6">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="flex items-start gap-3">
-              <User className="h-5 w-5 text-primary mt-1" />
-              <div className="space-y-1">
-                <Label className="text-muted-foreground">Full Name</Label>
-                <p className="font-medium">{formData.name}</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <Phone className="h-5 w-5 text-primary mt-1" />
-              <div className="space-y-1">
-                <Label className="text-muted-foreground">Phone Number</Label>
-                <p className="font-medium">{formData.phone}</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <Mail className="h-5 w-5 text-primary mt-1" />
-              <div className="space-y-1">
-                <Label className="text-muted-foreground">Email</Label>
-                <p className="font-medium">{formData.email || "Not provided"}</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <PhoneCall className="h-5 w-5 text-primary mt-1" />
-              <div className="space-y-1">
-                <Label className="text-muted-foreground">Emergency Contact</Label>
-                <p className="font-medium">{formData.emergencyContact}</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <MapPin className="h-5 w-5 text-primary mt-1" />
-              <div className="space-y-1">
-                <Label className="text-muted-foreground">Address</Label>
-                <p className="font-medium">{formData.address || "Not provided"}</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <Hash className="h-5 w-5 text-primary mt-1" />
-              <div className="space-y-1">
-                <Label className="text-muted-foreground">PIN Code</Label>
-                <p className="font-medium">{formData.pinCode || "Not provided"}</p>
+        <Card className="p-6 relative">
+          <EditProfileImage tenant={tenant} onSuccess={onSuccess} />
+          <div className="flex items-center gap-4 mb-6">
+            <Avatar className="h-20 w-20">
+              <AvatarImage src={tenant.imageUrl} alt={formData.name} />
+              <AvatarFallback className="bg-primary/10">
+                <User className="h-10 w-10 text-primary" />
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <h2 className="text-2xl font-semibold">{formData.name}</h2>
+              {/* <p className="text-muted-foreground">Tenant ID: {tenant._id}</p> */}
+              <div className="flex items-center gap-2 mt-2">
+                <Badge variant="outline" className="capitalize">{tenant.status}</Badge>
+                <span className="text-sm text-muted-foreground">
+                  Member since {format(new Date(tenant.joinDate), "MMM yyyy")}
+                </span>
               </div>
             </div>
           </div>
-        </div>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-muted-foreground">Contact Information</h3>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Phone className="h-4 w-4 text-muted-foreground" />
+                  <span>{formData.phone}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <span>{formData.email || "Not provided"}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <PhoneCall className="h-4 w-4 text-muted-foreground" />
+                  <span>{formData.emergencyContact}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-muted-foreground">Address Information</h3>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <span>{formData.address || "Not provided"}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Hash className="h-4 w-4 text-muted-foreground" />
+                  <span>{formData.pinCode || "Not provided"}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
 
         <div className="border-t pt-6 mt-6">
           <h3 className="text-lg font-semibold mb-4">Room Information</h3>

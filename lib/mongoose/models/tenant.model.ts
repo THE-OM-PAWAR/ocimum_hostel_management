@@ -16,6 +16,7 @@ export interface ITenant extends Document {
   statusChangeReason?: string;
   address?: string;
   pinCode?: string;
+  profileImage?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -84,6 +85,10 @@ const tenantSchema = new Schema<ITenant>(
       trim: true,
     },
     pinCode: {
+      type: String,
+      trim: true,
+    },
+    profileImage: {
       type: String,
       trim: true,
     },
