@@ -26,6 +26,7 @@ import { cn } from "@/lib/utils";
 import { CreateTenantSheet } from "@/components/create-tenant-sheet";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface RentPayment {
   _id: string;
@@ -46,6 +47,7 @@ interface Tenant {
   roomType: string;
   joinDate: string;
   recentPayments: RentPayment[];
+  profileImage: string;
 }
 
 interface Block {
@@ -302,6 +304,10 @@ export default function BlockDetailsPage() {
                 }}
               >
                 <div className="flex items-center gap-4">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={tenant.profileImage} alt={tenant.name} />
+                    <AvatarFallback>{tenant.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                  </Avatar>
                   <div>
                     <h3 className="font-medium">{tenant.name}</h3>
                     <div className="flex items-center gap-2 mt-1">

@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@clerk/nextjs";
 import ReactCrop, { type Crop as CropType, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
+import { compressProfileImage, isImageFile } from "@/utils/image-compressor";
 
 interface EditProfileImageProps {
     tenant: any;
@@ -76,21 +77,11 @@ export function EditProfileImage({ tenant, onSuccess, children }: EditProfileIma
         setCompletedCrop(initialCrop);
     }, [centerAspectCrop]);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            // Validate file size (2MB max)
-            if (file.size > 2 * 1024 * 1024) {
-                toast({
-                    title: "Error",
-                    description: "File size should be less than 2MB",
-                    variant: "destructive",
-                });
-                return;
-            }
-
             // Validate file type
-            if (!file.type.startsWith("image/")) {
+            if (!isImageFile(file)) {
                 toast({
                     title: "Error",
                     description: "Please upload an image file",
@@ -99,16 +90,27 @@ export function EditProfileImage({ tenant, onSuccess, children }: EditProfileIma
                 return;
             }
 
-            setSelectedFile(file);
-            
-            // Revoke previous object URL to avoid memory leaks
-            if (previewUrl) {
-                URL.revokeObjectURL(previewUrl);
+            try {
+                // Compress the image before processing
+                const compressedFile = await compressProfileImage(file);
+                setSelectedFile(compressedFile);
+                
+                // Revoke previous object URL to avoid memory leaks
+                if (previewUrl) {
+                    URL.revokeObjectURL(previewUrl);
+                }
+                
+                const url = URL.createObjectURL(compressedFile);
+                setPreviewUrl(url);
+                setShowCrop(true);
+            } catch (error) {
+                console.error('Error compressing image:', error);
+                toast({
+                    title: "Error",
+                    description: "Failed to process image",
+                    variant: "destructive",
+                });
             }
-            
-            const url = URL.createObjectURL(file);
-            setPreviewUrl(url);
-            setShowCrop(true);
         }
     };
 
@@ -168,14 +170,16 @@ export function EditProfileImage({ tenant, onSuccess, children }: EditProfileIma
 
         try {
             const croppedFile = await getCroppedImg(imgRef.current, completedCrop);
-            setSelectedFile(croppedFile);
+            // Compress the cropped image
+            const compressedCroppedFile = await compressProfileImage(croppedFile);
+            setSelectedFile(compressedCroppedFile);
             
             // Revoke previous object URL to avoid memory leaks
             if (previewUrl) {
                 URL.revokeObjectURL(previewUrl);
             }
             
-            const croppedUrl = URL.createObjectURL(croppedFile);
+            const croppedUrl = URL.createObjectURL(compressedCroppedFile);
             setPreviewUrl(croppedUrl);
             setShowCrop(false);
         } catch (error) {
@@ -336,7 +340,7 @@ export function EditProfileImage({ tenant, onSuccess, children }: EditProfileIma
                                 Choose Image
                             </label>
                             <p className="text-sm text-muted-foreground">
-                                Recommended: Square image, max 2MB
+                                Recommended: Square image
                             </p>
                         </div>
                     </div>

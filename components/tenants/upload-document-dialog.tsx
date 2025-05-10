@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Upload, File } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
+import { compressDocumentImage, isImageFile } from "@/utils/image-compressor";
 
 interface UploadDocumentDialogProps {
   isOpen: boolean;
@@ -34,22 +35,34 @@ export function UploadDocumentDialog({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Validate file size (5MB max)
-      if (file.size > 5 * 1024 * 1024) {
+      try {
+        let processedFile = file;
+        
+        // If it's an image, compress it
+        if (isImageFile(file)) {
+          processedFile = await compressDocumentImage(file);
+        }
+
+        setSelectedFile(processedFile);
+        
+        // Revoke previous object URL to avoid memory leaks
+        if (previewUrl) {
+          URL.revokeObjectURL(previewUrl);
+        }
+        
+        const url = URL.createObjectURL(processedFile);
+        setPreviewUrl(url);
+      } catch (error) {
+        console.error('Error processing file:', error);
         toast({
           title: "Error",
-          description: "File size should be less than 5MB",
+          description: "Failed to process file",
           variant: "destructive",
         });
-        return;
       }
-
-      setSelectedFile(file);
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
     }
   };
 
@@ -116,6 +129,11 @@ export function UploadDocumentDialog({
   };
 
   const handleClose = () => {
+    // Clean up URLs
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    
     setDocumentName("");
     setSelectedFile(null);
     setPreviewUrl(null);
@@ -161,7 +179,7 @@ export function UploadDocumentDialog({
                       Click to upload or drag and drop
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      PDF, PNG, JPG, JPEG (Max 5MB)
+                      PDF, PNG, JPG, JPEG
                     </span>
                   </div>
                 </Label>

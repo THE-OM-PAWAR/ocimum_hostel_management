@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@clerk/nextjs";
-import { Eye, Download, Trash2, FileText, Image as ImageIcon, File } from "lucide-react";
+import { Eye, Download, Trash2, FileText, Image as ImageIcon, File, ZoomIn, ZoomOut, RotateCw } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,6 +44,21 @@ export function DocumentList({ documents, tenantId, onDocumentDeleted }: Documen
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<DocumentItem | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if device is mobile
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkIfMobile);
+    };
+  }, []);
 
   const handleDeleteDocument = async () => {
     if (!documentToDelete) return;
@@ -206,33 +221,110 @@ export function DocumentList({ documents, tenantId, onDocumentDeleted }: Documen
 
       {/* Document Preview Sheet */}
       <Sheet open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-        <SheetContent side="right" className="w-[90vw] sm:w-[80vw] md:w-[60vw] lg:w-[50vw] overflow-y-auto">
-          <SheetHeader className="mb-4">
-            <SheetTitle>{selectedDocument?.type}</SheetTitle>
-            <SheetDescription>
-              {selectedDocument?.url.split("/").pop()}
-            </SheetDescription>
-          </SheetHeader>
-          <div className="h-[80vh] w-full overflow-hidden">
+        <SheetContent 
+          side="right" 
+          className="w-full md:w-1/2 p-0 overflow-hidden"
+        >
+          <div className="p-4 border-b">
+            <SheetHeader>
+              <SheetTitle>{selectedDocument?.type}</SheetTitle>
+              <SheetDescription className="truncate">
+                {selectedDocument?.url.split("/").pop()}
+              </SheetDescription>
+            </SheetHeader>
+          </div>
+          
+          <div className="h-[calc(100vh-10rem)] w-full overflow-hidden">
             {selectedDocument && isImage(selectedDocument.url) ? (
               <TransformWrapper
                 initialScale={1}
                 initialPositionX={0}
                 initialPositionY={0}
+                minScale={0.5}
+                maxScale={8}
+                limitToBounds={true}
                 doubleClick={{
                   mode: "reset",
                 }}
+                panning={{
+                  velocityDisabled: true,
+                  lockAxisX: false,
+                  lockAxisY: false,
+                  allowLeftClickPan: true,
+                  allowMiddleClickPan: true,
+                  allowRightClickPan: false,
+                  disabled: false,
+                }}
+                wheel={{
+                  disabled: false,
+                  step: 0.1,
+                  touchPadDisabled: false,
+                }}
+                alignmentAnimation={{
+                  sizeX: 0,
+                  sizeY: 0,
+                  animationTime: 0,
+                  animationType: "linear",
+                }}
+                centerOnInit={true}
+                centerZoomedOut={true}
               >
-                <TransformComponent wrapperClass="h-full w-full">
-                  <img
-                    src={selectedDocument.url}
-                    alt={selectedDocument.type}
-                    className="max-h-full max-w-full object-contain"
-                  />
-                </TransformComponent>
+                {({ zoomIn, zoomOut, resetTransform }) => (
+                  <>
+                    {!isMobile && (
+                      <div className="absolute top-4 right-4 z-10 flex gap-2 bg-background/80 backdrop-blur-sm rounded-md p-1">
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          className="h-8 w-8" 
+                          onClick={() => zoomIn()}
+                        >
+                          <ZoomIn className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          className="h-8 w-8" 
+                          onClick={() => zoomOut()}
+                        >
+                          <ZoomOut className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          className="h-8 w-8" 
+                          onClick={() => resetTransform()}
+                        >
+                          <RotateCw className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+                    <TransformComponent
+                      wrapperStyle={{
+                        width: "100%",
+                        height: "100%",
+                        overflow: "hidden"
+                      }}
+                      contentStyle={{
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center"
+                      }}
+                    >
+                      <img
+                        src={selectedDocument.url}
+                        alt={selectedDocument.type}
+                        className="max-h-full max-w-full object-contain"
+                        style={{ touchAction: "none" }}
+                      />
+                    </TransformComponent>
+                  </>
+                )}
               </TransformWrapper>
             ) : (
-              <div className="h-full w-full flex flex-col items-center justify-center">
+              <div className="h-full w-full flex flex-col items-center justify-center p-4">
                 <div className="p-8 bg-muted rounded-lg flex flex-col items-center">
                   {selectedDocument && getDocumentIcon(selectedDocument.url)}
                   <p className="mt-4 text-muted-foreground">
@@ -242,7 +334,8 @@ export function DocumentList({ documents, tenantId, onDocumentDeleted }: Documen
               </div>
             )}
           </div>
-          <div className="flex justify-end mt-4 gap-2">
+          
+          <div className="flex justify-end p-4 border-t gap-2 bg-background">
             <Button
               variant="outline"
               onClick={() => setIsPreviewOpen(false)}
