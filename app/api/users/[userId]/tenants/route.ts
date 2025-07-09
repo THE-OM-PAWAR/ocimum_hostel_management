@@ -8,12 +8,23 @@ import { RoomType } from "@/lib/mongoose/models/room-type.model";
 export async function GET(req: Request) {
   try {
     await connectDB();
-    const { searchParams } = new URL(req.url);
+    const { searchParams, pathname } = new URL(req.url);
     const blockId = searchParams.get('blockId');
+    
+    // Extract userId from the pathname
+    const pathParts = pathname.split('/');
+    const userId = pathParts[pathParts.indexOf('users') + 1];
 
-    let query = {};
+    let query: any = {};
+    
     if (blockId) {
+      // If blockId is specified, get tenants for that specific block
       query = { block: blockId };
+    } else if (userId) {
+      // If no blockId but userId is provided, get all tenants for all blocks owned by this user
+      const blocks = await Block.find({ userId });
+      const blockIds = blocks.map(block => block._id);
+      query = { block: { $in: blockIds } };
     }
 
     const tenants = await Tenant.find(query)
