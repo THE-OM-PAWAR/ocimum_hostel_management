@@ -1,0 +1,59 @@
+I have to create a animated landing page for a community engagement and event management platform,  this app could have simple features where a user who can create account and the users can create there own community and under this community they can organize the event this could have all the event management tools as well as like create forms and updates about  the event and volenteers and members of the community etc. clean modern minimal beautifull animated nextjs app
+
+Design a modern, clean, and responsive landing page for a Community and Event Management Web App. The web app enables users to create their own communities and organize events under them. Include the following key sections:
+
+Hero Section
+
+A bold heading: "Empowering Communities. Simplifying Events."
+
+Subheading: "Create your own community, manage events, engage volunteers, and grow your impact—all in one platform."
+
+CTA Buttons: “Get Started” and “Watch Demo”
+
+A visual mockup or illustration of the dashboard or mobile preview
+
+Key Features Section
+
+Create & Manage Communities
+
+Organize Events with Custom Registration Forms
+
+Assign and Manage Volunteers
+
+Post Announcements and Share Updates
+
+Public Event Pages optimized for SEO
+
+Clean and mobile-friendly interface
+
+How It Works
+
+Step 1: Sign Up
+
+Step 2: Create Your Community
+
+Step 3: Organize Events and Share Forms
+
+Step 4: Manage Volunteers and Announcements
+
+Screenshots or Live Previews
+
+Showcase event creation page, volunteer form, community dashboard
+
+Testimonials / Community Stats (if available)
+
+User quotes, growth metrics, or success stories
+
+FAQ Section
+
+“Is this free to use?”
+
+“Can I create multiple communities?”
+
+“Can volunteers apply through custom forms?”
+
+Final CTA
+
+"Join the platform that helps communities grow and events succeed."
+
+CTA Button: “Create Your Community Today”

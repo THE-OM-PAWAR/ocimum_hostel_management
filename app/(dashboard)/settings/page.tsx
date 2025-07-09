@@ -77,7 +77,7 @@ export default function SettingsPage() {
         <div className="bg-card p-6 rounded-lg border shadow-sm space-y-4">
           <LoadingSkeleton className="h-8 w-48" />
           <div className="space-y-4">
-            {[1, 2, 3, 4].map((i) => (
+            {[1, 2, 3, 4].map((i ) => (
               <LoadingSkeleton key={i} className="h-20" />
             ))}
           </div>

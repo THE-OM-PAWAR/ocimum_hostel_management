@@ -46,11 +46,11 @@ const navigationItems = [
     icon: <Users className="h-5 w-5" />,
     href: "/tenants",
   },
-  {
-    title: "Payments",
-    icon: <CreditCard className="h-5 w-5" />,
-    href: "/payments",
-  },
+  // {
+  //   title: "Payments",
+  //   icon: <CreditCard className="h-5 w-5" />,
+  //   href: "/payments",
+  // },
   {
     title: "Settings",
     icon: <Settings className="h-5 w-5" />,
