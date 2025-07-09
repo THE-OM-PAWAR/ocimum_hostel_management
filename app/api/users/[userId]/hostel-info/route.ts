@@ -23,8 +23,10 @@ export async function GET(
     const hostel = user.hostel as any;
     
     return NextResponse.json({
-      ownerName: user.email, // Using email as owner name for now
+      ownerName: user.ownerName,
+      phoneNumber: user.phoneNumber,
       hostelName: hostel.name,
+      hostelId: hostel._id,
       joinCode: hostel.joinCode,
       userRole: user.role,
     });

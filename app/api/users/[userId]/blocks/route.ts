@@ -37,6 +37,11 @@ export async function POST(req: Request) {
       hostel: user.hostel,
     });
 
+    // Automatically add the block to admin's assignedBlocks array
+    await User.findByIdAndUpdate(user._id, {
+      $addToSet: { assignedBlocks: block._id }
+    });
+
     return NextResponse.json(block);
   } catch (error) {
     console.error("Error creating block:", error);

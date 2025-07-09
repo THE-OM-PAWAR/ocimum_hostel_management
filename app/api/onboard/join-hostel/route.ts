@@ -5,9 +5,9 @@ import connectDB from "@/lib/mongodb/client";
 
 export async function POST(req: Request) {
   try {
-    const { joinCode, userId, email } = await req.json();
+    const { joinCode, ownerName, phoneNumber, userId, email } = await req.json();
     
-    if (!userId || !joinCode || !email) {
+    if (!userId || !joinCode || !email || !ownerName || !phoneNumber) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -37,11 +37,19 @@ export async function POST(req: Request) {
     // Create or update user
     let user;
     if (existingUser) {
-      user = existingUser;
+      user = await User.findByIdAndUpdate(existingUser._id, {
+        ownerName,
+        phoneNumber,
+        email,
+        role: 'pending',
+        isOnboarded: false,
+      }, { new: true });
     } else {
       user = await User.create({
         userId,
         email,
+        ownerName,
+        phoneNumber,
         role: 'pending',
         isOnboarded: false,
       });

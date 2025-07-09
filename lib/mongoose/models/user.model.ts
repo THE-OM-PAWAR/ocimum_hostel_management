@@ -3,6 +3,8 @@ import mongoose, { Document, Model, Schema } from 'mongoose';
 export interface IUser extends Document {
   userId: string;
   email: string;
+  ownerName: string;
+  phoneNumber: string;
   role: 'admin' | 'manager' | 'warden' | 'tenant' | 'pending';
   hostel?: mongoose.Types.ObjectId;
   assignedBlocks: mongoose.Types.ObjectId[];
@@ -23,6 +25,16 @@ const userSchema = new Schema<IUser>(
       required: [true, 'Please provide an email'],
       unique: true,
       lowercase: true,
+      trim: true,
+    },
+    ownerName: {
+      type: String,
+      required: [true, 'Please provide owner name'],
+      trim: true,
+    },
+    phoneNumber: {
+      type: String,
+      required: [true, 'Please provide phone number'],
       trim: true,
     },
     role: {

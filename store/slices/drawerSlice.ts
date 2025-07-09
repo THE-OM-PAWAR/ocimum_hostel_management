@@ -43,7 +43,9 @@ const initialState: DrawerState = {
   },
 };
 
-const drawerSlice = createSlice({
+import type { Slice } from '@reduxjs/toolkit';
+
+const drawerSlice: Slice<DrawerState> = createSlice({
   name: 'drawer',
   initialState,
   reducers: {

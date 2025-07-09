@@ -27,12 +27,13 @@ import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { OnboardingDialog } from "@/components/onboarding-dialog";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { PWAInstallPrompt } from "@/components/pwa-install-prompt";
+import { NotificationButton } from "@/components/notification-button";
 import {
   Card,
   CardContent,
 } from "@/components/ui/card";
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { openDrawer, closeDrawer } from '@/store/slices/drawerSlice';
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { openDrawer, closeDrawer } from "@/store/slices/drawerSlice";
 import { DrawerContent as CustomDrawerContent } from "@/components/drawer-content";
 import { RootState } from "@/store";
 
@@ -326,6 +327,11 @@ export default function DashboardLayout({
                 </div>
               )}
             </div>
+            
+            {/* Notification Button */}
+            <div className="ml-auto mr-4">
+              <NotificationButton />
+            </div>
           </div>
 
           <div className="container max-sm:mb-8 py-8 px-4 md:px-8">{children}</div>
@@ -347,7 +353,7 @@ export default function DashboardLayout({
       </div>
 
       {/* Global Drawer */}
-      <Drawer open={isOpen} onOpenChange={(open) => !open && dispatch(closeDrawer())}>
+      <Drawer open={isOpen} onOpenChange={(open) => { if (!open) dispatch(closeDrawer(undefined)); }}>
         <DrawerContent>
           <CustomDrawerContent />
         </DrawerContent>

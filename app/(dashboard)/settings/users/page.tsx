@@ -21,12 +21,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface HostelUser {
+  id: string;
   userId: {
     _id: string;
     email: string;
     userId: string;
+    ownerName: string;
+    phoneNumber: string;
     role: string;
     assignedBlocks: Array<{ _id: string; name: string }>;
   };
@@ -35,10 +39,16 @@ interface HostelUser {
   joinedAt: string;
 }
 
+interface Block {
+  _id: string;
+  name: string;
+}
+
 export default function UsersManagementPage() {
   const { user } = useUser();
   const { toast } = useToast();
   const [users, setUsers] = useState<HostelUser[]>([]);
+  const [blocks, setBlocks] = useState<Block[]>([]);
   const [hostelInfo, setHostelInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -46,6 +56,7 @@ export default function UsersManagementPage() {
   useEffect(() => {
     fetchUsers();
     fetchHostelInfo();
+    fetchBlocks();
   }, [user?.id]);
 
   const fetchHostelInfo = async () => {
@@ -56,6 +67,17 @@ export default function UsersManagementPage() {
       setHostelInfo(data);
     } catch (error) {
       console.error("Error fetching hostel info:", error);
+    }
+  };
+
+  const fetchBlocks = async () => {
+    if (!user?.id) return;
+    try {
+      const response = await fetch(`/api/users/${user.id}/blocks`);
+      const data = await response.json();
+      setBlocks(data);
+    } catch (error) {
+      console.error("Error fetching blocks:", error);
     }
   };
 
@@ -135,6 +157,22 @@ export default function UsersManagementPage() {
         variant: "destructive",
       });
     }
+  };
+
+  const handleBlockAssignment = (userId: string, blockId: string, isChecked: boolean) => {
+    const user = users.find(u => u.userId.userId === userId);
+    if (!user) return;
+
+    const currentBlocks = user.userId.assignedBlocks?.map(b => b._id) || [];
+    let updatedBlocks;
+
+    if (isChecked) {
+      updatedBlocks = [...currentBlocks, blockId];
+    } else {
+      updatedBlocks = currentBlocks.filter(id => id !== blockId);
+    }
+
+    updateUser(userId, { assignedBlocks: updatedBlocks });
   };
 
   const getStatusBadge = (status: string) => {
@@ -247,8 +285,10 @@ export default function UsersManagementPage() {
                   className="flex items-center justify-between p-4 border rounded-lg"
                 >
                   <div>
-                    <h3 className="font-medium">{user.userId.email}</h3>
-                    <p className="text-sm text-muted-foreground">
+                    <h3 className="font-medium">{user.userId.ownerName}</h3>
+                    <p className="text-sm text-muted-foreground">{user.userId.email}</p>
+                    <p className="text-sm text-muted-foreground">{user.userId.phoneNumber}</p>
+                    <p className="text-xs text-muted-foreground">
                       Requested to join on {new Date(user.joinedAt).toLocaleDateString()}
                     </p>
                   </div>
@@ -285,53 +325,77 @@ export default function UsersManagementPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-6">
             {approvedUsers.map((user) => (
               <motion.div
                 key={user.userId._id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center justify-between p-4 border rounded-lg"
+                className="border rounded-lg p-6 space-y-4"
               >
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="font-medium">{user.userId.email}</h3>
-                    {getStatusBadge(user.status)}
-                    {getRoleBadge(user.role)}
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="font-medium">{user.userId.ownerName}</h3>
+                      {getStatusBadge(user.status)}
+                      {getRoleBadge(user.role)}
+                    </div>
+                    <p className="text-sm text-muted-foreground">{user.userId.email}</p>
+                    <p className="text-sm text-muted-foreground">{user.userId.phoneNumber}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Joined on {new Date(user.joinedAt).toLocaleDateString()}
+                    </p>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    Joined on {new Date(user.joinedAt).toLocaleDateString()}
-                  </p>
-                  {user.userId.assignedBlocks?.length > 0 && (
-                    <div className="mt-2">
-                      <p className="text-xs text-muted-foreground">Assigned Blocks:</p>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {user.userId.assignedBlocks.map((block) => (
-                          <Badge key={block._id} variant="outline" className="text-xs">
-                            {block.name}
-                          </Badge>
-                        ))}
+                  
+                  {user.userId.userId !== user?.id && (
+                    <div className="flex items-center gap-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Role</label>
+                        <Select
+                          value={user.role}
+                          onValueChange={(role) => updateUser(user.userId.userId, { role })}
+                        >
+                          <SelectTrigger className="w-32">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="tenant">Tenant</SelectItem>
+                            <SelectItem value="warden">Warden</SelectItem>
+                            <SelectItem value="manager">Manager</SelectItem>
+                            <SelectItem value="admin">Admin</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
                   )}
                 </div>
-                
-                {user.userId.userId !== user?.id && (
-                  <div className="flex items-center gap-2">
-                    <Select
-                      value={user.role}
-                      onValueChange={(role) => updateUser(user.userId.userId, { role })}
-                    >
-                      <SelectTrigger className="w-32">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="tenant">Tenant</SelectItem>
-                        <SelectItem value="warden">Warden</SelectItem>
-                        <SelectItem value="manager">Manager</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
-                      </SelectContent>
-                    </Select>
+
+                {/* Block Assignment */}
+                {user.role !== 'admin' && user.role !== 'tenant' && blocks.length > 0 && (
+                  <div className="space-y-3 pt-4 border-t">
+                    <h4 className="text-sm font-medium">Assigned Blocks</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {blocks.map((block) => {
+                        const isAssigned = user.userId.assignedBlocks?.some(b => b._id === block._id) || false;
+                        return (
+                          <div key={block._id} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`${user.userId._id}-${block._id}`}
+                              checked={isAssigned}
+                              onCheckedChange={(checked) => 
+                                handleBlockAssignment(user.userId.userId, block._id, checked as boolean)
+                              }
+                            />
+                            <label
+                              htmlFor={`${user.userId._id}-${block._id}`}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              {block.name}
+                            </label>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
               </motion.div>

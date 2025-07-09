@@ -18,10 +18,14 @@ export function OnboardingDialog() {
   const [activeTab, setActiveTab] = useState("create");
 
   const [createHostelData, setCreateHostelData] = useState({
+    ownerName: "",
+    phoneNumber: "",
     hostelName: "",
   });
 
   const [joinHostelData, setJoinHostelData] = useState({
+    ownerName: "",
+    phoneNumber: "",
     joinCode: "",
   });
 
@@ -161,6 +165,28 @@ export function OnboardingDialog() {
             
             <form onSubmit={handleCreateHostel} className="space-y-4">
               <div className="space-y-2">
+                <Label htmlFor="ownerName">Owner Name</Label>
+                <Input
+                  id="ownerName"
+                  value={createHostelData.ownerName}
+                  onChange={(e) => setCreateHostelData(prev => ({ ...prev, ownerName: e.target.value }))}
+                  placeholder="Enter your full name"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber">Phone Number</Label>
+                <Input
+                  id="phoneNumber"
+                  value={createHostelData.phoneNumber}
+                  onChange={(e) => setCreateHostelData(prev => ({ ...prev, phoneNumber: e.target.value }))}
+                  placeholder="Enter your phone number"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="hostelName">Hostel Name</Label>
                 <Input
                   id="hostelName"
@@ -181,11 +207,33 @@ export function OnboardingDialog() {
             <div className="text-center mb-4">
               <h3 className="text-lg font-semibold">Join Existing Hostel</h3>
               <p className="text-sm text-muted-foreground">
-                Enter the join code provided by your hostel admin
+                Enter your details and the join code provided by your hostel admin
               </p>
             </div>
             
             <form onSubmit={handleJoinHostel} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="joinOwnerName">Owner Name</Label>
+                <Input
+                  id="joinOwnerName"
+                  value={joinHostelData.ownerName}
+                  onChange={(e) => setJoinHostelData(prev => ({ ...prev, ownerName: e.target.value }))}
+                  placeholder="Enter your full name"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="joinPhoneNumber">Phone Number</Label>
+                <Input
+                  id="joinPhoneNumber"
+                  value={joinHostelData.phoneNumber}
+                  onChange={(e) => setJoinHostelData(prev => ({ ...prev, phoneNumber: e.target.value }))}
+                  placeholder="Enter your phone number"
+                  required
+                />
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="joinCode">Join Code</Label>
                 <Input
