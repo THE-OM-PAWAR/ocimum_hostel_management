@@ -30,7 +30,8 @@ export function CreateBlockDialog({
     name: "",
     description: "",
   });
-  const { user } = useUser(); // Assuming you have a way to get the user ID
+  const { user } = useUser();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -44,12 +45,12 @@ export function CreateBlockDialog({
         body: JSON.stringify({
           ...formData,
           userId,
-          hostelId,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to create block");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create block");
       }
 
       toast({
@@ -61,10 +62,10 @@ export function CreateBlockDialog({
       onSuccess();
       onClose();
       setFormData({ name: "", description: "" });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to create block. Please try again.",
+        description: error.message || "Failed to create block. Please try again.",
         variant: "destructive",
       });
     } finally {

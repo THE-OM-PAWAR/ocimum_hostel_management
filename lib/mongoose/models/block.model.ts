@@ -3,8 +3,7 @@ import mongoose, { Document, Model, Schema } from 'mongoose';
 export interface IBlock extends Document {
   name: string;
   description?: string;
-  hostelId: string;
-  userId: string;
+  hostel: mongoose.Types.ObjectId;
   rentGenerationDay: string;
   rentGenerationEnabled: boolean;
   createdAt: Date;
@@ -22,13 +21,10 @@ const blockSchema = new Schema<IBlock>(
       type: String,
       trim: true,
     },
-    hostelId: {
-      type: String,
+    hostel: {
+      type: Schema.Types.ObjectId,
+      ref: 'Hostel',
       required: [true, 'Please provide a hostel ID'],
-    },
-    userId: {
-      type: String,
-      required: [true, 'Please provide a user ID'],
     },
     rentGenerationDay: {
       type: String,

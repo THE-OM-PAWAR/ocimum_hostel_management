@@ -2,13 +2,10 @@ import mongoose, { Document, Model, Schema } from 'mongoose';
 
 export interface IUser extends Document {
   userId: string;
-  name: string;
   email: string;
-  password: string;
-  role: 'admin' | 'staff' | 'tenant';
-  ownerName: string;
-  hostelName: string;
-  phoneNumber: string;
+  role: 'admin' | 'manager' | 'warden' | 'tenant' | 'pending';
+  hostel?: mongoose.Types.ObjectId;
+  assignedBlocks: mongoose.Types.ObjectId[];
   isOnboarded: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -16,10 +13,11 @@ export interface IUser extends Document {
 
 const userSchema = new Schema<IUser>(
   {
-    userId : {
+    userId: {
       type: String,
       required: [true, 'Please provide a userId'],
-      unique: true,},
+      unique: true,
+    },
     email: {
       type: String,
       required: [true, 'Please provide an email'],
@@ -29,21 +27,17 @@ const userSchema = new Schema<IUser>(
     },
     role: {
       type: String,
-      enum: ['admin', 'staff', 'tenant'],
-      default: 'admin',
+      enum: ['admin', 'manager', 'warden', 'tenant', 'pending'],
+      default: 'pending',
     },
-    ownerName: {
-      type: String,
-      trim: true,
+    hostel: {
+      type: Schema.Types.ObjectId,
+      ref: 'Hostel',
     },
-    hostelName: {
-      type: String,
-      trim: true,
-    },
-    phoneNumber: {
-      type: String,
-      trim: true,
-    },
+    assignedBlocks: [{
+      type: Schema.Types.ObjectId,
+      ref: 'Block',
+    }],
     isOnboarded: {
       type: Boolean,
       default: false,

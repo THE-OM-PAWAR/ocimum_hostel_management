@@ -2,13 +2,15 @@
 
 import { useUser } from "@clerk/nextjs";
 import { motion } from "framer-motion";
-import { Plus, Building2, Users, Home, ArrowRight } from "lucide-react";
+import { Plus, Building2, Users, Home, ArrowRight, Bell } from "lucide-react";
 import { useEffect, useState } from "react";
 import { CreateBlockDialog } from "@/components/create-block-dialog";
 import { useRouter } from "next/navigation";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 
 interface BlockCardProps {
   index: number;
@@ -90,10 +92,14 @@ function BlockCard({ index, name, description, id }: BlockCardProps) {
 
 export default function DashboardPage() {
   const { user } = useUser();
+  const router = useRouter();
+  const { toast } = useToast();
   const [hostelName, setHostelName] = useState<string>("");
+  const [userRole, setUserRole] = useState<string>("");
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [pendingUsersCount, setPendingUsersCount] = useState(0);
 
   const fetchBlocks = async () => {
     try {
@@ -105,13 +111,41 @@ export default function DashboardPage() {
     }
   };
 
+  const fetchPendingUsers = async () => {
+    if (!user?.id) return;
+    try {
+      const hostelResponse = await fetch(`/api/users/${user.id}/hostel-info`);
+      const hostelData = await hostelResponse.json();
+      
+      if (!hostelData.error && hostelData.hostelId) {
+        const response = await fetch(`/api/hostels/${hostelData.hostelId}/pending-users`);
+        const data = await response.json();
+        setPendingUsersCount(data.count || 0);
+      }
+    } catch (error) {
+      console.error("Error fetching pending users:", error);
+    }
+  };
+
   useEffect(() => {
     const fetchHostelInfo = async () => {
       try {
         const response = await fetch(`/api/users/${user?.id}/hostel-info`);
         const data = await response.json();
+        
+        if (data.error) {
+          toast({
+            title: "Access Denied",
+            description: data.error,
+            variant: "destructive",
+          });
+          return;
+        }
+        
         setHostelName(data.hostelName);
+        setUserRole(data.userRole);
         await fetchBlocks();
+        await fetchPendingUsers();
       } catch (error) {
         console.error("Error fetching hostel info:", error);
       } finally {
@@ -145,26 +179,45 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8 mb-20">
       <div className="flex flex-col gap-2">
-        <motion.h1 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-4xl font-bold "
-        >
-          {hostelName}
-        </motion.h1>
+        <div className="flex items-center justify-between">
+          <motion.h1 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-4xl font-bold"
+          >
+            {hostelName}
+          </motion.h1>
+          
+          {userRole === 'admin' && pendingUsersCount > 0 && (
+            <Button
+              variant="outline"
+              onClick={() => router.push('/settings/users')}
+              className="flex items-center gap-2"
+            >
+              <Bell className="h-4 w-4" />
+              <Badge variant="destructive" className="ml-1">
+                {pendingUsersCount}
+              </Badge>
+              Pending Approvals
+            </Button>
+          )}
+        </div>
+        
         <motion.p 
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
           className="text-muted-foreground text-lg"
         >
-          Manage your hostel blocks and rooms
+          Manage your hostel blocks and rooms • Role: {userRole}
         </motion.p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 ">
-        <CreateBlockCard onClick={() => setIsCreateDialogOpen(true)} />
-        {(blocks.length >= 1) && blocks.map((block, i) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {userRole === 'admin' && (
+          <CreateBlockCard onClick={() => setIsCreateDialogOpen(true)} />
+        )}
+        {blocks.length >= 1 && blocks.map((block, i) => (
           <BlockCard
             key={block._id}
             index={i}
@@ -175,13 +228,15 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <CreateBlockDialog
-        isOpen={isCreateDialogOpen}
-        onClose={() => setIsCreateDialogOpen(false)}
-        onSuccess={fetchBlocks}
-        userId={user?.id || ""}
-        hostelId={hostelName}
-      />
+      {userRole === 'admin' && (
+        <CreateBlockDialog
+          isOpen={isCreateDialogOpen}
+          onClose={() => setIsCreateDialogOpen(false)}
+          onSuccess={fetchBlocks}
+          userId={user?.id || ""}
+          hostelId={hostelName}
+        />
+      )}
     </div>
   );
 }
