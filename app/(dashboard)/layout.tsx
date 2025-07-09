@@ -26,6 +26,7 @@ import { useState, useEffect } from "react";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { OnboardingDialog } from "@/components/onboarding-dialog";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { PWAInstallPrompt } from "@/components/pwa-install-prompt";
 import {
   Card,
   CardContent,
@@ -353,6 +354,7 @@ export default function DashboardLayout({
       </Drawer>
 
       <OnboardingDialog />
+      <PWAInstallPrompt />
     </div>
   );
 }

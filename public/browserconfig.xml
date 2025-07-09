@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<browserconfig>
+    <msapplication>
+        <tile>
+            <square150x150logo src="/maskable_icon_x152.png"/>
+            <TileColor>#73ddb5</TileColor>
+        </tile>
+    </msapplication>
+</browserconfig>

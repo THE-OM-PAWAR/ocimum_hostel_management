@@ -78,9 +78,8 @@ export function OnboardingDialog() {
         description: "Your hostel has been set up successfully.",
       });
 
-      setOpen(false);
+       setOpen(false);
 
-      window.location.reload(); // Reload to reflect changes
 
     } catch (error) {
       toast({
@@ -90,6 +89,8 @@ export function OnboardingDialog() {
       });
     } finally {
       setIsSubmitting(false);
+      // Optionally, you can reload the page to reflect changes
+      window.location.reload();
     }
   };
 

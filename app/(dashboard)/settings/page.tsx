@@ -3,11 +3,12 @@
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Phone, Mail, MapPin, Building2, Sun, Moon, Laptop } from "lucide-react";
+import { ArrowRight, Phone, Mail, MapPin, Building2, Sun, Moon, Laptop, Download, Smartphone, AlertCircle, CheckCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { useTheme } from "next-themes";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 
 interface Owner {
   _id: string;
@@ -26,14 +27,28 @@ interface Owner {
   updatedAt: string;
 }
 
+interface BeforeInstallPromptEvent extends Event {
+  readonly platforms: string[];
+  readonly userChoice: Promise<{
+    outcome: 'accepted' | 'dismissed';
+    platform: string;
+  }>;
+  prompt(): Promise<void>;
+}
+
 export default function SettingsPage() {
   const { user } = useUser();
   const { signOut } = useClerk();
   const router = useRouter();
   const { theme, setTheme } = useTheme();
+  const { toast } = useToast();
   const [owner, setOwner] = useState<Owner | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isInstalled, setIsInstalled] = useState(false);
+  const [isInstalling, setIsInstalling] = useState(false);
+  const [installStatus, setInstallStatus] = useState<'checking' | 'available' | 'not-available' | 'installed'>('checking');
 
   useEffect(() => {
     const fetchOwnerData = async () => {
@@ -58,13 +73,217 @@ export default function SettingsPage() {
     fetchOwnerData();
   }, [user?.id]);
 
-  console.log(owner);
+  useEffect(() => {
+    let mounted = true;
+
+    const checkInstallStatus = () => {
+      // Check if app is already installed
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+      const isInWebAppiOS = (window.navigator as any).standalone === true;
+      const installed = isStandalone || isInWebAppiOS;
+      
+      if (mounted) {
+        setIsInstalled(installed);
+        if (installed) {
+          setInstallStatus('installed');
+          return;
+        }
+      }
+
+      // Check if installation is supported
+      const isHttps = location.protocol === 'https:' || location.hostname === 'localhost';
+      const hasServiceWorker = 'serviceWorker' in navigator;
+      
+      if (!isHttps || !hasServiceWorker) {
+        if (mounted) {
+          setInstallStatus('not-available');
+        }
+        return;
+      }
+
+      // Set up install prompt listener
+      const handleBeforeInstallPrompt = (e: Event) => {
+        console.log('beforeinstallprompt event fired');
+        e.preventDefault();
+        if (mounted) {
+          setDeferredPrompt(e as BeforeInstallPromptEvent);
+          setInstallStatus('available');
+        }
+      };
+
+      const handleAppInstalled = () => {
+        console.log('App installed');
+        if (mounted) {
+          setIsInstalled(true);
+          setInstallStatus('installed');
+          setDeferredPrompt(null);
+          toast({
+            title: "Success!",
+            description: "OCIMUM has been installed on your device",
+          });
+        }
+      };
+
+      window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.addEventListener('appinstalled', handleAppInstalled);
+
+      // Fallback: if no prompt after 3 seconds, check if we can still install
+      const fallbackTimer = setTimeout(() => {
+        if (mounted && !deferredPrompt && !installed) {
+          // Check if we're in a PWA-capable environment
+          if (isHttps && hasServiceWorker) {
+            setInstallStatus('not-available');
+          }
+        }
+      }, 3000);
+
+      return () => {
+        window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+        window.removeEventListener('appinstalled', handleAppInstalled);
+        clearTimeout(fallbackTimer);
+      };
+    };
+
+    const cleanup = checkInstallStatus();
+
+    return () => {
+      mounted = false;
+      if (cleanup) cleanup();
+    };
+  }, [toast, deferredPrompt]);
+
+  const handleInstallApp = async () => {
+    if (deferredPrompt) {
+      setIsInstalling(true);
+      try {
+        await deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        
+        if (outcome === 'accepted') {
+          toast({
+            title: "Installing...",
+            description: "OCIMUM is being installed on your device",
+          });
+        } else {
+          toast({
+            title: "Installation cancelled",
+            description: "You can install the app anytime from the settings",
+          });
+        }
+      } catch (error) {
+        console.error('Installation error:', error);
+        toast({
+          title: "Installation failed",
+          description: "Please try again or use your browser's install option",
+          variant: "destructive",
+        });
+      } finally {
+        setIsInstalling(false);
+        setDeferredPrompt(null);
+      }
+    } else {
+      // Fallback instructions
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const isAndroid = /Android/.test(navigator.userAgent);
+      
+      let instructions = "Open your browser menu and look for 'Install app' or 'Add to Home Screen'";
+      
+      if (isIOS) {
+        instructions = "Tap the Share button in Safari, then select 'Add to Home Screen'";
+      } else if (isAndroid) {
+        instructions = "Tap the menu (⋮) in Chrome, then select 'Install app' or 'Add to Home screen'";
+      }
+      
+      toast({
+        title: "Manual Installation",
+        description: instructions,
+      });
+    }
+  };
 
   const handleLogout = () => {
     signOut(() => {
       router.push(`/`);
       console.log("User logged out");
     });
+  };
+
+  const getInstallButtonContent = () => {
+    if (isInstalling) {
+      return (
+        <>
+          <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          Installing...
+        </>
+      );
+    }
+
+    switch (installStatus) {
+      case 'installed':
+        return (
+          <>
+            <CheckCircle className="h-4 w-4" />
+            Installed
+          </>
+        );
+      case 'available':
+        return (
+          <>
+            <Download className="h-4 w-4" />
+            Install App
+          </>
+        );
+      case 'not-available':
+        return (
+          <>
+            <Smartphone className="h-4 w-4" />
+            Install Guide
+          </>
+        );
+      default:
+        return (
+          <>
+            <Download className="h-4 w-4" />
+            Install App
+          </>
+        );
+    }
+  };
+
+  const getStatusMessage = () => {
+    switch (installStatus) {
+      case 'installed':
+        return (
+          <div className="flex items-center gap-2 text-success">
+            <CheckCircle className="h-4 w-4" />
+            <span className="text-sm">OCIMUM is installed on your device</span>
+          </div>
+        );
+      case 'available':
+        return (
+          <p className="text-sm text-muted-foreground">
+            Install OCIMUM as an app for faster access and offline capabilities
+          </p>
+        );
+      case 'not-available':
+        return (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-warning">
+              <AlertCircle className="h-4 w-4" />
+              <span className="text-sm">Automatic installation not available</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              You can still install manually through your browser menu
+            </p>
+          </div>
+        );
+      default:
+        return (
+          <p className="text-sm text-muted-foreground">
+            Checking installation availability...
+          </p>
+        );
+    }
   };
 
   if (loading) {
@@ -160,6 +379,45 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+
+      <div className="bg-card p-6 rounded-lg border shadow-sm">
+        <h2 className="text-xl font-semibold mb-4">Install App</h2>
+        <div className="space-y-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <Smartphone className="h-5 w-5 text-primary" />
+                <h3 className="font-medium">Install OCIMUM App</h3>
+              </div>
+              
+              {getStatusMessage()}
+            </div>
+            
+            <Button
+              onClick={handleInstallApp}
+              disabled={isInstalling}
+              className="flex items-center gap-2 min-w-[140px]"
+              variant={installStatus === 'installed' ? "outline" : "default"}
+            >
+              {getInstallButtonContent()}
+            </Button>
+          </div>
+          
+          {installStatus !== 'installed' && (
+            <div className="mt-4 p-4 bg-muted/50 rounded-md">
+              <h4 className="text-sm font-medium mb-2">Benefits of installing:</h4>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• Faster loading and better performance</li>
+                <li>• Works offline for basic features</li>
+                <li>• Easy access from your home screen</li>
+                <li>• Native app-like experience</li>
+                <li>• Push notifications (coming soon)</li>
+              </ul>
+            </div>
+          )}
+        </div>
+      </div>
+
       <div className="bg-card p-6 rounded-lg border shadow-sm">
         <h2 className="text-xl font-semibold mb-4">Appearance</h2>
         <div className="space-y-4">
