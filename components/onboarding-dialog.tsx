@@ -79,6 +79,9 @@ export function OnboardingDialog() {
       });
 
       setOpen(false);
+
+      window.location.reload(); // Reload to reflect changes
+
     } catch (error) {
       toast({
         title: "Error",
