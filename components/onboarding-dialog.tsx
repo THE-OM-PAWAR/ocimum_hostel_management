@@ -144,7 +144,7 @@ export function OnboardingDialog() {
         </DialogHeader>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          {/* <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="create" className="flex items-center gap-2">
               <Building2 className="h-4 w-4" />
               Create Hostel
@@ -154,7 +154,7 @@ export function OnboardingDialog() {
               Join Hostel
             </TabsTrigger>
           </TabsList>
-          
+           */}
           <TabsContent value="create" className="space-y-4 mt-6">
             <div className="text-center mb-4">
               <h3 className="text-lg font-semibold">Create Your Hostel</h3>

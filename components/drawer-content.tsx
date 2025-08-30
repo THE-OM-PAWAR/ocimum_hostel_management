@@ -45,7 +45,7 @@ export function DrawerContent() {
                 onClick={() => {
                   if (!action.disabled) {
                     action.onClick();
-                    dispatch(closeDrawer());
+                    dispatch(closeDrawer(undefined));
                   }
                 }}
                 disabled={action.disabled}
