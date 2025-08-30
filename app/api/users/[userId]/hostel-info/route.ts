@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { User } from "@/lib/mongoose/models/user.model";
-import { Hostel } from "@/lib/mongoose/models/hostel.model";
 import connectDB from "@/lib/mongodb/client";
+// Import models to ensure they are registered with mongoose
+import "@/lib/mongoose/models/hostel.model";
+import { User } from "@/lib/mongoose/models/user.model";
 
 export async function GET(
   req: Request,
@@ -21,6 +22,8 @@ export async function GET(
     }
 
     const hostel = user.hostel as any;
+
+    console.log("Fetched hostel info for userId:", params.userId, hostel);
     
     return NextResponse.json({
       ownerName: user.ownerName,

@@ -3,7 +3,7 @@
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Phone, Mail, MapPin, Building2, Sun, Moon, Laptop, Download, Smartphone, AlertCircle, CheckCircle } from "lucide-react";
+import { ArrowRight, Phone, Mail, MapPin, Building2, Sun, Moon, Laptop, Download, Smartphone, AlertCircle, CheckCircle, Globe, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { useTheme } from "next-themes";
@@ -376,6 +376,41 @@ export default function SettingsPage() {
                 <p className="text-muted-foreground">{owner?.pan || 'Not provided'}</p>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-card p-6 rounded-lg border shadow-sm">
+        <h2 className="text-xl font-semibold mb-4">Hostel Management</h2>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-medium">Online Presence</h3>
+              <p className="text-sm text-muted-foreground">Manage your hostel's online profile and visibility</p>
+            </div>
+            <Button
+              onClick={() => router.push('/settings/hostel-profile')}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Globe className="h-4 w-4" />
+              Manage Profile
+            </Button>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-medium">User Management</h3>
+              <p className="text-sm text-muted-foreground">Manage users and their permissions</p>
+            </div>
+            <Button
+              onClick={() => router.push('/settings/users')}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Users className="h-4 w-4" />
+              Manage Users
+            </Button>
           </div>
         </div>
       </div>
