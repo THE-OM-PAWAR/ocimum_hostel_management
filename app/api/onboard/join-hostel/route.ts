@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { User } from "@/lib/mongoose/models/user.model";
+import { IUser, User } from "@/lib/mongoose/models/user.model";
 import { Hostel } from "@/lib/mongoose/models/hostel.model";
 import connectDB from "@/lib/mongodb/client";
+import { Document } from "mongoose";
 
 export async function POST(req: Request) {
   try {
@@ -35,7 +36,7 @@ export async function POST(req: Request) {
     }
 
     // Create or update user
-    let user;
+    let user: (Document<unknown, {}, IUser> & IUser & Required<{ _id: unknown; }> & { __v: number; }) | null;
     if (existingUser) {
       user = await User.findByIdAndUpdate(existingUser._id, {
         ownerName,
@@ -56,9 +57,12 @@ export async function POST(req: Request) {
     }
 
     // Check if user is already in the hostel
-    const existingUserInHostel = hostel.users.find(
-      (u) => u.userId.toString() === user._id.toString()
-    );
+    let existingUserInHostel = null;
+    if (user && user._id) {
+      existingUserInHostel = hostel.users.find(
+        (u) => u.userId.toString() === user?._id?.toString()
+      );
+    }
 
     if (existingUserInHostel) {
       return NextResponse.json(
@@ -68,6 +72,13 @@ export async function POST(req: Request) {
     }
 
     // Add user to hostel with pending status
+    if (!user) {
+      return NextResponse.json(
+        { error: "Failed to create or update user" },
+        { status: 500 }
+      );
+    }
+
     await Hostel.findByIdAndUpdate(hostel._id, {
       $push: {
         users: {

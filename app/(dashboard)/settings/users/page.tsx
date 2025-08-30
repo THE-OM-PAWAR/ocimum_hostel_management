@@ -222,6 +222,8 @@ export default function UsersManagementPage() {
   const pendingUsers = users.filter(u => u.status === 'pending');
   const approvedUsers = users.filter(u => u.status === 'approved');
 
+  console.log(users);
+
   return (
     <div className="space-y-8">
       <div>

@@ -11,14 +11,21 @@ export async function PUT(
     await connectDB();
     const { role, status, assignedBlocks } = await req.json();
 
+    // First, find the User document using Clerk's userId to get the Mongoose _id
+    const user = await User.findOne({ userId: params.userId }) as { _id: string; userId: string };
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
     // Update user in hostel
     const hostel = await Hostel.findById(params.hostelId);
     if (!hostel) {
       return NextResponse.json({ error: 'Hostel not found' }, { status: 404 });
     }
 
+    // Use the Mongoose _id to find the user in the hostel.users array
     const userIndex = hostel.users.findIndex(
-      (u) => u.userId.toString() === params.userId
+      (u) => u.userId.toString() === user._id.toString()
     );
 
     if (userIndex === -1) {
