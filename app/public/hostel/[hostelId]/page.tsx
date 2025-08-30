@@ -99,7 +99,7 @@ export default function PublicHostelPage({ params }: { params: { hostelId: strin
       setError(error.message);
     } finally {
       setLoading(false);
-    }
+    } 
   };
 
   const getPropertyTypeLabel = (type: string) => {
