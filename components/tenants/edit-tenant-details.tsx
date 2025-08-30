@@ -43,6 +43,12 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
+interface RoomTypeImage {
+  url: string;
+  title: string;
+  isCover: boolean;
+}
+
 interface EditTenantDetailsProps {
   tenant: any;
   roomTypes: any[];
@@ -237,6 +243,35 @@ export function EditTenantDetails({ tenant, roomTypes, onSuccess }: EditTenantDe
                   <Bed className="h-5 w-5 text-primary" />
                   <h4 className="font-medium">Room Amenities</h4>
                 </div>
+                
+                {/* Room Type Images */}
+                {selectedRoomType.images && selectedRoomType.images.length > 0 && (
+                  <div className="space-y-3">
+                    <h5 className="text-sm font-medium">Room Images</h5>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {selectedRoomType.images.map((image: RoomTypeImage, index: number) => (
+                        <div key={index} className="relative">
+                          <div className="aspect-video rounded-lg overflow-hidden border">
+                            <img
+                              src={image.url}
+                              alt={image.title}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          {image.isCover && (
+                            <Badge className="absolute top-1 left-1 bg-yellow-100 text-yellow-800 text-xs">
+                              Cover
+                            </Badge>
+                          )}
+                          <p className="text-xs text-muted-foreground mt-1 truncate">
+                            {image.title}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
                 <div className="flex flex-wrap gap-2">
                   {selectedRoomType.components.map((component: any) => (
                     <Badge 

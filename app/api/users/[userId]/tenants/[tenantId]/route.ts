@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { Tenant } from "@/lib/mongoose/models/tenant.model";
+import { RoomType } from "@/lib/mongoose/models/room-type.model";
+import { Block } from "@/lib/mongoose/models/block.model";
 import connectDB from "@/lib/mongodb/client";
 
 export async function GET(
@@ -26,6 +28,26 @@ export async function GET(
       );
     }
 
+    // Fetch room type details with images
+    try {
+      const block = await Block.findById(tenant.block);
+      if (block) {
+        const roomType = await RoomType.findOne({
+          blockId: block._id.toString(),
+          name: tenant.roomType
+        }).populate('components');
+        
+        if (roomType) {
+          const tenantWithRoomType = {
+            ...tenant.toObject(),
+            roomTypeDetails: roomType
+          };
+          return NextResponse.json(tenantWithRoomType);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching room type details:", error);
+    }
 
     return NextResponse.json(tenant);
   } catch (error) {

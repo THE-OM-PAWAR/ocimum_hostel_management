@@ -1,14 +1,27 @@
 import mongoose, { Document, Model, Schema } from 'mongoose';
 
+interface RoomTypeImage {
+  url: string;
+  title: string;
+  isCover: boolean;
+}
+
 export interface IRoomType extends Document {
   name: string;
   description: string;
   components: mongoose.Types.ObjectId[];
   rent: number;
   blockId: string;
+  images: RoomTypeImage[];
   createdAt: Date;
   updatedAt: Date;
 }
+
+const roomTypeImageSchema = new Schema({
+  url: { type: String, required: true },
+  title: { type: String, required: true },
+  isCover: { type: Boolean, default: false },
+});
 
 const roomTypeSchema = new Schema<IRoomType>(
   {
@@ -42,6 +55,7 @@ const roomTypeSchema = new Schema<IRoomType>(
       type: String,
       required: [true, 'Please provide a block ID'],
     },
+    images: [roomTypeImageSchema],
   },
   {
     timestamps: true,

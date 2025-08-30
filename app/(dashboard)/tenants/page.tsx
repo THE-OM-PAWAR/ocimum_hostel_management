@@ -19,6 +19,12 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+interface RoomTypeImage {
+  url: string;
+  title: string;
+  isCover: boolean;
+}
+
 interface RentPayment {
   year: number;
   _id: string;
@@ -40,6 +46,9 @@ interface Tenant {
   joinDate: string;
   recentPayments: RentPayment[];
   profileImage: string;
+  roomTypeDetails?: {
+    images: RoomTypeImage[];
+  };
   block: {
     _id: string;
     name: string;

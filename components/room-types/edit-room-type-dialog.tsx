@@ -10,11 +10,18 @@ import { useToast } from "@/hooks/use-toast";
 import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { RoomTypeImageGallery } from "./room-type-image-gallery";
 
 interface RoomComponent {
   _id: string;
   name: string;
   description: string;
+}
+
+interface RoomTypeImage {
+  url: string;
+  title: string;
+  isCover: boolean;
 }
 
 interface RoomType {
@@ -23,6 +30,7 @@ interface RoomType {
   description: string;
   components: RoomComponent[];
   rent: number;
+  images: RoomTypeImage[];
 }
 
 interface EditRoomTypeDialogProps {
@@ -52,6 +60,7 @@ export function EditRoomTypeDialog({
     description: roomType.description,
     components: roomType.components.map(c => c._id),
     rent: roomType.rent.toString(),
+    images: roomType.images || [],
   });
 
   useEffect(() => {
@@ -142,6 +151,30 @@ export function EditRoomTypeDialog({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  const handleAddImage = (image: RoomTypeImage) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.map(img => ({ ...img, isCover: false })).concat({
+        ...image,
+        isCover: image.isCover || prev.images.length === 0
+      })
+    }));
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleSetCoverImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.map((img, i) => ({ ...img, isCover: i === index }))
+    }));
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -257,6 +290,13 @@ export function EditRoomTypeDialog({
               step="100"
             />
           </div>
+
+          <RoomTypeImageGallery
+            images={formData.images}
+            onAddImage={handleAddImage}
+            onRemoveImage={handleRemoveImage}
+            onSetCoverImage={handleSetCoverImage}
+          />
 
           <div className="flex justify-end gap-3">
             <Button type="button" variant="outline" onClick={onClose}>

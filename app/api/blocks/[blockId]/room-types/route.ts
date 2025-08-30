@@ -9,11 +9,11 @@ export async function POST(
 ) {
   try {
     await connectDB();
-    const { name, description, components, rent } = await req.json();
-    console.log("Received data:", { name, description, components, rent });
+    const { name, description, components, rent, images } = await req.json();
+    console.log("Received data:", { name, description, components, rent, images });
     const { blockId } = params;
 
-    if (!name || !description || !components || !rent || !blockId) {
+    if (!name || !description || !components || rent === undefined || !blockId) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -36,6 +36,7 @@ export async function POST(
       components: validComponents,
       rent,
       blockId,
+      images: images || [],
     });
 
     const populatedRoomType = await RoomType.findById(roomType._id).populate('components');

@@ -28,6 +28,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+interface RoomTypeImage {
+  url: string;
+  title: string;
+  isCover: boolean;
+}
+
 interface RentPayment {
   _id: string;
   month: string;
@@ -48,6 +54,9 @@ interface Tenant {
   joinDate: string;
   recentPayments: RentPayment[];
   profileImage: string;
+  roomTypeDetails?: {
+    images: RoomTypeImage[];
+  };
 }
 
 interface Block {

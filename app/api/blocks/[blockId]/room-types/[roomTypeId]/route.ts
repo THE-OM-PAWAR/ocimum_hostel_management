@@ -9,7 +9,7 @@ export async function PUT(
   try {
     await connectDB();
     const { roomTypeId } = params;
-    const { name, description, components, rent } = await req.json();
+    const { name, description, components, rent, images } = await req.json();
 
     // Filter out any null or invalid component IDs
     const validComponents = components.filter((id : string) => id && typeof id === 'string');
@@ -27,7 +27,8 @@ export async function PUT(
         name, 
         description, 
         components: validComponents,
-        rent 
+        rent,
+        images: images || []
       },
       { new: true }
     ).populate('components');

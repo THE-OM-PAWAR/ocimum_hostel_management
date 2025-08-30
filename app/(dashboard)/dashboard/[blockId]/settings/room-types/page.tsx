@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Plus, Search, Package2, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +25,12 @@ interface RoomComponent {
   description: string;
 }
 
+interface RoomTypeImage {
+  url: string;
+  title: string;
+  isCover: boolean;
+}
+
 interface RoomType {
   _id: string;
   name: string;
@@ -31,6 +38,7 @@ interface RoomType {
   components: RoomComponent[];
   rent: number;
   blockId: string;
+  images: RoomTypeImage[];
 }
 
 export default function RoomTypesPage() {
@@ -97,6 +105,26 @@ export default function RoomTypesPage() {
       animate={{ opacity: 1, y: 0 }}
       className="bg-card border rounded-lg p-6 hover:shadow-md transition-all"
     >
+      {/* Cover Image */}
+      {roomType.images && roomType.images.length > 0 && (
+        <div className="mb-4 -mx-6 -mt-6">
+          <div className="aspect-video overflow-hidden rounded-t-lg">
+            <img
+              src={roomType.images.find(img => img.isCover)?.url || roomType.images[0]?.url}
+              alt={roomType.name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          {roomType.images.length > 1 && (
+            <div className="absolute top-2 right-2">
+              <Badge variant="secondary" className="bg-black/50 text-white">
+                +{roomType.images.length - 1} more
+              </Badge>
+            </div>
+          )}
+        </div>
+      )}
+      
       <div className="flex items-start justify-between">
         <div>
           <h3 className="font-semibold text-lg">{roomType.name}</h3>

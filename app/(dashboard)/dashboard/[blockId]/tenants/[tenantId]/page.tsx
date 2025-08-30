@@ -41,6 +41,12 @@ import { useTheme } from "next-themes";
 import { DocumentList } from "@/components/tenants/document-list";
 import { UploadDocumentDialog } from "@/components/tenants/upload-document-dialog";
 
+interface RoomTypeImage {
+  url: string;
+  title: string;
+  isCover: boolean;
+}
+
 interface RentPayment {
   _id: string;
   amount: number;
@@ -70,6 +76,14 @@ interface Tenant {
   roomNumber: string;
   roomType: string;
   documents: { type: string; url: string }[];
+  roomTypeDetails?: {
+    _id: string;
+    name: string;
+    description: string;
+    rent: number;
+    images: RoomTypeImage[];
+    components: Array<{ _id: string; name: string; description: string }>;
+  };
   block: string;
   status: string;
 }
