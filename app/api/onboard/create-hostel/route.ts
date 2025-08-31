@@ -57,6 +57,13 @@ export async function POST(req: Request) {
       }
     }
 
+    if (!user) {
+      return NextResponse.json(
+        { error: "Failed to create or update user" },
+        { status: 500 }
+      );
+    }
+
     // Create hostel
     const hostel = await Hostel.create({
       name: hostelName,

@@ -31,9 +31,9 @@ export async function GET(
     // Fetch room type details with images
     try {
       const block = await Block.findById(tenant.block);
-      if (block) {
+      if (block && block._id) {
         const roomType = await RoomType.findOne({
-          blockId: block._id.toString(),
+          blockId: (block._id as any).toString(),
           name: tenant.roomType
         }).populate('components');
         
