@@ -26,6 +26,7 @@ interface RoomTypeImageGalleryProps {
   onAddImage: (image: RoomTypeImage) => void;
   onRemoveImage: (index: number) => void;
   onSetCoverImage: (index: number) => void;
+  onUploadStateChange?: (isUploading: boolean) => void;
   disabled?: boolean;
 }
 
@@ -34,6 +35,7 @@ export function RoomTypeImageGallery({
   onAddImage, 
   onRemoveImage, 
   onSetCoverImage,
+  onUploadStateChange,
   disabled = false 
 }: RoomTypeImageGalleryProps) {
   const [selectedImage, setSelectedImage] = useState<RoomTypeImage | null>(null);
@@ -50,6 +52,16 @@ export function RoomTypeImageGallery({
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "Error",
+          description: "File size must be less than 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
       if (!isImageFile(file)) {
         toast({
           title: "Error",
@@ -83,6 +95,8 @@ export function RoomTypeImageGallery({
     }
 
     setUploading(true);
+    onUploadStateChange?.(true);
+    
     try {
       const formData = new FormData();
       formData.append("file", uploadForm.file);
@@ -126,6 +140,7 @@ export function RoomTypeImageGallery({
       });
     } finally {
       setUploading(false);
+      onUploadStateChange?.(false);
     }
   };
 
@@ -257,6 +272,7 @@ export function RoomTypeImageGallery({
                 value={uploadForm.title}
                 onChange={(e) => setUploadForm(prev => ({ ...prev, title: e.target.value }))}
                 placeholder="Enter image title"
+                required
               />
             </div>
             
@@ -269,6 +285,7 @@ export function RoomTypeImageGallery({
                   accept="image/*"
                   onChange={handleFileChange}
                   className="hidden"
+                  required
                 />
                 <Label
                   htmlFor="imageFile"
@@ -277,7 +294,7 @@ export function RoomTypeImageGallery({
                   <div className="flex flex-col items-center gap-2 text-center">
                     <Upload className="h-8 w-8 text-muted-foreground" />
                     <span className="text-sm font-medium">
-                      Click to upload or drag and drop
+                      {uploadForm.file ? uploadForm.file.name : "Click to upload or drag and drop"}
                     </span>
                     <span className="text-xs text-muted-foreground">
                       PNG, JPG, JPEG (max 5MB)
@@ -297,11 +314,28 @@ export function RoomTypeImageGallery({
                 />
               </div>
             )}
+
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="setCover"
+                checked={uploadForm.isCover}
+                onChange={(e) => setUploadForm(prev => ({ ...prev, isCover: e.target.checked }))}
+                className="rounded"
+              />
+              <Label htmlFor="setCover" className="text-sm">
+                Set as cover image
+              </Label>
+            </div>
             
             <div className="flex justify-end gap-2">
               <Button
                 variant="outline"
                 onClick={() => {
+                  // Clean up any object URLs
+                  if (uploadForm.file) {
+                    URL.revokeObjectURL(URL.createObjectURL(uploadForm.file));
+                  }
                   setIsUploadDialogOpen(false);
                   setUploadForm({ title: "", file: null, isCover: false });
                 }}
@@ -313,7 +347,14 @@ export function RoomTypeImageGallery({
                 onClick={handleUpload}
                 disabled={uploading || !uploadForm.file || !uploadForm.title}
               >
-                {uploading ? "Uploading..." : "Upload Image"}
+                {uploading ? (
+                  <>
+                    <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                    Uploading...
+                  </>
+                ) : (
+                  "Upload Image"
+                )}
               </Button>
             </div>
           </div>

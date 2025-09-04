@@ -50,6 +50,7 @@ export function EditRoomTypeDialog({
 }: EditRoomTypeDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
   const [components, setComponents] = useState<RoomComponent[]>([]);
@@ -89,10 +90,20 @@ export function EditRoomTypeDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check if there are any pending image uploads
+    if (isUploadingImages) {
+      toast({
+        title: "Please wait",
+        description: "Images are still uploading. Please wait for completion.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-        console.log("roomType", roomType);
       const response = await fetch(`/api/blocks/${blockId}/room-types/${roomType._id}`, {
         method: "PUT",
         headers: {
@@ -296,14 +307,15 @@ export function EditRoomTypeDialog({
             onAddImage={handleAddImage}
             onRemoveImage={handleRemoveImage}
             onSetCoverImage={handleSetCoverImage}
+            onUploadStateChange={setIsUploadingImages}
           />
 
           <div className="flex justify-end gap-3">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Updating..." : "Update Room Type"}
+            <Button type="submit" disabled={isSubmitting || isUploadingImages}>
+              {isSubmitting ? "Updating..." : isUploadingImages ? "Uploading Images..." : "Update Room Type"}
             </Button>
           </div>
         </form>
