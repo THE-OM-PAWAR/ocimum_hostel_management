@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Check, ChevronsUpDown, Plus } from "lucide-react";
+import { Check, ChevronsUpDown, Plus, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { RoomTypeImageGallery } from "./room-type-image-gallery";
@@ -67,8 +67,16 @@ export function EditRoomTypeDialog({
   useEffect(() => {
     if (isOpen) {
       fetchComponents();
+      // Reset form data when dialog opens
+      setFormData({
+        name: roomType.name,
+        description: roomType.description,
+        components: roomType.components.map(c => c._id),
+        rent: roomType.rent.toString(),
+        images: roomType.images || [],
+      });
     }
-  }, [isOpen, blockId]);
+  }, [isOpen, blockId, roomType]);
 
   const fetchComponents = async () => {
     try {
@@ -88,16 +96,61 @@ export function EditRoomTypeDialog({
     }
   };
 
+  const validateForm = () => {
+    if (!formData.name.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Room type name is required",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    if (!formData.description.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Description is required",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    if (formData.components.length === 0) {
+      toast({
+        title: "Validation Error",
+        description: "At least one component must be selected",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    if (!formData.rent || parseFloat(formData.rent) <= 0) {
+      toast({
+        title: "Validation Error",
+        description: "Valid rent amount is required",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Check if there are any pending image uploads
+    // Prevent submission if images are still uploading
     if (isUploadingImages) {
       toast({
         title: "Please wait",
         description: "Images are still uploading. Please wait for completion.",
         variant: "destructive",
       });
+      return;
+    }
+
+    // Validate form
+    if (!validateForm()) {
       return;
     }
 
@@ -110,13 +163,17 @@ export function EditRoomTypeDialog({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          ...formData,
+          name: formData.name.trim(),
+          description: formData.description.trim(),
+          components: formData.components,
           rent: parseFloat(formData.rent),
+          images: formData.images,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to update room type");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update room type");
       }
 
       toast({
@@ -126,10 +183,11 @@ export function EditRoomTypeDialog({
 
       onSuccess();
       onClose();
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Error updating room type:", error);
       toast({
         title: "Error",
-        description: "Failed to update room type. Please try again.",
+        description: error.message || "Failed to update room type. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -187,26 +245,29 @@ export function EditRoomTypeDialog({
     }));
   };
 
+  const isFormDisabled = isSubmitting || isUploadingImages;
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+    <Dialog open={isOpen} onOpenChange={!isFormDisabled ? onClose : undefined}>
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Room Type</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+        <form onSubmit={handleSubmit} className="space-y-6 mt-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Room Type Name</Label>
+            <Label htmlFor="name">Room Type Name *</Label>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
               placeholder="Enter room type name"
               required
+              disabled={isFormDisabled}
             />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">Description *</Label>
             <Textarea
               id="description"
               value={formData.description}
@@ -214,18 +275,20 @@ export function EditRoomTypeDialog({
               placeholder="Enter room type description"
               rows={3}
               required
+              disabled={isFormDisabled}
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Room Components</Label>
+            <Label>Room Components *</Label>
             <div className="relative" ref={popoverRef}>
               <Button
                 type="button"
                 variant="outline"
                 role="combobox"
                 className="w-full justify-between"
-                onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                onClick={() => !isFormDisabled && setIsPopoverOpen(!isPopoverOpen)}
+                disabled={isFormDisabled}
               >
                 {formData.components.length > 0
                   ? `${formData.components.length} component${formData.components.length > 1 ? 's' : ''} selected`
@@ -233,7 +296,7 @@ export function EditRoomTypeDialog({
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
 
-              {isPopoverOpen && (
+              {isPopoverOpen && !isFormDisabled && (
                 <div className="absolute z-50 w-full mt-1 bg-popover border rounded-md shadow-md">
                   <div className="p-2">
                     <Input
@@ -245,30 +308,37 @@ export function EditRoomTypeDialog({
                       onClick={(e) => e.stopPropagation()}
                     />
                     <div className="max-h-[200px] overflow-y-auto">
-                      {filteredComponents.map((component) => (
-                        <button
-                          key={component._id}
-                          type="button"
-                          className={cn(
-                            "w-full flex items-center space-x-2 p-2 cursor-pointer hover:bg-accent rounded-md text-left",
-                            formData.components.includes(component._id) && "bg-accent"
-                          )}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleComponentToggle(component._id);
-                          }}
-                        >
-                          <div className={cn(
-                            "h-4 w-4 border rounded-sm flex items-center justify-center shrink-0",
-                            formData.components.includes(component._id) && "bg-primary border-primary"
-                          )}>
-                            {formData.components.includes(component._id) && (
-                              <Check className="h-3 w-3 text-primary-foreground" />
+                      {filteredComponents.length > 0 ? (
+                        filteredComponents.map((component) => (
+                          <button
+                            key={component._id}
+                            type="button"
+                            className={cn(
+                              "w-full flex items-center space-x-2 p-2 cursor-pointer hover:bg-accent rounded-md text-left",
+                              formData.components.includes(component._id) && "bg-accent"
                             )}
-                          </div>
-                          <span className="flex-1">{component.name}</span>
-                        </button>
-                      ))}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleComponentToggle(component._id);
+                            }}
+                          >
+                            <div className={cn(
+                              "h-4 w-4 border rounded-sm flex items-center justify-center shrink-0",
+                              formData.components.includes(component._id) && "bg-primary border-primary"
+                            )}>
+                              {formData.components.includes(component._id) && (
+                                <Check className="h-3 w-3 text-primary-foreground" />
+                              )}
+                            </div>
+                            <div className="flex-1">
+                              <div className="font-medium">{component.name}</div>
+                              <div className="text-xs text-muted-foreground">{component.description}</div>
+                            </div>
+                          </button>
+                        ))
+                      ) : (
+                        <div className="p-2 text-sm text-muted-foreground">No components found</div>
+                      )}
                       <Button
                         type="button"
                         variant="ghost"
@@ -289,7 +359,7 @@ export function EditRoomTypeDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="rent">Monthly Rent (₹)</Label>
+            <Label htmlFor="rent">Monthly Rent (₹) *</Label>
             <Input
               id="rent"
               type="number"
@@ -299,23 +369,52 @@ export function EditRoomTypeDialog({
               required
               min="0"
               step="100"
+              disabled={isFormDisabled}
             />
           </div>
 
-          <RoomTypeImageGallery
-            images={formData.images}
-            onAddImage={handleAddImage}
-            onRemoveImage={handleRemoveImage}
-            onSetCoverImage={handleSetCoverImage}
-            onUploadStateChange={setIsUploadingImages}
-          />
+          <div className="space-y-2">
+            <Label>Room Images</Label>
+            <RoomTypeImageGallery
+              images={formData.images}
+              onAddImage={handleAddImage}
+              onRemoveImage={handleRemoveImage}
+              onSetCoverImage={handleSetCoverImage}
+              onUploadStateChange={setIsUploadingImages}
+              disabled={isFormDisabled}
+            />
+            {isUploadingImages && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Uploading images... Please wait before submitting.</span>
+              </div>
+            )}
+          </div>
 
-          <div className="flex justify-end gap-3">
-            <Button type="button" variant="outline" onClick={onClose}>
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onClose}
+              disabled={isFormDisabled}
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting || isUploadingImages}>
-              {isSubmitting ? "Updating..." : isUploadingImages ? "Uploading Images..." : "Update Room Type"}
+            <Button 
+              type="submit" 
+              disabled={isFormDisabled}
+              className="min-w-[120px]"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Updating...
+                </>
+              ) : isUploadingImages ? (
+                "Uploading Images..."
+              ) : (
+                "Update Room Type"
+              )}
             </Button>
           </div>
         </form>

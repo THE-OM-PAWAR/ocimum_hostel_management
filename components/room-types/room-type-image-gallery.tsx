@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Star, X, Eye, Upload } from "lucide-react";
+import { Star, X, Eye, Upload, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -42,6 +42,7 @@ export function RoomTypeImageGallery({
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploadForm, setUploadForm] = useState({
     title: "",
     file: null as File | null,
@@ -51,41 +52,50 @@ export function RoomTypeImageGallery({
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      // Validate file size (5MB limit)
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "Error",
-          description: "File size must be less than 5MB",
-          variant: "destructive",
-        });
-        return;
-      }
+    if (!file) return;
 
-      if (!isImageFile(file)) {
-        toast({
-          title: "Error",
-          description: "Please upload an image file",
-          variant: "destructive",
-        });
-        return;
-      }
+    // Validate file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Error",
+        description: "File size must be less than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
 
-      try {
-        const compressedFile = await compressDocumentImage(file);
-        setUploadForm(prev => ({ ...prev, file: compressedFile }));
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to process image",
-          variant: "destructive",
-        });
+    if (!isImageFile(file)) {
+      toast({
+        title: "Error",
+        description: "Please upload an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const compressedFile = await compressDocumentImage(file);
+      setUploadForm(prev => ({ ...prev, file: compressedFile }));
+      
+      // Clean up previous preview URL
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
       }
+      
+      // Create new preview URL
+      const newPreviewUrl = URL.createObjectURL(compressedFile);
+      setPreviewUrl(newPreviewUrl);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to process image",
+        variant: "destructive",
+      });
     }
   };
 
   const handleUpload = async () => {
-    if (!uploadForm.file || !uploadForm.title) {
+    if (!uploadForm.file || !uploadForm.title.trim()) {
       toast({
         title: "Error",
         description: "Please provide a title and select an image",
@@ -114,25 +124,19 @@ export function RoomTypeImageGallery({
       
       const newImage: RoomTypeImage = {
         url: result.secure_url,
-        title: uploadForm.title,
+        title: uploadForm.title.trim(),
         isCover: uploadForm.isCover || images.length === 0, // First image is cover by default
       };
 
       onAddImage(newImage);
-
-      setUploadForm({
-        title: "",
-        file: null,
-        isCover: false,
-      });
-
-      setIsUploadDialogOpen(false);
+      handleCloseUploadDialog();
 
       toast({
         title: "Success",
         description: "Image uploaded successfully",
       });
     } catch (error) {
+      console.error("Upload error:", error);
       toast({
         title: "Error",
         description: "Failed to upload image",
@@ -142,6 +146,21 @@ export function RoomTypeImageGallery({
       setUploading(false);
       onUploadStateChange?.(false);
     }
+  };
+
+  const handleCloseUploadDialog = () => {
+    // Clean up preview URL
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+    }
+    
+    setUploadForm({
+      title: "",
+      file: null,
+      isCover: false,
+    });
+    setIsUploadDialogOpen(false);
   };
 
   const openPreview = (image: RoomTypeImage) => {
@@ -155,10 +174,11 @@ export function RoomTypeImageGallery({
         <div className="flex items-center justify-between">
           <Label>Room Images</Label>
           <Button
+            type="button"
             variant="outline"
             size="sm"
             onClick={() => setIsUploadDialogOpen(true)}
-            disabled={disabled}
+            disabled={disabled || uploading}
           >
             <Upload className="h-4 w-4 mr-2" />
             Add Image
@@ -190,6 +210,7 @@ export function RoomTypeImageGallery({
                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <div className="flex gap-1">
                     <Button
+                      type="button"
                       size="sm"
                       variant="secondary"
                       onClick={() => openPreview(image)}
@@ -198,6 +219,7 @@ export function RoomTypeImageGallery({
                     </Button>
                     {!image.isCover && (
                       <Button
+                        type="button"
                         size="sm"
                         variant="secondary"
                         onClick={() => onSetCoverImage(index)}
@@ -207,6 +229,7 @@ export function RoomTypeImageGallery({
                       </Button>
                     )}
                     <Button
+                      type="button"
                       size="sm"
                       variant="destructive"
                       onClick={() => onRemoveImage(index)}
@@ -259,7 +282,7 @@ export function RoomTypeImageGallery({
       </Dialog>
 
       {/* Upload Dialog */}
-      <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
+      <Dialog open={isUploadDialogOpen} onOpenChange={!uploading ? handleCloseUploadDialog : undefined}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Upload Room Image</DialogTitle>
@@ -272,7 +295,7 @@ export function RoomTypeImageGallery({
                 value={uploadForm.title}
                 onChange={(e) => setUploadForm(prev => ({ ...prev, title: e.target.value }))}
                 placeholder="Enter image title"
-                required
+                disabled={uploading}
               />
             </div>
             
@@ -285,11 +308,11 @@ export function RoomTypeImageGallery({
                   accept="image/*"
                   onChange={handleFileChange}
                   className="hidden"
-                  required
+                  disabled={uploading}
                 />
                 <Label
                   htmlFor="imageFile"
-                  className="cursor-pointer flex items-center justify-center border-2 border-dashed border-muted-foreground/25 rounded-md p-6 transition-colors hover:border-muted-foreground/50"
+                  className={`cursor-pointer flex items-center justify-center border-2 border-dashed border-muted-foreground/25 rounded-md p-6 transition-colors hover:border-muted-foreground/50 ${uploading ? 'pointer-events-none opacity-50' : ''}`}
                 >
                   <div className="flex flex-col items-center gap-2 text-center">
                     <Upload className="h-8 w-8 text-muted-foreground" />
@@ -304,11 +327,11 @@ export function RoomTypeImageGallery({
               </div>
             </div>
 
-            {uploadForm.file && (
+            {previewUrl && (
               <div className="mt-4 border rounded-md p-2">
                 <div className="text-sm font-medium mb-2">Preview:</div>
                 <img
-                  src={URL.createObjectURL(uploadForm.file)}
+                  src={previewUrl}
                   alt="Preview"
                   className="max-h-[200px] object-contain mx-auto rounded"
                 />
@@ -322,6 +345,7 @@ export function RoomTypeImageGallery({
                 checked={uploadForm.isCover}
                 onChange={(e) => setUploadForm(prev => ({ ...prev, isCover: e.target.checked }))}
                 className="rounded"
+                disabled={uploading}
               />
               <Label htmlFor="setCover" className="text-sm">
                 Set as cover image
@@ -330,26 +354,21 @@ export function RoomTypeImageGallery({
             
             <div className="flex justify-end gap-2">
               <Button
+                type="button"
                 variant="outline"
-                onClick={() => {
-                  // Clean up any object URLs
-                  if (uploadForm.file) {
-                    URL.revokeObjectURL(URL.createObjectURL(uploadForm.file));
-                  }
-                  setIsUploadDialogOpen(false);
-                  setUploadForm({ title: "", file: null, isCover: false });
-                }}
+                onClick={handleCloseUploadDialog}
                 disabled={uploading}
               >
                 Cancel
               </Button>
               <Button
+                type="button"
                 onClick={handleUpload}
-                disabled={uploading || !uploadForm.file || !uploadForm.title}
+                disabled={uploading || !uploadForm.file || !uploadForm.title.trim()}
               >
                 {uploading ? (
                   <>
-                    <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Uploading...
                   </>
                 ) : (
