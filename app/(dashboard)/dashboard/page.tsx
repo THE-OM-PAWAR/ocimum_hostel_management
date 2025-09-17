@@ -2,7 +2,7 @@
 
 import { useUser } from "@clerk/nextjs";
 import { motion } from "framer-motion";
-import { Plus, Building2, Users, Home, ArrowRight, Bell } from "lucide-react";
+import { Plus, Building2, Users, Home, ArrowRight, Bell, Globe, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { CreateBlockDialog } from "@/components/create-block-dialog";
 import { useRouter } from "next/navigation";
@@ -212,6 +212,55 @@ export default function DashboardPage() {
           Manage your hostel blocks and rooms • Role: {userRole}
         </motion.p>
       </div>
+
+      {/* Setup Prompts for Admin */}
+      {userRole === 'admin' && (!hasHostelProfile || !hasBlockProfiles) && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <Card className="border-primary/20 bg-primary/5">
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-4">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Building2 className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold mb-2">Complete Your Setup</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Enhance your hostel management by setting up profiles and showcasing your property online.
+                  </p>
+                  <div className="flex flex-wrap gap-3">
+                    {!hasHostelProfile && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => router.push('/settings/hostel-profile')}
+                        className="flex items-center gap-2"
+                      >
+                        <Globe className="h-4 w-4" />
+                        Setup Hostel Profile
+                      </Button>
+                    )}
+                    {!hasBlockProfiles && blocks.length > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => router.push('/settings/block-profiles')}
+                        className="flex items-center gap-2"
+                      >
+                        <Settings className="h-4 w-4" />
+                        Setup Block Profiles
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {userRole === 'admin' && (

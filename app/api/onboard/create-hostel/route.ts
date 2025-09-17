@@ -84,12 +84,29 @@ export async function POST(req: Request) {
       isOnboarded: true,
     });
 
+    // Create default block for the hostel
+    const { Block } = await import("@/lib/mongoose/models/block.model");
+    const block = await Block.create({
+      name: hostelName,
+      description: `Main block for ${hostelName}`,
+      hostel: hostel._id,
+    });
+
+    // Add the block to admin's assignedBlocks array
+    await User.findByIdAndUpdate(user._id, {
+      $addToSet: { assignedBlocks: block._id }
+    });
+
     return NextResponse.json({
       message: "Hostel created successfully",
       hostel: {
         id: hostel._id,
         name: hostel.name,
         joinCode: hostel.joinCode,
+      },
+      block: {
+        id: block._id,
+        name: block.name,
       },
     });
   } catch (error) {

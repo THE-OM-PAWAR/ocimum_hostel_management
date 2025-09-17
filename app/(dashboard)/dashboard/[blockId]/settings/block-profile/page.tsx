@@ -201,15 +201,56 @@ export default function BlockProfilePage() {
         const profileData = await profileResponse.json();
         setProfile(profileData);
       } else {
-        // If no profile exists, use default with block name
-        setProfile(prev => ({
-          ...prev,
-          basicInfo: {
-            ...prev.basicInfo,
-            name: blockData.name,
-            email: user.primaryEmailAddress?.emailAddress || "",
+        // If no profile exists, try to get hostel profile data
+        try {
+          const hostelResponse = await fetch(`/api/users/${user.id}/hostel-info`);
+          const hostelData = await hostelResponse.json();
+          
+          let hostelProfile = null;
+          if (!hostelData.error && hostelData.hostelId) {
+            const hostelProfileResponse = await fetch(`/api/hostels/${hostelData.hostelId}/profile`);
+            if (hostelProfileResponse.ok) {
+              hostelProfile = await hostelProfileResponse.json();
+            }
           }
-        }));
+          
+          // Use hostel profile data as fallback
+          setProfile(prev => ({
+            ...prev,
+            basicInfo: {
+              ...prev.basicInfo,
+              name: blockData.name,
+              email: user.primaryEmailAddress?.emailAddress || "",
+              address: hostelProfile?.basicInfo?.address || "",
+              landmark: hostelProfile?.basicInfo?.landmark || "",
+              city: hostelProfile?.basicInfo?.city || "",
+              state: hostelProfile?.basicInfo?.state || "",
+              pincode: hostelProfile?.basicInfo?.pincode || "",
+              contactNumber: hostelProfile?.basicInfo?.contactNumber || "",
+            },
+            propertyDetails: {
+              ...prev.propertyDetails,
+              accommodationType: hostelProfile?.propertyDetails?.type || 'boys',
+            },
+            locationInfo: {
+              ...prev.locationInfo,
+              googleMapLink: hostelProfile?.locationFactors?.googleMapLink || "",
+              nearbyLandmarks: hostelProfile?.locationFactors?.nearbyLandmarks || [],
+              transportConnectivity: [],
+            },
+          }));
+        } catch (error) {
+          console.error("Error fetching hostel profile:", error);
+          // Use default with block name
+          setProfile(prev => ({
+            ...prev,
+            basicInfo: {
+              ...prev.basicInfo,
+              name: blockData.name,
+              email: user.primaryEmailAddress?.emailAddress || "",
+            }
+          }));
+        }
       }
     } catch (error) {
       console.error("Error fetching block profile:", error);
@@ -1153,9 +1194,38 @@ export default function BlockProfilePage() {
 
       {/* Save Button */}
       <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={saving || uploading} size="lg">
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            onClick={async () => {
+              try {
+                const response = await fetch(`/api/blocks/${params.blockId}/profile/auto-populate`);
+                if (response.ok) {
+                  const data = await response.json();
+                  setProfile(data);
+                  toast({
+                    title: "Success",
+                    description: "Profile auto-populated from hostel data",
+                  });
+                } else {
+                  throw new Error("Failed to auto-populate");
+                }
+              } catch (error) {
+                toast({
+                  title: "Error",
+                  description: "Failed to auto-populate from hostel profile",
+                  variant: "destructive",
+                });
+              }
+            }}
+            disabled={saving || uploading}
+          >
+            Auto-populate from Hostel
+          </Button>
+          <Button onClick={handleSave} disabled={saving || uploading} size="lg">
           {saving ? "Saving..." : "Save Profile"}
         </Button>
+        </div>
       </div>
     </div>
   );

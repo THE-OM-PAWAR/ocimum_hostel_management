@@ -21,6 +21,7 @@ export function OnboardingDialog() {
     ownerName: "",
     phoneNumber: "",
     hostelName: "",
+    blockName: "",
   });
 
   const [joinHostelData, setJoinHostelData] = useState({
