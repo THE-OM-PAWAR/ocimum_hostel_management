@@ -3,7 +3,7 @@
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Phone, Mail, MapPin, Building2, Sun, Moon, Laptop, Download, Smartphone, AlertCircle, CheckCircle, Globe, Users } from "lucide-react";
+import { ArrowRight, Phone, Mail, MapPin, Building2, Sun, Moon, Laptop, Download, Smartphone, AlertCircle, CheckCircle, Globe, Users, Settings as SettingsIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { useTheme } from "next-themes";
@@ -395,6 +395,21 @@ export default function SettingsPage() {
             >
               <Globe className="h-4 w-4" />
               Manage Profile
+            </Button>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-medium">Block Profiles</h3>
+              <p className="text-sm text-muted-foreground">Manage detailed information for each block</p>
+            </div>
+            <Button
+              onClick={() => router.push('/settings/block-profiles')}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <SettingsIcon className="h-4 w-4" />
+              Manage Blocks
             </Button>
           </div>
           

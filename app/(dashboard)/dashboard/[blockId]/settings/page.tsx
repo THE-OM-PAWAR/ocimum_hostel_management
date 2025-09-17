@@ -7,11 +7,6 @@ import { ChevronRight, Home, Building2, Settings } from "lucide-react";
 
 const settingsOptions = [
   {
-    title: "Block Profile",
-    description: "Manage block information, photos, and location details",
-    href: "block-profile",
-  },
-  {
     title: "Room Components",
     description: "Manage room amenities, furniture, and equipment",
     href: "room-components",
