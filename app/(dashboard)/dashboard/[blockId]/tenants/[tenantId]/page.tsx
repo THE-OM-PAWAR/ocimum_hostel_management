@@ -40,7 +40,6 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { useTheme } from "next-themes";
 import { DocumentList } from "@/components/tenants/document-list";
 import { UploadDocumentDialog } from "@/components/tenants/upload-document-dialog";
-import { isPaymentVisible, getPaymentUrgency } from "@/lib/utils";
 
 interface RoomTypeImage {
   url: string;
@@ -276,16 +275,9 @@ export default function TenantDetailsPage() {
   };
 
   const RentPaymentCard = ({ payment }: { payment: RentPayment }) => (
-    <div className={cn(
-      "relative flex items-start gap-2 pb-4",
-      !isPaymentVisible(payment.dueDate) && "opacity-50"
-    )}>
+    <div className="relative flex items-start gap-2 pb-4">
       <div className="flex-1">
-        <div className={cn(
-          "bg-card border-2 rounded-lg p-4 sm:p-6 hover:shadow-md transition-all",
-          getPaymentUrgency(payment.dueDate) === 'urgent' && "border-destructive/50 bg-destructive/5",
-          getPaymentUrgency(payment.dueDate) === 'soon' && "border-warning/50 bg-warning/5"
-        )}>
+        <div className="bg-card border-2 rounded-lg p-4 sm:p-6 hover:shadow-md transition-all">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div className="space-y-3 flex-1">
               {/* Header Section */}
@@ -296,16 +288,6 @@ export default function TenantDetailsPage() {
                   </h4>
                   <div className="flex flex-wrap items-center gap-2">
                     {getPaymentStatusBadge(payment.status)}
-                    {getPaymentUrgency(payment.dueDate) === 'urgent' && (
-                      <Badge variant="destructive" className="text-xs">
-                        {new Date(payment.dueDate) < new Date() ? 'Overdue' : 'Due Soon'}
-                      </Badge>
-                    )}
-                    {getPaymentUrgency(payment.dueDate) === 'soon' && (
-                      <Badge variant="secondary" className="bg-warning/10 text-warning text-xs">
-                        Due in 2 days
-                      </Badge>
-                    )}
                     {payment.paymentMethod && (
                       <Badge variant="secondary" className="text-xs">
                         {payment.paymentMethod}
@@ -360,7 +342,7 @@ export default function TenantDetailsPage() {
               <PaymentActions
                 payment={payment}
                 onSuccess={handlePaymentSuccess}
-                disabled={tenant?.status !== 'active' || !isPaymentVisible(payment.dueDate)}
+                disabled={tenant?.status !== 'active'}
               />
             </div>
           </div>

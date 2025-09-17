@@ -65,9 +65,8 @@ export async function POST(req: Request) {
       throw new Error("Block not found");
     }
 
-    // Use the join date's day as the due date for all future payments
-    const joinDate = new Date(data.joinDate);
-    const dueDay = joinDate.getDate();
+    const generationDay = parseInt(block.rentGenerationDay) || 1;
+    const paymentGenerationType = (block as any).paymentGenerationType || 'join_date_based';
 
     // Generate rent payments from join date to next month
     const joinDate = new Date(data.joinDate);
@@ -77,10 +76,20 @@ export async function POST(req: Request) {
     
     let date = new Date(joinDate);
     while (date <= nextMonth) {
+      let dueDate;
+      if (paymentGenerationType === 'join_date_based') {
+        // Use join date day for due date
+        const joinDay = joinDate.getDate();
+        dueDate = new Date(date.getFullYear(), date.getMonth(), joinDay);
+      } else {
+        // Use global generation day
+        dueDate = new Date(date.getFullYear(), date.getMonth(), generationDay);
+      }
+      
       months.push({
         month: date.toLocaleString('default', { month: 'long' }),
         year: date.getFullYear(),
-        dueDate: new Date(date.getFullYear(), date.getMonth(), dueDay)
+        dueDate
       });
       date.setMonth(date.getMonth() + 1);
     }

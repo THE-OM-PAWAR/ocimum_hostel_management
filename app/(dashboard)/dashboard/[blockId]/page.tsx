@@ -27,7 +27,6 @@ import { CreateTenantSheet } from "@/components/create-tenant-sheet";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { isPaymentVisible, getPaymentUrgency } from "@/lib/utils";
 
 interface RoomTypeImage {
   url: string;
@@ -201,11 +200,7 @@ export default function BlockDetailsPage() {
           </Badge>
         );
       default:
-        return (
-          <Badge variant="outline" className="bg-muted/10 hover:bg-muted/20 transition-colors">
-            Undefined
-          </Badge>
-        );
+        return null;
     }
   };
 
@@ -365,27 +360,12 @@ export default function BlockDetailsPage() {
                         <h4 className="text-sm font-medium mb-2">Last 3 Months</h4>
                         <div className="space-y-2">
                           {tenant.recentPayments?.slice(0, 3).map((payment) => (
-                            <div key={payment._id} className={cn(
-                              "flex items-center justify-between p-2 rounded",
-                              !isPaymentVisible(payment.dueDate) && "opacity-50",
-                              getPaymentUrgency(payment.dueDate) === 'urgent' && "bg-destructive/10",
-                              getPaymentUrgency(payment.dueDate) === 'soon' && "bg-warning/10"
-                            )}>
+                            <div key={payment._id} className="flex items-center justify-between">
                               <div className="text-sm">
                                 <div>{payment.month}</div>
                                 <div className="text-xs text-muted-foreground">
                                   ₹{payment.amount.toLocaleString()}
                                 </div>
-                                {getPaymentUrgency(payment.dueDate) === 'urgent' && (
-                                  <div className="text-xs text-destructive">
-                                    {new Date(payment.dueDate) < new Date() ? 'Overdue' : 'Due Soon'}
-                                  </div>
-                                )}
-                                {getPaymentUrgency(payment.dueDate) === 'soon' && (
-                                  <div className="text-xs text-warning">
-                                    Due in 2 days
-                                  </div>
-                                )}
                               </div>
                               {getPaymentStatusBadge(payment.status)}
                             </div>

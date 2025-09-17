@@ -10,21 +10,18 @@ export async function GET(
     await connectDB();
 
     const block = await Block.findById(params.blockId).select(
-      "rentGenerationDay rentGenerationEnabled"
+      "rentGenerationDay rentGenerationEnabled paymentGenerationType paymentVisibilityDays"
     ).lean();
 
     if (!block) {
       return NextResponse.json({ error: "Block not found" }, { status: 404 });
     }
 
-    console.log("Fetched block:", {
-      rentGenerationDay: block.rentGenerationDay,
-      rentGenerationEnabled: block.rentGenerationEnabled,
-    });
-
     return NextResponse.json({
       rentGenerationDay: block.rentGenerationDay || "1",
       rentGenerationEnabled: block.rentGenerationEnabled ?? true,
+      paymentGenerationType: (block as any).paymentGenerationType || 'join_date_based',
+      paymentVisibilityDays: (block as any).paymentVisibilityDays || 2,
     });
   } catch (error) {
     console.error("Error fetching payment settings:", error);
@@ -42,29 +39,32 @@ export async function PUT(
   try {
     await connectDB();
     const body = await req.json();
-    const { rentGenerationDay, rentGenerationEnabled } = body;
+    const { rentGenerationDay, rentGenerationEnabled, paymentGenerationType, paymentVisibilityDays } = body;
 
     const block = await Block.findByIdAndUpdate(
       params.blockId,
       {
         rentGenerationDay,
         rentGenerationEnabled,
+        paymentGenerationType,
+        paymentVisibilityDays,
       },
       {
         new: true,
         runValidators: true,
         strict: false,
       }
-    ).select("rentGenerationDay rentGenerationEnabled");
+    ).select("rentGenerationDay rentGenerationEnabled paymentGenerationType paymentVisibilityDays");
 
     if (!block) {
-      console.log("No block found with given ID.");
       return NextResponse.json({ error: "Block not found" }, { status: 404 });
     }
 
     return NextResponse.json({
       rentGenerationDay: block.rentGenerationDay,
       rentGenerationEnabled: block.rentGenerationEnabled,
+      paymentGenerationType: (block as any).paymentGenerationType,
+      paymentVisibilityDays: (block as any).paymentVisibilityDays,
     });
   } catch (error) {
     console.error("Error updating payment settings:", error);

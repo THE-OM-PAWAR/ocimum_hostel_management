@@ -29,6 +29,8 @@ export async function POST(req: Request) {
     const currentDate = new Date();
     const currentMonth = currentDate.toLocaleString('default', { month: 'long' });
     const currentYear = currentDate.getFullYear();
+    const generationDay = parseInt(block.rentGenerationDay) || 1;
+    const paymentGenerationType = (block as any).paymentGenerationType || 'join_date_based';
 
     // Get only active tenants
     const tenants = await Tenant.find({
@@ -43,10 +45,18 @@ export async function POST(req: Request) {
 
     for (const tenant of tenants) {
       try {
-        // Use tenant's join date day as the due day
-        const joinDate = new Date(tenant.joinDate);
-        const dueDay = joinDate.getDate();
-
+        // Calculate due dates based on payment generation type
+        let currentDueDate, nextDueDate;
+        
+        if (paymentGenerationType === 'join_date_based') {
+          const joinDay = new Date(tenant.joinDate).getDate();
+          currentDueDate = new Date(currentYear, currentDate.getMonth(), joinDay);
+          nextDueDate = new Date(currentYear, currentDate.getMonth() + 1, joinDay);
+        } else {
+          currentDueDate = new Date(currentYear, currentDate.getMonth(), generationDay);
+          nextDueDate = new Date(currentYear, currentDate.getMonth() + 1, generationDay);
+        }
+        
         // Check and create current month entry if missing
         const existingCurrentEntry = await RentPayment.findOne({
           tenant: tenant._id,
@@ -70,7 +80,7 @@ export async function POST(req: Request) {
               amount: roomType.rent,
               month: currentMonth,
               year: currentYear,
-              dueDate: new Date(currentYear, currentDate.getMonth(), dueDay),
+              dueDate: currentDueDate,
               status: 'undefined',
               type: 'monthly'
             });
@@ -78,10 +88,18 @@ export async function POST(req: Request) {
           }
         }
 
-        // Check if we should create next month's entry
-        // Create next month's entry 2 days before the due date
-        const daysToDue = dueDay - currentDate.getDate();
-        if (daysToDue <= 2 || currentDate.getDate() > dueDay) {
+        // Check if we should create next month's entry based on payment type
+        let shouldGenerateNext = false;
+        
+        if (paymentGenerationType === 'join_date_based') {
+          const joinDay = new Date(tenant.joinDate).getDate();
+          const daysUntilDue = joinDay - currentDate.getDate();
+          shouldGenerateNext = daysUntilDue <= 2; // Generate 2 days before due date
+        } else {
+          shouldGenerateNext = currentDate.getDate() >= generationDay;
+        }
+        
+        if (shouldGenerateNext) {
           const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
           const nextMonthName = nextMonth.toLocaleString('default', { month: 'long' });
           const nextMonthYear = nextMonth.getFullYear();
@@ -108,7 +126,7 @@ export async function POST(req: Request) {
                 amount: roomType.rent,
                 month: nextMonthName,
                 year: nextMonthYear,
-                dueDate: new Date(nextMonthYear, nextMonth.getMonth(), dueDay),
+                dueDate: nextDueDate,
                 status: 'undefined',
                 type: 'monthly'
               });

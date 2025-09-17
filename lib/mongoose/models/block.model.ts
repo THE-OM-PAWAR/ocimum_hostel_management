@@ -6,6 +6,8 @@ export interface IBlock extends Document {
   hostel: mongoose.Types.ObjectId;
   rentGenerationDay: string;
   rentGenerationEnabled: boolean;
+  paymentGenerationType: 'global' | 'join_date_based';
+  paymentVisibilityDays: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -33,6 +35,17 @@ const blockSchema = new Schema<IBlock>(
     rentGenerationEnabled: {
       type: Boolean,
       default: true,
+    },
+    paymentGenerationType: {
+      type: String,
+      enum: ['global', 'join_date_based'],
+      default: 'join_date_based',
+    },
+    paymentVisibilityDays: {
+      type: Number,
+      default: 2,
+      min: 1,
+      max: 30,
     },
   },
   {
