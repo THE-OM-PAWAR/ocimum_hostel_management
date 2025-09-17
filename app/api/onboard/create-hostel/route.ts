@@ -91,6 +91,7 @@ export async function POST(req: Request) {
       name: hostelName,
       description: `Main block for ${hostelName}`,
       hostel: hostel._id,
+      rentGenerationDay: "1", // Default, but will use individual tenant join dates
     });
 
     // Add the block to admin's assignedBlocks array

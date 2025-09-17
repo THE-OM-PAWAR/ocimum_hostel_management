@@ -35,7 +35,6 @@ export async function POST(req: Request) {
 
     // Get current date and generation day
     const currentDate = new Date();
-    const generationDay = parseInt(block.rentGenerationDay) || 5;
     
     // Calculate next month's date
     const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
@@ -50,6 +49,10 @@ export async function POST(req: Request) {
 
     for (const tenant of tenants) {
       try {
+        // Use tenant's join date day as the due day
+        const joinDate = new Date(tenant.joinDate);
+        const dueDay = joinDate.getDate();
+
         // Check if rent entry already exists for next month
         const existingRent = await RentPayment.findOne({
           tenant: tenant._id,
@@ -76,7 +79,7 @@ export async function POST(req: Request) {
             amount: roomType.rent,
             month: nextMonth.toLocaleString('default', { month: 'long' }),
             year: nextMonth.getFullYear(),
-            dueDate: new Date(nextMonth.getFullYear(), nextMonth.getMonth(), generationDay),
+            dueDate: new Date(nextMonth.getFullYear(), nextMonth.getMonth(), dueDay),
             status: 'undefined',
             type: 'monthly'
           });

@@ -17,14 +17,18 @@ export async function POST(req: Request) {
       );
     }
 
-    const generationDay = parseInt(block.rentGenerationDay) || 5;
-
-    // Calculate due date based on settings
-    const dueDate = new Date(
-      data.year,
-      new Date(Date.parse(`${data.month} 1, 2000`)).getMonth(),
-      generationDay
-    );
+    // For manual rent payments, use the provided due date or calculate based on month
+    let dueDate;
+    if (data.dueDate) {
+      dueDate = new Date(data.dueDate);
+    } else {
+      // Default to 1st of the month if no specific due date provided
+      dueDate = new Date(
+        data.year,
+        new Date(Date.parse(`${data.month} 1, 2000`)).getMonth(),
+        1
+      );
+    }
 
     // Check for duplicate monthly rent
     if (data.type === 'monthly') {

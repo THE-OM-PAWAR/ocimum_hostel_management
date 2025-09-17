@@ -29,7 +29,6 @@ export async function POST(req: Request) {
     const currentDate = new Date();
     const currentMonth = currentDate.toLocaleString('default', { month: 'long' });
     const currentYear = currentDate.getFullYear();
-    const generationDay = parseInt(block.rentGenerationDay) || 5;
 
     // Get only active tenants
     const tenants = await Tenant.find({
@@ -44,6 +43,10 @@ export async function POST(req: Request) {
 
     for (const tenant of tenants) {
       try {
+        // Use tenant's join date day as the due day
+        const joinDate = new Date(tenant.joinDate);
+        const dueDay = joinDate.getDate();
+
         // Check and create current month entry if missing
         const existingCurrentEntry = await RentPayment.findOne({
           tenant: tenant._id,
@@ -67,7 +70,7 @@ export async function POST(req: Request) {
               amount: roomType.rent,
               month: currentMonth,
               year: currentYear,
-              dueDate: new Date(currentYear, currentDate.getMonth(), generationDay),
+              dueDate: new Date(currentYear, currentDate.getMonth(), dueDay),
               status: 'undefined',
               type: 'monthly'
             });
@@ -76,7 +79,9 @@ export async function POST(req: Request) {
         }
 
         // Check if we should create next month's entry
-        if (currentDate.getDate() >= generationDay) {
+        // Create next month's entry 2 days before the due date
+        const daysToDue = dueDay - currentDate.getDate();
+        if (daysToDue <= 2 || currentDate.getDate() > dueDay) {
           const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
           const nextMonthName = nextMonth.toLocaleString('default', { month: 'long' });
           const nextMonthYear = nextMonth.getFullYear();
@@ -103,7 +108,7 @@ export async function POST(req: Request) {
                 amount: roomType.rent,
                 month: nextMonthName,
                 year: nextMonthYear,
-                dueDate: new Date(nextMonthYear, nextMonth.getMonth(), generationDay),
+                dueDate: new Date(nextMonthYear, nextMonth.getMonth(), dueDay),
                 status: 'undefined',
                 type: 'monthly'
               });
