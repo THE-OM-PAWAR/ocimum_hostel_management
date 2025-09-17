@@ -323,7 +323,7 @@ export default function DashboardLayout({
                     <span className="text-lg font-semibold">
                       {loading ? "Loading..." : pageTitle}
                     </span>
-                  </div>
+                  </div>  
                 </div>
               )}
             </div>
