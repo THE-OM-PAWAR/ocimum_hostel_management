@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { CreateRoomTypeDialog } from "@/components/room-types/create-room-type-dialog";
 
 interface BlockCardProps {
   index: number;
@@ -46,6 +47,31 @@ function CreateBlockCard({ onClick }: { onClick: () => void }) {
         Add a new block to your hostel
       </p>
       <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-primary/0 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+    </motion.div>
+  );
+}
+
+function CreateRoomTypeCard({ onClick }: { onClick: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      className="bg-gradient-to-br from-accent/5 to-accent/10 p-6 rounded-lg border-2 border-dashed border-accent/20 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer flex flex-col items-center justify-center h-[200px] group relative"
+      onClick={onClick}
+    >
+      <div className="relative">
+        <div className="absolute inset-0 bg-accent/10 rounded-full blur-xl group-hover:blur-2xl transition-all duration-300" />
+        <div className="relative h-16 w-16 rounded-full bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-all duration-300">
+          <Plus className="h-8 w-8 text-accent group-hover:scale-110 transition-transform duration-300" />
+        </div>
+      </div>
+      <h3 className="font-semibold text-lg text-center group-hover:text-accent transition-colors duration-300">Create Room Type</h3>
+      <p className="text-sm text-muted-foreground mt-2 text-center max-w-[200px] group-hover:text-accent/80 transition-colors duration-300">
+        Quick setup for your first room type
+      </p>
+      <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-accent/0 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
     </motion.div>
   );
 }
@@ -99,7 +125,10 @@ export default function DashboardPage() {
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isCreateRoomTypeDialogOpen, setIsCreateRoomTypeDialogOpen] = useState(false);
   const [pendingUsersCount, setPendingUsersCount] = useState(0);
+  const [hasHostelProfile, setHasHostelProfile] = useState(false);
+  const [hasBlockProfiles, setHasBlockProfiles] = useState(false);
 
   const fetchBlocks = async () => {
     try {
@@ -266,6 +295,9 @@ export default function DashboardPage() {
         {userRole === 'admin' && (
           <CreateBlockCard onClick={() => setIsCreateDialogOpen(true)} />
         )}
+        {userRole === 'admin' && blocks.length > 0 && (
+          <CreateRoomTypeCard onClick={() => setIsCreateRoomTypeDialogOpen(true)} />
+        )}
         {blocks.length >= 1 && blocks.map((block, i) => (
           <BlockCard
             key={block._id}
@@ -284,6 +316,21 @@ export default function DashboardPage() {
           onSuccess={fetchBlocks}
           userId={user?.id || ""}
           hostelId={hostelName}
+        />
+      )}
+
+      {userRole === 'admin' && blocks.length > 0 && (
+        <CreateRoomTypeDialog
+          isOpen={isCreateRoomTypeDialogOpen}
+          onClose={() => setIsCreateRoomTypeDialogOpen(false)}
+          onSuccess={() => {
+            setIsCreateRoomTypeDialogOpen(false);
+            toast({
+              title: "Success",
+              description: "Room type created successfully! You can manage more room types in block settings.",
+            });
+          }}
+          blockId={blocks[0]._id}
         />
       )}
     </div>

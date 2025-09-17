@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { User } from "@/lib/mongoose/models/user.model";
 import { Hostel } from "@/lib/mongoose/models/hostel.model";
 import connectDB from "@/lib/mongodb/client";
+import mongoose from "mongoose";
 
 export async function POST(req: Request) {
   try {
@@ -97,6 +98,35 @@ export async function POST(req: Request) {
       $addToSet: { assignedBlocks: block._id }
     });
 
+    // Create basic room components automatically
+    const { RoomComponent } = await import("@/lib/mongoose/models/room-component.model");
+    const basicComponents = [
+      { name: "Bed", description: "Single/double bed with mattress" },
+      { name: "Study Table", description: "Wooden study table with drawers" },
+      { name: "Chair", description: "Comfortable study chair" },
+      { name: "Almirah/Wardrobe", description: "Storage wardrobe for clothes" },
+      { name: "Ceiling Fan", description: "Electric ceiling fan" },
+      { name: "Tube Light", description: "LED tube light for room lighting" },
+      { name: "Dustbin", description: "Small waste bin for room" },
+      { name: "Mirror", description: "Wall-mounted mirror" },
+      { name: "Window Curtains", description: "Privacy curtains for windows" },
+      { name: "Mattress", description: "Comfortable sleeping mattress" },
+      { name: "Pillow", description: "Sleeping pillow with cover" },
+      { name: "Blanket", description: "Warm blanket for sleeping" },
+      { name: "Study Lamp", description: "Table lamp for reading" },
+      { name: "Bookshelf", description: "Small shelf for books and items" },
+      { name: "Water Bottle", description: "Personal water bottle" },
+    ];
+
+    const createdComponents = await Promise.all(
+      basicComponents.map(component  =>
+        RoomComponent.create({
+          ...component,
+          blockId: (block._id as mongoose.Types.ObjectId).toString(),
+        })
+      )
+    );
+    
     return NextResponse.json({
       message: "Hostel created successfully",
       hostel: {
@@ -108,6 +138,7 @@ export async function POST(req: Request) {
         id: block._id,
         name: block.name,
       },
+      componentsCreated: createdComponents.length,
     });
   } catch (error) {
     console.error("Error in hostel creation:", error);
