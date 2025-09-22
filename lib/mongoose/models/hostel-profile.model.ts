@@ -16,6 +16,7 @@ export interface IHostelProfile extends Document {
   hostel: mongoose.Types.ObjectId;
   isOnlinePresenceEnabled: boolean;
   basicInfo: {
+    state: string;
     name: string;
     address: string;
     landmark: string;

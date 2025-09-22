@@ -206,7 +206,7 @@ export default function BlockProfilePage() {
           const hostelResponse = await fetch(`/api/users/${user.id}/hostel-info`);
           const hostelData = await hostelResponse.json();
           
-          let hostelProfile = null;
+          let hostelProfile: BlockProfile | null = null;
           if (!hostelData.error && hostelData.hostelId) {
             const hostelProfileResponse = await fetch(`/api/hostels/${hostelData.hostelId}/profile`);
             if (hostelProfileResponse.ok) {
@@ -230,12 +230,12 @@ export default function BlockProfilePage() {
             },
             propertyDetails: {
               ...prev.propertyDetails,
-              accommodationType: hostelProfile?.propertyDetails?.type || 'boys',
+              accommodationType: hostelProfile?.propertyDetails?.accommodationType || 'boys',
             },
             locationInfo: {
               ...prev.locationInfo,
-              googleMapLink: hostelProfile?.locationFactors?.googleMapLink || "",
-              nearbyLandmarks: hostelProfile?.locationFactors?.nearbyLandmarks || [],
+              googleMapLink: hostelProfile?.locationInfo?.googleMapLink || "",
+              nearbyLandmarks: hostelProfile?.locationInfo?.nearbyLandmarks || [],
               transportConnectivity: [],
             },
           }));
