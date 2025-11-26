@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { Tenant } from "@/lib/mongoose/models/tenant.model";
 import { RoomType } from "@/lib/mongoose/models/room-type.model";
-import { Block } from "@/lib/mongoose/models/block.model";
+import { Hostel } from "@/lib/mongoose/models/hostel.model";
 import connectDB from "@/lib/mongodb/client";
 
 export async function GET(
@@ -30,10 +30,10 @@ export async function GET(
 
     // Fetch room type details with images
     try {
-      const block = await Block.findById(tenant.block);
-      if (block && block._id) {
+      const hostel = await Hostel.findById(tenant.hostel);
+      if (hostel && hostel._id) {
         const roomType = await RoomType.findOne({
-          blockId: (block._id as any).toString(),
+          hostelId: (hostel._id as any).toString(),
           name: tenant.roomType
         }).populate('components');
         

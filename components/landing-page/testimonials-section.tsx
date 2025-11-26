@@ -6,8 +6,8 @@ import { Star } from "lucide-react";
 const testimonials = [
   {
     name: "Rahul Sharma",
-    role: "Hostel Owner",
-    testimonial: "HostelHub has transformed how we manage our 50-room student hostel. The automated billing system alone has saved us countless hours every month.",
+    role: "Organisation Owner",
+    testimonial: "OrganisationHub has transformed how we manage our 50-room student organisation. The automated billing system alone has saved us countless hours every month.",
     rating: 5,
   },
   {
@@ -24,7 +24,7 @@ const testimonials = [
   },
   {
     name: "Anjali Desai",
-    role: "Hostel Administrator",
+    role: "Organisation Administrator",
     testimonial: "The maintenance tracking feature has improved our response times significantly. Our tenants are happier and renewal rates have increased.",
     rating: 5,
   },
@@ -36,10 +36,10 @@ export function TestimonialsSection() {
       <div className="container px-4 md:px-6">
         <div className="text-center max-w-[800px] mx-auto mb-12">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-            Trusted by hostel owners nationwide
+            Trusted by organisation owners nationwide
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Don't just take our word for it. Here's what our customers have to say about HostelHub.
+            Don't just take our word for it. Here's what our customers have to say about OrganisationHub.
           </p>
         </div>
 
@@ -61,9 +61,9 @@ export function TestimonialsSection() {
                   />
                 ))}
               </div>
-              <blockquote className="text-lg mb-4 italic">
+              <hostelquote className="text-lg mb-4 italic">
                 "{testimonial.testimonial}"
-              </blockquote>
+              </hostelquote>
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
                   <span className="text-sm font-medium">
@@ -81,7 +81,7 @@ export function TestimonialsSection() {
 
         <div className="mt-16 text-center">
           <div className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-muted">
-            <span className="text-sm font-medium">Trusted by 500+ hostel owners across India</span>
+            <span className="text-sm font-medium">Trusted by 500+ organisation owners across India</span>
           </div>
         </div>
       </div>

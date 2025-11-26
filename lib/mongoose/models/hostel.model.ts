@@ -1,42 +1,16 @@
 import mongoose, { Document, Model, Schema } from 'mongoose';
 
-interface HostelUser {
-  userId: mongoose.Types.ObjectId;
-  role: 'admin' | 'manager' | 'warden' | 'tenant' | 'pending';
-  status: 'approved' | 'pending' | 'rejected';
-  joinedAt: Date;
-}
-
 export interface IHostel extends Document {
   name: string;
-  owner: mongoose.Types.ObjectId;
-  users: HostelUser[];
-  joinCode: string;
+  description?: string;
+  organisation: mongoose.Types.ObjectId;
+  rentGenerationDay: string;
+  rentGenerationEnabled: boolean;
+  paymentGenerationType: 'global' | 'join_date_based';
+  paymentVisibilityDays: number;
   createdAt: Date;
   updatedAt: Date;
 }
-
-const hostelUserSchema = new Schema({
-  userId: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  },
-  role: {
-    type: String,
-    enum: ['admin', 'manager', 'warden', 'tenant', 'pending'],
-    default: 'pending',
-  },
-  status: {
-    type: String,
-    enum: ['approved', 'pending', 'rejected'],
-    default: 'pending',
-  },
-  joinedAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
 
 const hostelSchema = new Schema<IHostel>(
   {
@@ -45,30 +19,39 @@ const hostelSchema = new Schema<IHostel>(
       required: [true, 'Please provide a hostel name'],
       trim: true,
     },
-    owner: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: [true, 'Please provide the hostel owner'],
-    },
-    users: [hostelUserSchema],
-    joinCode: {
+    description: {
       type: String,
-      unique: true,
-      required: true,
+      trim: true,
+    },
+    organisation: {
+      type: Schema.Types.ObjectId,
+      ref: 'Organisation',
+      required: [true, 'Please provide a organisation ID'],
+    },
+    rentGenerationDay: {
+      type: String,
+      default: "1",
+    },
+    rentGenerationEnabled: {
+      type: Boolean,
+      default: true,
+    },
+    paymentGenerationType: {
+      type: String,
+      enum: ['global', 'join_date_based'],
+      default: 'join_date_based',
+    },
+    paymentVisibilityDays: {
+      type: Number,
+      default: 2,
+      min: 1,
+      max: 30,
     },
   },
   {
     timestamps: true,
   }
 );
-
-// Generate unique join code before saving
-hostelSchema.pre('save', function(next) {
-  if (!this.joinCode) {
-    this.joinCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-  }
-  next();
-});
 
 export const Hostel = (mongoose.models.Hostel as Model<IHostel>) ||
   mongoose.model<IHostel>('Hostel', hostelSchema);

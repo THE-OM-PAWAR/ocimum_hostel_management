@@ -1,7 +1,7 @@
 {
-    "name": "OCIMUM - Modern Hostel Management",
-    "short_name": "OCIMUM",
-    "description": "Streamline your hostel management with OCIMUM's comprehensive solution",
+    "name": "Getstay - Modern Hostel Management",
+    "short_name": "Getstay",
+    "description": "Streamline your hostel management with Getstay's comprehensive solution",
     "start_url": "/dashboard",
     "display": "standalone",
     "background_color": "#ffffff",

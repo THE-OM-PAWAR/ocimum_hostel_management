@@ -40,14 +40,14 @@ interface CreateTenantDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  blockId: string;
+  hostelId: string;
 }
 
 export function CreateTenantDialog({
   isOpen,
   onClose,
   onSuccess,
-  blockId,
+  hostelId,
 }: CreateTenantDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [roomTypes, setRoomTypes] = useState<string[]>([]);
@@ -67,7 +67,7 @@ export function CreateTenantDialog({
   useEffect(() => {
     const fetchRoomTypes = async () => {
       try {
-        const response = await fetch(`/api/blocks/${blockId}/room-types`);
+        const response = await fetch(`/api/hostels/${hostelId}/room-types`);
         if (response.ok) {
           const types = await response.json();
           setRoomTypes(types);
@@ -77,10 +77,10 @@ export function CreateTenantDialog({
       }
     };
 
-    if (blockId) {
+    if (hostelId) {
       fetchRoomTypes();
     }
-  }, [blockId]);
+  }, [hostelId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,7 +94,7 @@ export function CreateTenantDialog({
         },
         body: JSON.stringify({
           ...formData,
-          block: blockId,
+          hostel: hostelId,
           status: "active",
         }),
       });

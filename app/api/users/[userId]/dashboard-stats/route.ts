@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { Block } from "@/lib/mongoose/models/block.model";
+import { Hostel } from "@/lib/mongoose/models/hostel.model";
 import { Tenant } from "@/lib/mongoose/models/tenant.model";
 import { RentPayment } from "@/lib/mongoose/models/rentPayment.model";
 import connectDB from "@/lib/mongodb/client";
@@ -12,12 +12,12 @@ export async function GET(
     await connectDB();
     const { userId } = params;
 
-    // Get all blocks for the user
-    const blocks = await Block.find({ userId });
-    const blockIds = blocks.map(block => block._id);
+    // Get all hostels for the user
+    const hostels = await Hostel.find({ userId });
+    const hostelIds = hostels.map(hostel => hostel._id);
 
-    // Get all tenants across all blocks
-    const tenants = await Tenant.find({ block: { $in: blockIds } });
+    // Get all tenants across all hostels
+    const tenants = await Tenant.find({ hostel: { $in: hostelIds } });
     const activeTenants = tenants.filter(tenant => tenant.status === 'active');
 
     // Get rent payments for the current month
@@ -26,7 +26,7 @@ export async function GET(
     const currentYear = now.getFullYear();
 
     const rentPayments = await RentPayment.find({
-      block: { $in: blockIds },
+      hostel: { $in: hostelIds },
       month: currentMonth,
       year: currentYear
     });

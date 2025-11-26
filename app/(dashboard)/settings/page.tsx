@@ -14,7 +14,7 @@ interface Owner {
   _id: string;
   userId: string;
   ownerName: string;
-  hostelName: string;
+  organisationName: string;
   email: string;
   phoneNumber: string;
   address: string;
@@ -119,7 +119,7 @@ export default function SettingsPage() {
           setDeferredPrompt(null);
           toast({
             title: "Success!",
-            description: "OCIMUM has been installed on your device",
+            description: "Getstay has been installed on your device",
           });
         }
       };
@@ -162,7 +162,7 @@ export default function SettingsPage() {
         if (outcome === 'accepted') {
           toast({
             title: "Installing...",
-            description: "OCIMUM is being installed on your device",
+            description: "Getstay is being installed on your device",
           });
         } else {
           toast({
@@ -256,13 +256,13 @@ export default function SettingsPage() {
         return (
           <div className="flex items-center gap-2 text-success">
             <CheckCircle className="h-4 w-4" />
-            <span className="text-sm">OCIMUM is installed on your device</span>
+            <span className="text-sm">Getstay is installed on your device</span>
           </div>
         );
       case 'available':
         return (
           <p className="text-sm text-muted-foreground">
-            Install OCIMUM as an app for faster access and offline capabilities
+            Install Getstay as an app for faster access and offline capabilities
           </p>
         );
       case 'not-available':
@@ -381,15 +381,15 @@ export default function SettingsPage() {
       </div>
 
       <div className="bg-card p-6 rounded-lg border shadow-sm">
-        <h2 className="text-xl font-semibold mb-4">Hostel Management</h2>
+        <h2 className="text-xl font-semibold mb-4">Organisation Management</h2>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="font-medium">Online Presence</h3>
-              <p className="text-sm text-muted-foreground">Manage your hostel's online profile and visibility</p>
+              <p className="text-sm text-muted-foreground">Manage your organisation's online profile and visibility</p>
             </div>
             <Button
-              onClick={() => router.push('/settings/hostel-profile')}
+              onClick={() => router.push('/settings/organisation-profile')}
               variant="outline"
               className="flex items-center gap-2"
             >
@@ -400,16 +400,16 @@ export default function SettingsPage() {
           
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-medium">Block Profiles</h3>
-              <p className="text-sm text-muted-foreground">Manage detailed information for each block</p>
+              <h3 className="font-medium">Hostel Profiles</h3>
+              <p className="text-sm text-muted-foreground">Manage detailed information for each hostel</p>
             </div>
             <Button
-              onClick={() => router.push('/settings/block-profiles')}
+              onClick={() => router.push('/settings/hostel-profiles')}
               variant="outline"
               className="flex items-center gap-2"
             >
               <SettingsIcon className="h-4 w-4" />
-              Manage Blocks
+              Manage Hostels
             </Button>
           </div>
           
@@ -437,7 +437,7 @@ export default function SettingsPage() {
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
                 <Smartphone className="h-5 w-5 text-primary" />
-                <h3 className="font-medium">Install OCIMUM App</h3>
+                <h3 className="font-medium">Install Getstay App</h3>
               </div>
               
               {getStatusMessage()}

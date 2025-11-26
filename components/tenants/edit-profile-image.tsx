@@ -303,7 +303,7 @@ export function EditProfileImage({ tenant, onSuccess, children }: EditProfileIma
                                             style={{ 
                                                 maxWidth: '100%', 
                                                 maxHeight: '300px',
-                                                display: 'block'
+                                                display: 'hostel'
                                             }}
                                             className="object-contain"
                                         />

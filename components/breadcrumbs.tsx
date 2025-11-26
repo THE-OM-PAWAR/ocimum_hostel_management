@@ -29,7 +29,7 @@ export function Breadcrumbs() {
     const fetchOwnerName = async () => {
       if (!user?.id) return;
       try {
-        const response = await fetch(`/api/users/${user.id}/hostel-info`);
+        const response = await fetch(`/api/users/${user.id}/organisation-info`);
         const data = await response.json();
         console.log("Owner Name:", data);
         setOwnerName(data.ownerName || "");
@@ -73,7 +73,7 @@ export function Breadcrumbs() {
 
         // Handle dynamic segments and route mapping
         if (index === 1 && segments[0] === "dashboard") {
-          label = "Block";
+          label = "Hostel";
           icon = <Building2 className="h-4 w-4" />;
         } else if (index === 3 && segments[2] === "tenants") {
           label = "Tenant";

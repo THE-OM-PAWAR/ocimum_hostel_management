@@ -7,7 +7,7 @@ const features = [
   {
     icon: <Building2 className="h-6 w-6" />,
     title: "Room Management",
-    description: "Organize rooms by blocks, floors and categories. Assign and track room status in real-time.",
+    description: "Organize rooms by hostels, floors and categories. Assign and track room status in real-time.",
   },
   {
     icon: <User className="h-6 w-6" />,

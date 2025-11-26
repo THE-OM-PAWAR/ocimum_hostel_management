@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { RentPayment } from "@/lib/mongoose/models/rentPayment.model";
-import { Block } from "@/lib/mongoose/models/block.model";
+import { Hostel } from "@/lib/mongoose/models/hostel.model";
 import connectDB from "@/lib/mongodb/client";
 
 export async function POST(req: Request) {
@@ -8,16 +8,16 @@ export async function POST(req: Request) {
     await connectDB();
     const data = await req.json();
 
-    // Get block settings for rent generation
-    const block = await Block.findById(data.block);
-    if (!block) {
+    // Get hostel settings for rent generation
+    const hostel = await Hostel.findById(data.hostel);
+    if (!hostel) {
       return NextResponse.json(
-        { error: "Block not found" },
+        { error: "Hostel not found" },
         { status: 404 }
       );
     }
 
-    const generationDay = parseInt(block.rentGenerationDay) || 5;
+    const generationDay = parseInt(hostel.rentGenerationDay) || 5;
 
     // Calculate due date based on settings
     const dueDate = new Date(
@@ -65,11 +65,11 @@ export async function GET(req: Request) {
     await connectDB();
     const { searchParams } = new URL(req.url);
     const tenantId = searchParams.get('tenantId');
-    const blockId = searchParams.get('blockId');
+    const hostelId = searchParams.get('hostelId');
 
-    if (!tenantId && !blockId) {
+    if (!tenantId && !hostelId) {
       return NextResponse.json(
-        { error: "Either tenant ID or block ID is required" },
+        { error: "Either tenant ID or hostel ID is required" },
         { status: 400 }
       );
     }
@@ -77,8 +77,8 @@ export async function GET(req: Request) {
     let query = {};
     if (tenantId) {
       query = { tenant: tenantId };
-    } else if (blockId) {
-      query = { block: blockId };
+    } else if (hostelId) {
+      query = { hostel: hostelId };
     }
 
     const rentPayments = await RentPayment.find(query)

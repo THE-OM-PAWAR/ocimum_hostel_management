@@ -4,9 +4,9 @@ import connectDB from "@/lib/mongodb/client";
 
 export async function POST(req: Request) {
   try {
-    const { ownerName, hostelName, phoneNumber, email, userId } = await req.json();
-    console.log('Received onboarding data:', { ownerName, hostelName, phoneNumber, email, userId });
-    if (!userId || !ownerName || !hostelName || !phoneNumber || !email) {
+    const { ownerName, organisationName, phoneNumber, email, userId } = await req.json();
+    console.log('Received onboarding data:', { ownerName, organisationName, phoneNumber, email, userId });
+    if (!userId || !ownerName || !organisationName || !phoneNumber || !email) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -16,11 +16,11 @@ export async function POST(req: Request) {
     console.log('Connecting to MongoDB for onboarding...');
     await connectDB();
     
-    console.log('Creating new user:', { ownerName, hostelName, phoneNumber, email, userId });
+    console.log('Creating new user:', { ownerName, organisationName, phoneNumber, email, userId });
     const user = await User.create({
       userId,
       ownerName,
-      hostelName,
+      organisationName,
       phoneNumber,
       email,
       isOnboarded: true,

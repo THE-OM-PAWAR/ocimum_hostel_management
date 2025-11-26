@@ -21,8 +21,8 @@ export default function TermsPage() {
             <p className="font-medium">Effective Date: July 1, 2023</p>
             
             <p className="mt-4">
-              These Terms and Conditions (&quot;Terms&quot;) govern your use of our <strong>Hostel Management Software</strong> (&quot;Service&quot;) 
-              provided by HostelHub, located at Main Street, Tech Park, Bangalore, India (referred to as &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;).
+              These Terms and Conditions (&quot;Terms&quot;) govern your use of our <strong>Organisation Management Software</strong> (&quot;Service&quot;) 
+              provided by OrganisationHub, located at Main Street, Tech Park, Bangalore, India (referred to as &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;).
             </p>
             
             <p className="mt-2 mb-6">
@@ -35,7 +35,7 @@ export default function TermsPage() {
               <p>By registering or using the Service, you:</p>
               <ul className="list-disc pl-6 space-y-2">
                 <li>Agree to abide by all terms and policies listed here.</li>
-                <li>Confirm that you are authorized to act on behalf of the hostel or institution you represent.</li>
+                <li>Confirm that you are authorized to act on behalf of the organisation or institution you represent.</li>
                 <li>Agree that any violation of these terms may result in suspension or termination of your access.</li>
               </ul>
             </section>
@@ -53,7 +53,7 @@ export default function TermsPage() {
               <h2 className="text-2xl font-semibold mb-4">3. Description of Services</h2>
               <p>We provide a cloud-based platform that allows:</p>
               <ul className="list-disc pl-6 space-y-2">
-                <li>Hostel owners/administrators to manage rooms, students, fees, complaints, visitor logs, attendance, and more.</li>
+                <li>Organisation owners/administrators to manage rooms, students, fees, complaints, visitor logs, attendance, and more.</li>
                 <li>Access via web or mobile app for authorized users including staff and students.</li>
               </ul>
             </section>

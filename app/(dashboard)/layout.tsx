@@ -147,13 +147,13 @@ export default function DashboardLayout({
     if (pathParts[0] === 'dashboard') {
       if (pathParts.length === 1) return 'Dashboard';
       
-      // Handle block pages
+      // Handle hostel pages
       if (pathParts[1] && pathParts[1] !== 'settings') {
         try {
-          const response = await fetch(`/api/users/${user?.id}/block/${pathParts[1]}`);
+          const response = await fetch(`/api/users/${user?.id}/hostel/${pathParts[1]}`);
           if (response.ok) {
-            const block = await response.json();
-            if (pathParts[2] === 'settings') return `${block.name} Settings`;
+            const hostel = await response.json();
+            if (pathParts[2] === 'settings') return `${hostel.name} Settings`;
             if (pathParts[2] === 'tenants' && pathParts[3]) {
               const tenantResponse = await fetch(`/api/users/${user?.id}/tenants/${pathParts[3]}`);
               if (tenantResponse.ok) {
@@ -161,18 +161,18 @@ export default function DashboardLayout({
                 return tenant.name;
               }
             }
-            return block.name;
+            return hostel.name;
           }
         } catch (error) {
-          console.error('Error fetching block details:', error);
+          console.error('Error fetching hostel details:', error);
         }
       }
     }
     
-    if (pathParts[0] === 'blocks') {
-      if (pathParts.length === 1) return 'Blocks';
-      if (pathParts[2] === 'settings') return 'Block Settings';
-      return 'Block Details';
+    if (pathParts[0] === 'hostels') {
+      if (pathParts.length === 1) return 'Hostels';
+      if (pathParts[2] === 'settings') return 'Hostel Settings';
+      return 'Hostel Details';
     }
     if (pathParts[0] === 'tenants') {
       if (pathParts.length === 1) return 'Tenants';
@@ -232,7 +232,7 @@ export default function DashboardLayout({
             <div className="flex items-center gap-2">
               <Building2 className="h-6 w-6 text-primary" />
               {!isSidebarCollapsed && (
-                <span className="text-xl font-bold">OCIMUM</span>
+                <span className="text-xl font-bold">Getstay</span>
               )}
             </div>
           </div>
@@ -299,7 +299,7 @@ export default function DashboardLayout({
                 )}
               />
             </Button> 
-            <div className="px-4 hidden md:block">
+            <div className="px-4 hidden md:hostel">
               <Breadcrumbs />
             </div>
             {/* Mobile Header */}
@@ -307,7 +307,7 @@ export default function DashboardLayout({
               {pathname === "/dashboard" ? (
                 <div className="flex items-center gap-2">
                   <Building2 className="h-6 w-6 text-primary" />
-                  <span className="text-xl font-bold">OCIMUM</span>
+                  <span className="text-xl font-bold">Getstay</span>
                 </div>
               ) : (
                 <div className="flex items-center justify-between w-full">

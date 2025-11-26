@@ -20,7 +20,7 @@ interface AddAdditionalPaymentDialogProps {
   onClose: () => void;
   onSuccess: () => void;
   tenantId: string;
-  blockId: string;
+  hostelId: string;
   roomNumber: string;
   roomType: string;
 }
@@ -30,7 +30,7 @@ export function AddAdditionalPaymentDialog({
   onClose,
   onSuccess,
   tenantId,
-  blockId,
+  hostelId,
   roomNumber,
   roomType,
 }: AddAdditionalPaymentDialogProps) {
@@ -58,7 +58,7 @@ export function AddAdditionalPaymentDialog({
         body: JSON.stringify({
           ...formData,
           tenant: tenantId,
-          block: blockId,
+          hostel: hostelId,
           roomNumber,
           roomType,
           type: "additional",

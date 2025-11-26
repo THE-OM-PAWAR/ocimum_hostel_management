@@ -9,22 +9,22 @@ export function WorkflowSection() {
       <div className="container px-4 md:px-6">
         <div className="text-center max-w-[800px] mx-auto mb-16">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-            How HostelHub works
+            How OrganisationHub works
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Our streamlined workflow makes hostel management simple and efficient
+            Our streamlined workflow makes organisation management simple and efficient
           </p>
         </div>
 
         <div className="relative">
           {/* Connecting line */}
-          <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-border -translate-x-1/2 hidden md:block" />
+          <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-border -translate-x-1/2 hidden md:hostel" />
 
           {/* Workflow steps */}
           <div className="space-y-24 relative">
             <WorkflowStep 
               icon={<Building2 className="h-6 w-6" />}
-              title="Set up your hostel layout"
+              title="Set up your organisation layout"
               align="right"
               index={1}
             >
@@ -41,7 +41,7 @@ export function WorkflowSection() {
                       <div className="h-2 w-2 rounded-full bg-destructive"></div>
                       <div className="h-2 w-2 rounded-full bg-warning"></div>
                       <div className="h-2 w-2 rounded-full bg-success"></div>
-                      <div className="text-xs text-muted-foreground ml-2">Hostel Setup</div>
+                      <div className="text-xs text-muted-foreground ml-2">Organisation Setup</div>
                     </div>
                   </div>
                   <div className="p-4">
@@ -82,12 +82,12 @@ export function WorkflowSection() {
                 <div className="lg:col-span-2 space-y-4">
                   <h3 className="text-xl font-bold">Configure your building</h3>
                   <p className="text-muted-foreground">
-                    Start by setting up your hostel blocks, floors, and room types. Define room capacities, amenities, and pricing tiers.
+                    Start by setting up your organisation hostels, floors, and room types. Define room capacities, amenities, and pricing tiers.
                   </p>
                   <ul className="space-y-2">
                     <li className="flex items-center gap-2 text-sm">
                       <div className="h-1.5 w-1.5 rounded-full bg-primary"></div>
-                      Add multiple buildings and blocks
+                      Add multiple buildings and hostels
                     </li>
                     <li className="flex items-center gap-2 text-sm">
                       <div className="h-1.5 w-1.5 rounded-full bg-primary"></div>
@@ -112,7 +112,7 @@ export function WorkflowSection() {
                 <div className="lg:col-span-2 space-y-4 lg:order-1 order-2">
                   <h3 className="text-xl font-bold">Customize your room types</h3>
                   <p className="text-muted-foreground">
-                    Define different room categories with unique amenities, pricing, and features to match your hostel offerings.
+                    Define different room categories with unique amenities, pricing, and features to match your organisation offerings.
                   </p>
                   <ul className="space-y-2">
                     <li className="flex items-center gap-2 text-sm">

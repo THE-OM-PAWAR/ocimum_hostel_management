@@ -5,7 +5,7 @@ export interface IMaintenance extends Document {
   description: string;
   tenant: mongoose.Types.ObjectId;
   room: mongoose.Types.ObjectId;
-  hostel: mongoose.Types.ObjectId;
+  organisation: mongoose.Types.ObjectId;
   issueType: string;
   priority: 'low' | 'medium' | 'high' | 'urgent';
   status: 'pending' | 'in-progress' | 'completed' | 'cancelled';
@@ -39,10 +39,10 @@ const maintenanceSchema = new Schema<IMaintenance>(
       ref: 'Room',
       required: [true, 'Please provide the room ID'],
     },
-    hostel: {
+    organisation: {
       type: Schema.Types.ObjectId,
-      ref: 'Hostel',
-      required: [true, 'Please provide the hostel ID'],
+      ref: 'Organisation',
+      required: [true, 'Please provide the organisation ID'],
     },
     issueType: {
       type: String,

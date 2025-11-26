@@ -9,7 +9,7 @@ const tiers = [
   {
     name: "Starter",
     price: "₹1,999",
-    description: "Perfect for small hostels with basic management needs",
+    description: "Perfect for small organisations with basic management needs",
     features: [
       "Up to 20 rooms",
       "Basic tenant management",
@@ -23,7 +23,7 @@ const tiers = [
   {
     name: "Professional",
     price: "₹3,999",
-    description: "Ideal for growing hostels with advanced requirements",
+    description: "Ideal for growing organisations with advanced requirements",
     features: [
       "Up to 50 rooms",
       "Advanced tenant management",
@@ -39,7 +39,7 @@ const tiers = [
   {
     name: "Enterprise",
     price: "Custom",
-    description: "For large hostels and multi-property management companies",
+    description: "For large organisations and multi-property management companies",
     features: [
       "Unlimited rooms",
       "Multiple property management",
@@ -64,7 +64,7 @@ export function PricingSection() {
             Simple, transparent pricing
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Choose the plan that&apos;s right for your hostel. All plans include a 14-day free trial.
+            Choose the plan that&apos;s right for your organisation. All plans include a 14-day free trial.
           </p>
         </div>
 

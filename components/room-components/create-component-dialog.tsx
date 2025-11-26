@@ -12,14 +12,14 @@ interface CreateComponentDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  blockId: string;
+  hostelId: string;
 }
 
 export function CreateComponentDialog({
   isOpen,
   onClose,
   onSuccess,
-  blockId,
+  hostelId,
 }: CreateComponentDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -33,14 +33,14 @@ export function CreateComponentDialog({
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`/api/blocks/${blockId}/components`, {
+      const response = await fetch(`/api/hostels/${hostelId}/components`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           ...formData,
-          blockId,
+          hostelId,
         }),
       });
 

@@ -37,7 +37,7 @@ interface EditRoomTypeDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  blockId: string;
+  hostelId: string;
   roomType: RoomType;
 }
 
@@ -45,7 +45,7 @@ export function EditRoomTypeDialog({
   isOpen,
   onClose,
   onSuccess,
-  blockId,
+  hostelId,
   roomType,
 }: EditRoomTypeDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -76,11 +76,11 @@ export function EditRoomTypeDialog({
         images: roomType.images || [],
       });
     }
-  }, [isOpen, blockId, roomType]);
+  }, [isOpen, hostelId, roomType]);
 
   const fetchComponents = async () => {
     try {
-      const response = await fetch(`/api/blocks/${blockId}/components`);
+      const response = await fetch(`/api/hostels/${hostelId}/components`);
       if (!response.ok) {
         throw new Error("Failed to fetch components");
       }
@@ -157,7 +157,7 @@ export function EditRoomTypeDialog({
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`/api/blocks/${blockId}/room-types/${roomType._id}`, {
+      const response = await fetch(`/api/hostels/${hostelId}/room-types/${roomType._id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -345,7 +345,7 @@ export function EditRoomTypeDialog({
                         className="w-full mt-2 text-primary"
                         onClick={(e) => {
                           e.stopPropagation();
-                          router.push(`/dashboard/${blockId}/settings/room-components`);
+                          router.push(`/dashboard/${hostelId}/settings/room-components`);
                         }}
                       >
                         <Plus className="mr-2 h-4 w-4" />

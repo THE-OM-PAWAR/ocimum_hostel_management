@@ -20,10 +20,10 @@ export function CtaSection() {
           
           <div className="relative z-10 py-12 px-6 md:py-24 md:px-12 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Ready to transform your hostel management?
+              Ready to transform your organisation management?
             </h2>
             <p className="text-lg md:text-xl mb-8 max-w-[600px] mx-auto text-muted-foreground">
-              Join hundreds of hostel owners who are saving time, increasing occupancy rates, and delivering better tenant experiences with HostelHub.
+              Join hundreds of organisation owners who are saving time, increasing occupancy rates, and delivering better tenant experiences with OrganisationHub.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

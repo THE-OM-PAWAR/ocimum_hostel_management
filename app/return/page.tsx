@@ -21,7 +21,7 @@ export default function ReturnPage() {
             <p className="font-medium">Effective Date: July 1, 2023</p>
             
             <p className="mt-4">
-              At HostelHub, we strive to provide the best service and experience for our users. 
+              At OrganisationHub, we strive to provide the best service and experience for our users. 
               However, in case you are not satisfied with your purchase or subscription, we have 
               created the following <strong>Return Policy</strong> to outline the process for 
               returning services or products.
@@ -52,7 +52,7 @@ export default function ReturnPage() {
               <p>The following are non-returnable:</p>
               <ul className="list-disc pl-6 space-y-2">
                 <li>Subscriptions that have been used or partially used.</li>
-                <li>Any custom development or setup charges for your specific hostel setup.</li>
+                <li>Any custom development or setup charges for your specific organisation setup.</li>
                 <li>Payments made for services that have been fully delivered and accepted.</li>
               </ul>
             </section>
@@ -61,7 +61,7 @@ export default function ReturnPage() {
               <h2 className="text-2xl font-semibold mb-4">4. How to Request a Return or Refund</h2>
               <p>If you believe that you are eligible for a return or refund, please follow these steps:</p>
               <ul className="list-disc pl-6 space-y-2">
-                <li><strong>Contact Us:</strong> Email our support team at support@hostelhub.com with the subject line "Return Request" or "Refund Request".</li>
+                <li><strong>Contact Us:</strong> Email our support team at support@organisationhub.com with the subject line "Return Request" or "Refund Request".</li>
                 <li><strong>Provide Information:</strong> Include your account details, the reason for your return request, and any relevant transaction details.</li>
                 <li><strong>Review Process:</strong> Our team will review your request and, if eligible, either provide a solution to the issue or process your return/refund accordingly.</li>
               </ul>

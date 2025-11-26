@@ -13,12 +13,12 @@ import { cn } from "@/lib/utils";
 import { useUser } from "@clerk/nextjs";
 
 interface CreateTenantSheetProps {
-  blockId: string;
+  hostelId: string;
   onSuccess: () => void;
   isMobile?: boolean;
 }
 
-export function CreateTenantSheet({ blockId, onSuccess, isMobile }: CreateTenantSheetProps) {
+export function CreateTenantSheet({ hostelId, onSuccess, isMobile }: CreateTenantSheetProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -45,7 +45,7 @@ export function CreateTenantSheet({ blockId, onSuccess, isMobile }: CreateTenant
   useEffect(() => {
     const fetchRoomTypes = async () => {
       try {
-        const response = await fetch(`/api/blocks/${blockId}/room-types`);
+        const response = await fetch(`/api/hostels/${hostelId}/room-types`);
         if (response.ok) {
           const data = await response.json();
           setRoomTypes(data);
@@ -58,7 +58,7 @@ export function CreateTenantSheet({ blockId, onSuccess, isMobile }: CreateTenant
     if (isOpen) {
       fetchRoomTypes();
     }
-  }, [isOpen, blockId]);
+  }, [isOpen, hostelId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +72,7 @@ export function CreateTenantSheet({ blockId, onSuccess, isMobile }: CreateTenant
         },
         body: JSON.stringify({
           ...formData,
-          block: blockId,
+          hostel: hostelId,
           status: "active",
         }),
       });

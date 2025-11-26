@@ -3,7 +3,7 @@ import mongoose, { Document, Model, Schema } from 'mongoose';
 export interface IRoomComponent extends Document {
   name: string;
   description: string;
-  blockId: string;
+  hostelId: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -20,9 +20,9 @@ const roomComponentSchema = new Schema<IRoomComponent>(
       required: [true, 'Please provide a description'],
       trim: true,
     },
-    blockId: {
+    hostelId: {
       type: String,
-      required: [true, 'Please provide a block ID'],
+      required: [true, 'Please provide a hostel ID'],
     },
   },
   {

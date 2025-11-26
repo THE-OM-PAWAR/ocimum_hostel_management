@@ -3,7 +3,7 @@ import mongoose, { Document, Model, Schema } from 'mongoose';
 export interface IPayment extends Document {
   tenant: mongoose.Types.ObjectId;
   room: mongoose.Types.ObjectId;
-  hostel: mongoose.Types.ObjectId;
+  organisation: mongoose.Types.ObjectId;
   amount: number;
   month: string;
   year: number;
@@ -30,10 +30,10 @@ const paymentSchema = new Schema<IPayment>(
       ref: 'Room',
       required: [true, 'Please provide the room ID'],
     },
-    hostel: {
+    organisation: {
       type: Schema.Types.ObjectId,
-      ref: 'Hostel',
-      required: [true, 'Please provide the hostel ID'],
+      ref: 'Organisation',
+      required: [true, 'Please provide the organisation ID'],
     },
     amount: {
       type: Number,

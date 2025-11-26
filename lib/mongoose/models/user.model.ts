@@ -6,8 +6,8 @@ export interface IUser extends Document {
   ownerName: string;
   phoneNumber: string;
   role: 'admin' | 'manager' | 'warden' | 'tenant' | 'pending';
-  hostel?: mongoose.Types.ObjectId;
-  assignedBlocks: mongoose.Types.ObjectId[];
+  organisation?: mongoose.Types.ObjectId;
+  assignedHostels: mongoose.Types.ObjectId[];
   isOnboarded: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -42,13 +42,13 @@ const userSchema = new Schema<IUser>(
       enum: ['admin', 'manager', 'warden', 'tenant', 'pending'],
       default: 'pending',
     },
-    hostel: {
+    organisation: {
+      type: Schema.Types.ObjectId,
+      ref: 'Organisation',
+    },
+    assignedHostels: [{
       type: Schema.Types.ObjectId,
       ref: 'Hostel',
-    },
-    assignedBlocks: [{
-      type: Schema.Types.ObjectId,
-      ref: 'Block',
     }],
     isOnboarded: {
       type: Boolean,

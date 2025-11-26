@@ -44,7 +44,7 @@ export function PWAInstallPrompt() {
       setDeferredPrompt(null);
       toast({
         title: "App Installed!",
-        description: "OCIMUM has been installed successfully",
+        description: "Getstay has been installed successfully",
       });
     };
 
@@ -92,7 +92,7 @@ export function PWAInstallPrompt() {
           <Smartphone className="h-6 w-6 text-primary" />
         </div>
         <div className="flex-1">
-          <h3 className="font-medium text-sm">Install OCIMUM App</h3>
+          <h3 className="font-medium text-sm">Install Getstay App</h3>
           <p className="text-xs text-muted-foreground mt-1">
             Get faster access and work offline
           </p>

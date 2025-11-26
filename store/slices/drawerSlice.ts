@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 // Define all possible page types
-type PageType = 'blocks' | 'tenants' | 'settings' | 'dashboard' | 'tenants-details' | 'default';
+type PageType = 'hostels' | 'tenants' | 'settings' | 'dashboard' | 'tenants-details' | 'default';
 
 // Define action types
 type ActionType = 'navigation' | 'action' | 'info';

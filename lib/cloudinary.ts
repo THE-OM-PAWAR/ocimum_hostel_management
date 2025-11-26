@@ -11,7 +11,7 @@ export { cloudinary };
 export const uploadToCloudinary = async (file: File): Promise<string> => {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('upload_preset', 'hostel_hub'); // Make sure to create this upload preset in your Cloudinary dashboard
+    formData.append('upload_preset', 'organisation_hub'); // Make sure to create this upload preset in your Cloudinary dashboard
   
     try {
       const response = await fetch(

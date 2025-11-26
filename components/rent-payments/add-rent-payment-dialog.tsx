@@ -19,7 +19,7 @@ interface AddRentPaymentDialogProps {
   onClose: () => void;
   onSuccess: () => void;
   tenantId: string;
-  blockId: string;
+  hostelId: string;
   roomNumber: string;
   roomType: string;
 }
@@ -29,7 +29,7 @@ export function AddRentPaymentDialog({
   onClose,
   onSuccess,
   tenantId,
-  blockId,
+  hostelId,
   roomNumber,
   roomType,
 }: AddRentPaymentDialogProps) {
@@ -48,7 +48,7 @@ export function AddRentPaymentDialog({
       if (!isOpen) return;
       
       try {
-        const response = await fetch(`/api/blocks/${blockId}/room-types`);
+        const response = await fetch(`/api/hostels/${hostelId}/room-types`);
         if (!response.ok) throw new Error("Failed to fetch room types");
         
         const roomTypes = await response.json();
@@ -63,7 +63,7 @@ export function AddRentPaymentDialog({
     };
 
     fetchRoomTypeDetails();
-  }, [isOpen, blockId, roomType]);
+  }, [isOpen, hostelId, roomType]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,7 +77,7 @@ export function AddRentPaymentDialog({
         },
         body: JSON.stringify({
           tenant: tenantId,
-          block: blockId,
+          hostel: hostelId,
           roomNumber,
           roomType,
           amount: parseFloat(formData.amount),

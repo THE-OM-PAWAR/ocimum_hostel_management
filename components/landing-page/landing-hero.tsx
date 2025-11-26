@@ -87,7 +87,7 @@ export function LandingHero() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2, duration: 0.5 }}
             >
-              <span className="text-muted-foreground">Simplify hostel management</span>
+              <span className="text-muted-foreground">Simplify organisation management</span>
               <motion.span 
                 className="ml-1 rounded-full bg-primary px-1.5 py-0.5 text-xs text-primary-foreground"
                 animate={{ scale: [1, 1.2, 1] }}
@@ -103,7 +103,7 @@ export function LandingHero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.8 }}
             >
-              Manage your hostel with ease and efficiency
+              Manage your organisation with ease and efficiency
             </motion.h1>
             
             <motion.p 
@@ -112,7 +112,7 @@ export function LandingHero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.8 }}
             >
-              HostelHub streamlines room management, tenant onboarding, rent collection, and maintenance tracking in one seamless platform.
+              OrganisationHub streamlines room management, tenant onboarding, rent collection, and maintenance tracking in one seamless platform.
             </motion.p>
             
             <motion.div 
@@ -208,7 +208,7 @@ export function LandingHero() {
                 {[...Array(4)].map((_, i) => (
                   <motion.div 
                     key={i}
-                    className="inline-block h-8 w-8 rounded-full border-2 border-background bg-muted overflow-hidden"
+                    className="inline-hostel h-8 w-8 rounded-full border-2 border-background bg-muted overflow-hidden"
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.7 + i * 0.1, duration: 0.5 }}
@@ -223,7 +223,7 @@ export function LandingHero() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 1, duration: 0.5 }}
               >
-                Trusted by <span className="font-medium text-foreground">500+</span> hostel owners
+                Trusted by <span className="font-medium text-foreground">500+</span> organisation owners
               </motion.div>
             </motion.div>
           </motion.div>
@@ -289,7 +289,7 @@ export function LandingHero() {
                     transition={{ delay: 0.5, duration: 0.5 }}
                     whileHover={{ scale: 1.02 }}
                   >
-                    <h3 className="text-sm font-medium mb-2">Hostel Occupancy</h3>
+                    <h3 className="text-sm font-medium mb-2">Organisation Occupancy</h3>
                     <div className="flex-1 flex items-end">
                       <div className="w-full grid grid-cols-7 gap-1 h-32">
                         {[65, 78, 92, 84, 88, 95, 89].map((height, i) => (

@@ -15,7 +15,7 @@ export interface ITenant extends Document {
   joinDate: Date;
   roomNumber: string;
   roomType: string;
-  block: mongoose.Types.ObjectId;
+  hostel: mongoose.Types.ObjectId;
   status: 'active' | 'left' | 'blacklisted' | 'pending';
   statusChangeDate?: Date;
   statusChangeReason?: string;
@@ -81,10 +81,10 @@ const tenantSchema = new Schema<ITenant>(
       type: String,
       required: [true, 'Please provide room type'],
     },
-    block: {
+    hostel: {
       type: Schema.Types.ObjectId,
-      ref: 'Block',
-      required: [true, 'Please provide the block ID'],
+      ref: 'Hostel',
+      required: [true, 'Please provide the hostel ID'],
     },
     status: {
       type: String,

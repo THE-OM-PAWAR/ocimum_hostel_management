@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { HostelProfile } from "@/lib/mongoose/models/hostel-profile.model";
+import { HostelProfile } from "@/lib/mongoose/models/organisation-profile.model";
+import { OrganisationProfile } from "@/lib/mongoose/models/organisation-profile.model";
+import { Hostel } from "@/lib/mongoose/models/hostel.model";
 import connectDB from "@/lib/mongodb/client";
 
 export async function GET(
@@ -9,7 +11,6 @@ export async function GET(
   try {
     await connectDB();
 
-
     const profile = await HostelProfile.findOne({ hostel: params.hostelId });
 
     if (!profile) {
@@ -18,7 +19,6 @@ export async function GET(
         { status: 404 }
       );
     }
-
 
     return NextResponse.json(profile);
   } catch (error) {
@@ -41,11 +41,54 @@ export async function PUT(
     let profile = await HostelProfile.findOne({ hostel: params.hostelId });
 
     if (!profile) {
-      // If profile doesn't exist, create new one
-      profile = await HostelProfile.create({
+      // If profile doesn't exist, create new one with organisation data as fallback
+      const hostel = await Hostel.findById(params.hostelId).populate('organisation');
+      let organisationProfile = null;
+      
+      if (hostel && hostel.organisation) {
+        try {
+          organisationProfile = await OrganisationProfile.findOne({ organisation: hostel.organisation });
+        } catch (error) {
+          console.log("No organisation profile found");
+        }
+      }
+      
+      // Merge organisation profile data with hostel profile data
+      const mergedData = {
         ...profileData,
         hostel: params.hostelId,
-      });
+        basicInfo: {
+          name: profileData.basicInfo?.name || hostel?.name || "",
+          description: profileData.basicInfo?.description || "",
+          address: profileData.basicInfo?.address || organisationProfile?.basicInfo?.address || "",
+          landmark: profileData.basicInfo?.landmark || organisationProfile?.basicInfo?.landmark || "",
+          city: profileData.basicInfo?.city || organisationProfile?.basicInfo?.city || "",
+          state: profileData.basicInfo?.state || organisationProfile?.basicInfo?.state || "",
+          pincode: profileData.basicInfo?.pincode || organisationProfile?.basicInfo?.pincode || "",
+          contactNumber: profileData.basicInfo?.contactNumber || organisationProfile?.basicInfo?.contactNumber || "",
+          email: profileData.basicInfo?.email || organisationProfile?.basicInfo?.email || "",
+        },
+        propertyDetails: {
+          totalFloors: profileData.propertyDetails?.totalFloors || 1,
+          totalRooms: profileData.propertyDetails?.totalRooms || 1,
+          accommodationType: profileData.propertyDetails?.accommodationType || organisationProfile?.propertyDetails?.type || 'boys',
+          establishedYear: profileData.propertyDetails?.establishedYear || new Date().getFullYear(),
+          buildingType: profileData.propertyDetails?.buildingType || 'independent',
+        },
+        locationInfo: {
+          googleMapLink: profileData.locationInfo?.googleMapLink || organisationProfile?.locationFactors?.googleMapLink || "",
+          nearbyLandmarks: profileData.locationInfo?.nearbyLandmarks || organisationProfile?.locationFactors?.nearbyLandmarks || [],
+          transportConnectivity: profileData.locationInfo?.transportConnectivity || [],
+        },
+        amenities: profileData.amenities || [],
+        safetyFeatures: profileData.safetyFeatures || [],
+        media: {
+          photos: profileData.media?.photos || [],
+          virtualTourLink: profileData.media?.virtualTourLink || "",
+        },
+      };
+      
+      profile = await HostelProfile.create(mergedData);
     } else {
       // If profile exists, update it
       profile = await HostelProfile.findOneAndUpdate(
@@ -57,7 +100,6 @@ export async function PUT(
         }
       );
     }
-
 
     return NextResponse.json(profile);
   } catch (error) {
@@ -86,10 +128,54 @@ export async function POST(
       );
     }
 
-    const profile = await HostelProfile.create({
+    // Get organisation data to pre-populate hostel profile
+    const hostel = await Hostel.findById(params.hostelId).populate('organisation');
+    let organisationProfile = null;
+    
+    if (hostel && hostel.organisation) {
+      try {
+        organisationProfile = await OrganisationProfile.findOne({ organisation: hostel.organisation });
+      } catch (error) {
+        console.log("No organisation profile found");
+      }
+    }
+    
+    // Merge organisation profile data with hostel profile data
+    const mergedData = {
       ...profileData,
       hostel: params.hostelId,
-    });
+      basicInfo: {
+        name: profileData.basicInfo?.name || hostel?.name || "",
+        description: profileData.basicInfo?.description || "",
+        address: profileData.basicInfo?.address || organisationProfile?.basicInfo?.address || "",
+        landmark: profileData.basicInfo?.landmark || organisationProfile?.basicInfo?.landmark || "",
+        city: profileData.basicInfo?.city || organisationProfile?.basicInfo?.city || "",
+        state: profileData.basicInfo?.state || organisationProfile?.basicInfo?.state || "",
+        pincode: profileData.basicInfo?.pincode || organisationProfile?.basicInfo?.pincode || "",
+        contactNumber: profileData.basicInfo?.contactNumber || organisationProfile?.basicInfo?.contactNumber || "",
+        email: profileData.basicInfo?.email || organisationProfile?.basicInfo?.email || "",
+      },
+      propertyDetails: {
+        totalFloors: profileData.propertyDetails?.totalFloors || 1,
+        totalRooms: profileData.propertyDetails?.totalRooms || 1,
+        accommodationType: profileData.propertyDetails?.accommodationType || organisationProfile?.propertyDetails?.type || 'boys',
+        establishedYear: profileData.propertyDetails?.establishedYear || new Date().getFullYear(),
+        buildingType: profileData.propertyDetails?.buildingType || 'independent',
+      },
+      locationInfo: {
+        googleMapLink: profileData.locationInfo?.googleMapLink || organisationProfile?.locationFactors?.googleMapLink || "",
+        nearbyLandmarks: profileData.locationInfo?.nearbyLandmarks || organisationProfile?.locationFactors?.nearbyLandmarks || [],
+        transportConnectivity: profileData.locationInfo?.transportConnectivity || [],
+      },
+      amenities: profileData.amenities || [],
+      safetyFeatures: profileData.safetyFeatures || [],
+      media: {
+        photos: profileData.media?.photos || [],
+        virtualTourLink: profileData.media?.virtualTourLink || "",
+      },
+    };
+    
+    const profile = await HostelProfile.create(mergedData);
 
     return NextResponse.json(profile);
   } catch (error) {

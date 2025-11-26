@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { Tenant } from "@/lib/mongoose/models/tenant.model";
-import { Block } from "@/lib/mongoose/models/block.model";
+import { Hostel } from "@/lib/mongoose/models/hostel.model";
 import connectDB from "@/lib/mongodb/client";
 import { RentPayment } from "@/lib/mongoose/models/rentPayment.model";
 import { RoomType } from "@/lib/mongoose/models/room-type.model";
@@ -9,7 +9,7 @@ export async function GET(req: Request) {
   try {
     await connectDB();
     const { searchParams, pathname } = new URL(req.url);
-    const blockId = searchParams.get('blockId');
+    const hostelId = searchParams.get('hostelId');
     
     // Extract userId from the pathname
     const pathParts = pathname.split('/');
@@ -17,18 +17,18 @@ export async function GET(req: Request) {
 
     let query: any = {};
     
-    if (blockId) {
-      // If blockId is specified, get tenants for that specific block
-      query = { block: blockId };
+    if (hostelId) {
+      // If hostelId is specified, get tenants for that specific hostel
+      query = { hostel: hostelId };
     } else if (userId) {
-      // If no blockId but userId is provided, get all tenants for all blocks owned by this user
-      const blocks = await Block.find({ userId });
-      const blockIds = blocks.map(block => block._id);
-      query = { block: { $in: blockIds } };
+      // If no hostelId but userId is provided, get all tenants for all hostels owned by this user
+      const hostels = await Hostel.find({ userId });
+      const hostelIds = hostels.map(hostel => hostel._id);
+      query = { hostel: { $in: hostelIds } };
     }
 
     const tenants = await Tenant.find(query)
-      .populate('block', 'name')
+      .populate('hostel', 'name')
       .sort({ createdAt: -1 });
 
     return NextResponse.json(tenants);
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
 
     // Get room type details for rent amount
     const roomType = await RoomType.findOne({ 
-      blockId: data.block,
+      hostelId: data.hostel,
       name: data.roomType 
     });
 
@@ -59,14 +59,14 @@ export async function POST(req: Request) {
       throw new Error("Room type not found");
     }
 
-    // Get block settings for rent generation
-    const block = await Block.findById(data.block);
-    if (!block) {
-      throw new Error("Block not found");
+    // Get hostel settings for rent generation
+    const hostel = await Hostel.findById(data.hostel);
+    if (!hostel) {
+      throw new Error("Hostel not found");
     }
 
-    const generationDay = parseInt(block.rentGenerationDay) || 1;
-    const paymentGenerationType = (block as any).paymentGenerationType || 'join_date_based';
+    const generationDay = parseInt(hostel.rentGenerationDay) || 1;
+    const paymentGenerationType = (hostel as any).paymentGenerationType || 'join_date_based';
 
     // Generate rent payments from join date to next month
     const joinDate = new Date(data.joinDate);
@@ -97,7 +97,7 @@ export async function POST(req: Request) {
     // Create rent payment records
     const rentPayments = months.map(month => ({
       tenant: tenant._id,
-      block: data.block,
+      hostel: data.hostel,
       roomNumber: data.roomNumber,
       roomType: data.roomType,
       amount: roomType.rent,

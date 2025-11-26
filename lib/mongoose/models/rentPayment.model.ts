@@ -13,7 +13,7 @@ interface ChangeLogEntry {
 
 export interface IRentPayment extends Document {
   tenant: mongoose.Types.ObjectId;
-  block: mongoose.Types.ObjectId;
+  hostel: mongoose.Types.ObjectId;
   roomNumber: string;
   roomType: string;
   amount: number;
@@ -40,10 +40,10 @@ const rentPaymentSchema = new Schema<IRentPayment>(
       ref: 'Tenant',
       required: [true, 'Please provide the tenant ID'],
     },
-    block: {
+    hostel: {
       type: Schema.Types.ObjectId,
-      ref: 'Block',
-      required: [true, 'Please provide the block ID'],
+      ref: 'Hostel',
+      required: [true, 'Please provide the hostel ID'],
     },
     roomNumber: {
       type: String,

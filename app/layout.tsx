@@ -9,8 +9,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "OCIMUM - Modern Hostel Management System",
-  description: "Streamline your hostel and PG operations with our easy-to-use management system",
+  title: "Getstay - Modern Hostel Management System",
+  description: "Streamline your organisation and PG operations with our easy-to-use management system",
   manifest: "/manifest.json",
   viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover",
   icons: {
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "OCIMUM",
+    title: "Getstay",
   },
 };
 
@@ -33,10 +33,10 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <head>
-          <meta name="application-name" content="OCIMUM" />
+          <meta name="application-name" content="Getstay" />
           <meta name="apple-mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-          <meta name="apple-mobile-web-app-title" content="OCIMUM" />
+          <meta name="apple-mobile-web-app-title" content="Getstay" />
           <meta name="format-detection" content="telephone=no" />
           <meta name="mobile-web-app-capable" content="yes" />
           <meta name="msapplication-config" content="/browserconfig.xml" />

@@ -23,7 +23,7 @@ import {
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
 
-interface HostelUser {
+interface OrganisationUser {
   id: string;
   userId: {
     _id: string;
@@ -32,14 +32,14 @@ interface HostelUser {
     ownerName: string;
     phoneNumber: string;
     role: string;
-    assignedBlocks: Array<{ _id: string; name: string }>;
+    assignedHostels: Array<{ _id: string; name: string }>;
   };
   role: string;
   status: string;
   joinedAt: string;
 }
 
-interface Block {
+interface Hostel {
   _id: string;
   name: string;
 }
@@ -47,53 +47,53 @@ interface Block {
 export default function UsersManagementPage() {
   const { user } = useUser();
   const { toast } = useToast();
-  const [users, setUsers] = useState<HostelUser[]>([]);
-  const [blocks, setBlocks] = useState<Block[]>([]);
-  const [hostelInfo, setHostelInfo] = useState<any>(null);
+  const [users, setUsers] = useState<OrganisationUser[]>([]);
+  const [hostels, setHostels] = useState<Hostel[]>([]);
+  const [organisationInfo, setOrganisationInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     fetchUsers();
-    fetchHostelInfo();
-    fetchBlocks();
+    fetchOrganisationInfo();
+    fetchHostels();
   }, [user?.id]);
 
-  const fetchHostelInfo = async () => {
+  const fetchOrganisationInfo = async () => {
     if (!user?.id) return;
     try {
-      const response = await fetch(`/api/users/${user.id}/hostel-info`);
+      const response = await fetch(`/api/users/${user.id}/organisation-info`);
       const data = await response.json();
-      setHostelInfo(data);
+      setOrganisationInfo(data);
     } catch (error) {
-      console.error("Error fetching hostel info:", error);
+      console.error("Error fetching organisation info:", error);
     }
   };
 
-  const fetchBlocks = async () => {
+  const fetchHostels = async () => {
     if (!user?.id) return;
     try {
-      const response = await fetch(`/api/users/${user.id}/blocks`);
+      const response = await fetch(`/api/users/${user.id}/hostels`);
       const data = await response.json();
-      setBlocks(data);
+      setHostels(data);
     } catch (error) {
-      console.error("Error fetching blocks:", error);
+      console.error("Error fetching hostels:", error);
     }
   };
 
   const fetchUsers = async () => {
     if (!user?.id) return;
     try {
-      // First get user's hostel info
-      const hostelResponse = await fetch(`/api/users/${user.id}/hostel-info`);
-      const hostelData = await hostelResponse.json();
+      // First get user's organisation info
+      const organisationResponse = await fetch(`/api/users/${user.id}/organisation-info`);
+      const organisationData = await organisationResponse.json();
       
-      if (hostelData.error) {
-        throw new Error(hostelData.error);
+      if (organisationData.error) {
+        throw new Error(organisationData.error);
       }
 
-      // Then fetch users for that hostel
-      const response = await fetch(`/api/hostels/${hostelData.hostelId}/users`);
+      // Then fetch users for that organisation
+      const response = await fetch(`/api/organisations/${organisationData.organisationId}/users`);
       const data = await response.json();
       setUsers(data.users || []);
     } catch (error) {
@@ -109,10 +109,10 @@ export default function UsersManagementPage() {
   };
 
   const updateUser = async (userId: string, updates: any) => {
-    if (!hostelInfo?.hostelId) return;
+    if (!organisationInfo?.organisationId) return;
     
     try {
-      const response = await fetch(`/api/hostels/${hostelInfo.hostelId}/users/${userId}`, {
+      const response = await fetch(`/api/organisations/${organisationInfo.organisationId}/users/${userId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -140,10 +140,10 @@ export default function UsersManagementPage() {
   };
 
   const copyJoinCode = async () => {
-    if (!hostelInfo?.joinCode) return;
+    if (!organisationInfo?.joinCode) return;
     
     try {
-      await navigator.clipboard.writeText(hostelInfo.joinCode);
+      await navigator.clipboard.writeText(organisationInfo.joinCode);
       setCopied(true);
       toast({
         title: "Copied!",
@@ -159,20 +159,20 @@ export default function UsersManagementPage() {
     }
   };
 
-  const handleBlockAssignment = (userId: string, blockId: string, isChecked: boolean) => {
+  const handleHostelAssignment = (userId: string, hostelId: string, isChecked: boolean) => {
     const user = users.find(u => u.userId.userId === userId);
     if (!user) return;
 
-    const currentBlocks = user.userId.assignedBlocks?.map(b => b._id) || [];
-    let updatedBlocks;
+    const currentHostels = user.userId.assignedHostels?.map(b => b._id) || [];
+    let updatedHostels;
 
     if (isChecked) {
-      updatedBlocks = [...currentBlocks, blockId];
+      updatedHostels = [...currentHostels, hostelId];
     } else {
-      updatedBlocks = currentBlocks.filter(id => id !== blockId);
+      updatedHostels = currentHostels.filter(id => id !== hostelId);
     }
 
-    updateUser(userId, { assignedBlocks: updatedBlocks });
+    updateUser(userId, { assignedHostels: updatedHostels });
   };
 
   const getStatusBadge = (status: string) => {
@@ -229,28 +229,28 @@ export default function UsersManagementPage() {
       <div>
         <h1 className="text-3xl font-bold">User Management</h1>
         <p className="text-muted-foreground mt-2">
-          Manage users and their permissions in your hostel
+          Manage users and their permissions in your organisation
         </p>
       </div>
 
       {/* Join Code Card */}
-      {hostelInfo && (
+      {organisationInfo && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
-              Hostel Join Code
+              Organisation Join Code
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-4">
               <div className="flex-1">
                 <p className="text-sm text-muted-foreground mb-2">
-                  Share this code with users to let them join your hostel
+                  Share this code with users to let them join your organisation
                 </p>
                 <div className="flex items-center gap-2">
                   <code className="bg-muted px-3 py-2 rounded-md text-lg font-mono">
-                    {hostelInfo.joinCode}
+                    {organisationInfo.joinCode}
                   </code>
                   <Button
                     variant="outline"
@@ -372,27 +372,27 @@ export default function UsersManagementPage() {
                   )}
                 </div>
 
-                {/* Block Assignment */}
-                {user.role !== 'admin' && user.role !== 'tenant' && blocks.length > 0 && (
+                {/* Hostel Assignment */}
+                {user.role !== 'admin' && user.role !== 'tenant' && hostels.length > 0 && (
                   <div className="space-y-3 pt-4 border-t">
-                    <h4 className="text-sm font-medium">Assigned Blocks</h4>
+                    <h4 className="text-sm font-medium">Assigned Hostels</h4>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {blocks.map((block) => {
-                        const isAssigned = user.userId.assignedBlocks?.some(b => b._id === block._id) || false;
+                      {hostels.map((hostel) => {
+                        const isAssigned = user.userId.assignedHostels?.some(b => b._id === hostel._id) || false;
                         return (
-                          <div key={block._id} className="flex items-center space-x-2">
+                          <div key={hostel._id} className="flex items-center space-x-2">
                             <Checkbox
-                              id={`${user.userId._id}-${block._id}`}
+                              id={`${user.userId._id}-${hostel._id}`}
                               checked={isAssigned}
                               onCheckedChange={(checked) => 
-                                handleBlockAssignment(user.userId.userId, block._id, checked as boolean)
+                                handleHostelAssignment(user.userId.userId, hostel._id, checked as boolean)
                               }
                             />
                             <label
-                              htmlFor={`${user.userId._id}-${block._id}`}
+                              htmlFor={`${user.userId._id}-${hostel._id}`}
                               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                             >
-                              {block.name}
+                              {hostel.name}
                             </label>
                           </div>
                         );

@@ -17,14 +17,14 @@ export function OnboardingDialog() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("create");
 
-  const [createHostelData, setCreateHostelData] = useState({
+  const [createOrganisationData, setCreateOrganisationData] = useState({
     ownerName: "",
     phoneNumber: "",
+    organisationName: "",
     hostelName: "",
-    blockName: "",
   });
 
-  const [joinHostelData, setJoinHostelData] = useState({
+  const [joinOrganisationData, setJoinOrganisationData] = useState({
     ownerName: "",
     phoneNumber: "",
     joinCode: "",
@@ -55,18 +55,18 @@ export function OnboardingDialog() {
     }
   }, [isLoaded, user]);
 
-  const handleCreateHostel = async (e: React.FormEvent) => {
+  const handleCreateOrganisation = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
     try {
-      const response = await fetch(`/api/onboard/create-hostel`, {
+      const response = await fetch(`/api/onboard/create-organisation`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...createHostelData,
+          ...createOrganisationData,
           userId: user?.id,
           email: user?.primaryEmailAddress?.emailAddress,
         }),
@@ -75,12 +75,12 @@ export function OnboardingDialog() {
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create hostel');
+        throw new Error(data.error || 'Failed to create organisation');
       }
       
       toast({
         title: "Success!",
-        description: `Hostel "${createHostelData.hostelName}" created successfully!`,
+        description: `Organisation "${createOrganisationData.organisationName}" created successfully!`,
       });
 
       setOpen(false);
@@ -88,7 +88,7 @@ export function OnboardingDialog() {
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to create hostel. Please try again.",
+        description: error.message || "Failed to create organisation. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -96,18 +96,18 @@ export function OnboardingDialog() {
     }
   };
 
-  const handleJoinHostel = async (e: React.FormEvent) => {
+  const handleJoinOrganisation = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
     try {
-      const response = await fetch(`/api/onboard/join-hostel`, {
+      const response = await fetch(`/api/onboard/join-organisation`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...joinHostelData,
+          ...joinOrganisationData,
           userId: user?.id,
           email: user?.primaryEmailAddress?.emailAddress,
         }),
@@ -116,7 +116,7 @@ export function OnboardingDialog() {
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to join hostel');
+        throw new Error(data.error || 'Failed to join organisation');
       }
       
       toast({
@@ -129,7 +129,7 @@ export function OnboardingDialog() {
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to join hostel. Please try again.",
+        description: error.message || "Failed to join organisation. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -141,36 +141,36 @@ export function OnboardingDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Welcome to OCIMUM!</DialogTitle>
+          <DialogTitle>Welcome to Getstay!</DialogTitle>
         </DialogHeader>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           {/* <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="create" className="flex items-center gap-2">
               <Building2 className="h-4 w-4" />
-              Create Hostel
+              Create Organisation
             </TabsTrigger>
             <TabsTrigger value="join" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
-              Join Hostel
+              Join Organisation
             </TabsTrigger>
           </TabsList>
            */}
           <TabsContent value="create" className="space-y-4 mt-6">
             <div className="text-center mb-4">
-              <h3 className="text-lg font-semibold">Create Your Hostel</h3>
+              <h3 className="text-lg font-semibold">Create Your Organisation</h3>
               <p className="text-sm text-muted-foreground">
-                Set up a new hostel and become the admin
+                Set up a new organisation and become the admin
               </p>
             </div>
             
-            <form onSubmit={handleCreateHostel} className="space-y-4">
+            <form onSubmit={handleCreateOrganisation} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="ownerName">Owner Name</Label>
                 <Input
                   id="ownerName"
-                  value={createHostelData.ownerName}
-                  onChange={(e) => setCreateHostelData(prev => ({ ...prev, ownerName: e.target.value }))}
+                  value={createOrganisationData.ownerName}
+                  onChange={(e) => setCreateOrganisationData(prev => ({ ...prev, ownerName: e.target.value }))}
                   placeholder="Enter your full name"
                   required
                 />
@@ -180,45 +180,45 @@ export function OnboardingDialog() {
                 <Label htmlFor="phoneNumber">Phone Number</Label>
                 <Input
                   id="phoneNumber"
-                  value={createHostelData.phoneNumber}
-                  onChange={(e) => setCreateHostelData(prev => ({ ...prev, phoneNumber: e.target.value }))}
+                  value={createOrganisationData.phoneNumber}
+                  onChange={(e) => setCreateOrganisationData(prev => ({ ...prev, phoneNumber: e.target.value }))}
                   placeholder="Enter your phone number"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="hostelName">Hostel Name</Label>
+                <Label htmlFor="organisationName">Organisation Name</Label>
                 <Input
-                  id="hostelName"
-                  value={createHostelData.hostelName}
-                  onChange={(e) => setCreateHostelData(prev => ({ ...prev, hostelName: e.target.value }))}
-                  placeholder="Enter your hostel name"
+                  id="organisationName"
+                  value={createOrganisationData.organisationName}
+                  onChange={(e) => setCreateOrganisationData(prev => ({ ...prev, organisationName: e.target.value }))}
+                  placeholder="Enter your organisation name"
                   required
                 />
               </div>
               
               <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? "Creating..." : "Create Hostel"}
+                {isSubmitting ? "Creating..." : "Create Organisation"}
               </Button>
             </form>
           </TabsContent>
           
           <TabsContent value="join" className="space-y-4 mt-6">
             <div className="text-center mb-4">
-              <h3 className="text-lg font-semibold">Join Existing Hostel</h3>
+              <h3 className="text-lg font-semibold">Join Existing Organisation</h3>
               <p className="text-sm text-muted-foreground">
-                Enter your details and the join code provided by your hostel admin
+                Enter your details and the join code provided by your organisation admin
               </p>
             </div>
             
-            <form onSubmit={handleJoinHostel} className="space-y-4">
+            <form onSubmit={handleJoinOrganisation} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="joinOwnerName">Owner Name</Label>
                 <Input
                   id="joinOwnerName"
-                  value={joinHostelData.ownerName}
-                  onChange={(e) => setJoinHostelData(prev => ({ ...prev, ownerName: e.target.value }))}
+                  value={joinOrganisationData.ownerName}
+                  onChange={(e) => setJoinOrganisationData(prev => ({ ...prev, ownerName: e.target.value }))}
                   placeholder="Enter your full name"
                   required
                 />
@@ -228,8 +228,8 @@ export function OnboardingDialog() {
                 <Label htmlFor="joinPhoneNumber">Phone Number</Label>
                 <Input
                   id="joinPhoneNumber"
-                  value={joinHostelData.phoneNumber}
-                  onChange={(e) => setJoinHostelData(prev => ({ ...prev, phoneNumber: e.target.value }))}
+                  value={joinOrganisationData.phoneNumber}
+                  onChange={(e) => setJoinOrganisationData(prev => ({ ...prev, phoneNumber: e.target.value }))}
                   placeholder="Enter your phone number"
                   required
                 />
@@ -239,8 +239,8 @@ export function OnboardingDialog() {
                 <Label htmlFor="joinCode">Join Code</Label>
                 <Input
                   id="joinCode"
-                  value={joinHostelData.joinCode}
-                  onChange={(e) => setJoinHostelData(prev => ({ ...prev, joinCode: e.target.value.toUpperCase() }))}
+                  value={joinOrganisationData.joinCode}
+                  onChange={(e) => setJoinOrganisationData(prev => ({ ...prev, joinCode: e.target.value.toUpperCase() }))}
                   placeholder="Enter 6-character join code"
                   maxLength={6}
                   required
@@ -248,7 +248,7 @@ export function OnboardingDialog() {
               </div>
               
               <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? "Joining..." : "Join Hostel"}
+                {isSubmitting ? "Joining..." : "Join Organisation"}
               </Button>
             </form>
           </TabsContent>

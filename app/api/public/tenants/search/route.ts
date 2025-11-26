@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { Tenant } from "@/lib/mongoose/models/tenant.model";
-import { Block } from "@/lib/mongoose/models/block.model";
+import { Hostel } from "@/lib/mongoose/models/hostel.model";
 import { RentPayment } from "@/lib/mongoose/models/rentPayment.model";
 import connectDB from "@/lib/mongodb/client";
 
@@ -18,13 +18,13 @@ export async function GET(req: Request) {
       );
     }
 
-    // First, get all blocks associated with the user
-    const blocks = await Block.find({ userId });
-    const blockIds = blocks.map(block => block._id);
+    // First, get all hostels associated with the user
+    const hostels = await Hostel.find({ userId });
+    const hostelIds = hostels.map(hostel => hostel._id);
 
-    // Then, search for tenants in these blocks with the given phone number
+    // Then, search for tenants in these hostels with the given phone number
     const tenants = await Tenant.find({
-      block: { $in: blockIds },
+      hostel: { $in: hostelIds },
       phone: { $regex: phone, $options: 'i' },
     });
 
@@ -41,7 +41,7 @@ export async function GET(req: Request) {
         };
       })
     );
-    console.log("Tenants with payments:", blocks);
+    console.log("Tenants with payments:", hostels);
 
     return NextResponse.json(tenantsWithPayments);
   } catch (error) {

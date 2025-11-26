@@ -22,8 +22,8 @@ interface PaymentDetailsDrawerProps {
   payment: any;
 }
 
-interface HostelData {
-  hostelName: string;
+interface OrganisationData {
+  organisationName: string;
   ownerName: string;
   address: string;
   city: string;
@@ -42,7 +42,7 @@ export function PaymentDetailsDrawer({
 }: PaymentDetailsDrawerProps) {
   const { user } = useUser();
   const [paymentDetails, setPaymentDetails] = useState<any>(null);
-  const [hostelData, setHostelData] = useState<HostelData | null>(null);
+  const [organisationData, setOrganisationData] = useState<OrganisationData | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -54,12 +54,12 @@ export function PaymentDetailsDrawer({
         const paymentData = await paymentResponse.json();
         setPaymentDetails(paymentData);
 
-        // Fetch hostel data
+        // Fetch organisation data
         if (user?.id) {
-          const hostelResponse = await fetch(`/api/owners/${user.id}`);
-          if (!hostelResponse.ok) throw new Error("Failed to fetch hostel data");
-          const hostelData = await hostelResponse.json();
-          setHostelData(hostelData);
+          const organisationResponse = await fetch(`/api/owners/${user.id}`);
+          if (!organisationResponse.ok) throw new Error("Failed to fetch organisation data");
+          const organisationData = await organisationResponse.json();
+          setOrganisationData(organisationData);
         }
       } catch (error) {
         toast({
@@ -120,7 +120,7 @@ export function PaymentDetailsDrawer({
               padding-bottom: 20px;
               border-bottom: 2px solid #000;
             }
-            .hostel-name {
+            .organisation-name {
               font-size: 28px;
               font-weight: bold;
               color: #000;
@@ -172,7 +172,7 @@ export function PaymentDetailsDrawer({
               color: #000;
             }
             .status {
-              display: inline-block;
+              display: inline-hostel;
               padding: 4px 12px;
               border-radius: 4px;
               font-size: 14px;
@@ -193,7 +193,7 @@ export function PaymentDetailsDrawer({
               font-size: 14px;
               color: #666;
             }
-            .address-block {
+            .address-hostel {
               margin-top: 10px;
               line-height: 1.5;
             }
@@ -209,16 +209,16 @@ export function PaymentDetailsDrawer({
         </head>
         <body>
           <div class="header">
-            <div class="hostel-name">${hostelData?.hostelName || 'Hostel Management System'}</div>
+            <div class="organisation-name">${organisationData?.organisationName || 'Organisation Management System'}</div>
             <div class="receipt-title">Payment Receipt</div>
             <div class="owner-info">
-              ${hostelData?.ownerName ? `Owner: ${hostelData.ownerName}` : ''}
+              ${organisationData?.ownerName ? `Owner: ${organisationData.ownerName}` : ''}
             </div>
-            <div class="address-block">
-              ${hostelData?.address ? `${hostelData.address},` : ''}
-              ${hostelData?.city ? `${hostelData.city},` : ''}
-              ${hostelData?.state ? `${hostelData.state} -` : ''}
-              ${hostelData?.pincode ? `${hostelData.pincode}` : ''}
+            <div class="address-hostel">
+              ${organisationData?.address ? `${organisationData.address},` : ''}
+              ${organisationData?.city ? `${organisationData.city},` : ''}
+              ${organisationData?.state ? `${organisationData.state} -` : ''}
+              ${organisationData?.pincode ? `${organisationData.pincode}` : ''}
             </div>
           </div>
 
@@ -281,15 +281,15 @@ export function PaymentDetailsDrawer({
           </div>
 
           <div class="contact-info">
-            <div>Phone: ${hostelData?.phoneNumber || 'Not provided'}</div>
-            <div>Email: ${hostelData?.email || 'Not provided'}</div>
+            <div>Phone: ${organisationData?.phoneNumber || 'Not provided'}</div>
+            <div>Email: ${organisationData?.email || 'Not provided'}</div>
           </div>
 
           <div class="footer">
             <div>Generated on ${format(new Date(), "PPP")}</div>
             <div>This is a computer-generated receipt and does not require a signature.</div>
-            ${hostelData?.gstin ? `<div>GSTIN: ${hostelData.gstin}</div>` : ''}
-            ${hostelData?.pan ? `<div>PAN: ${hostelData.pan}</div>` : ''}
+            ${organisationData?.gstin ? `<div>GSTIN: ${organisationData.gstin}</div>` : ''}
+            ${organisationData?.pan ? `<div>PAN: ${organisationData.pan}</div>` : ''}
           </div>
         </body>
       </html>

@@ -49,7 +49,7 @@ interface Tenant {
   roomTypeDetails?: {
     images: RoomTypeImage[];
   };
-  block: {
+  hostel: {
     _id: string;
     name: string;
   };
@@ -150,13 +150,13 @@ export default function TenantsPage() {
     tenant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     tenant.phone.includes(searchQuery) ||
     tenant.roomNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    tenant.block.name.toLowerCase().includes(searchQuery.toLowerCase())
+    tenant.hostel.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleViewDetails = (tenantId: string) => {
     const tenant = tenants.find(t => t._id === tenantId);
     if (tenant) {
-      router.push(`/dashboard/${tenant.block._id}/tenants/${tenantId}`);
+      router.push(`/dashboard/${tenant.hostel._id}/tenants/${tenantId}`);
     }
   };
 
@@ -209,7 +209,7 @@ export default function TenantsPage() {
             </div>
             <h3 className="font-medium text-lg">No tenants yet</h3>
             <p className="text-muted-foreground mt-2 text-center max-w-sm">
-              Start by adding tenants to your blocks to see them here
+              Start by adding tenants to your hostels to see them here
             </p>
           </div>
         ) : (
@@ -237,7 +237,7 @@ export default function TenantsPage() {
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-sm text-muted-foreground">Room {tenant.roomNumber}</span>
                       <span className="text-muted-foreground">•</span>
-                      <span className="text-sm text-muted-foreground">{tenant.block.name}</span>
+                      <span className="text-sm text-muted-foreground">{tenant.hostel.name}</span>
                     </div>
                   </div>
                 </div>

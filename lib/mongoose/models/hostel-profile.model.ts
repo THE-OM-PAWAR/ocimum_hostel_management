@@ -1,64 +1,77 @@
 import mongoose, { Document, Model, Schema } from 'mongoose';
 
-interface Facility {
-  name: string;
-  available: boolean;
-  details?: string;
-}
-
-interface LocationFactor {
-  name: string;
-  distance: string;
+interface HostelPhoto {
+  url: string;
+  title: string;
   description?: string;
+  type: 'boys' | 'girls' | 'common' | 'exterior' | 'interior' | 'amenities';
+  isMain?: boolean;
 }
 
 export interface IHostelProfile extends Document {
   hostel: mongoose.Types.ObjectId;
-  isOnlinePresenceEnabled: boolean;
   basicInfo: {
-    state: string;
     name: string;
+    description: string;
     address: string;
     landmark: string;
     city: string;
+    state: string;
     pincode: string;
     contactNumber: string;
     email: string;
   };
   propertyDetails: {
-    type: 'boys' | 'girls' | 'coed' | 'separate';
-    facilities: Facility[];
-    foodService: {
-      available: boolean;
-      type?: 'veg' | 'nonveg' | 'both';
-      details?: string;
-    };
+    totalFloors: number;
+    totalRooms: number;
+    accommodationType: 'boys' | 'girls' | 'coed' | 'separate';
+    establishedYear?: number;
+    buildingType: 'independent' | 'apartment' | 'commercial';
   };
-  rulesAndPolicies: string; // Markdown content
-  media: {
-    bannerImage?: string;
-    profileImage?: string;
-    galleryImages: string[];
-  };
-  locationFactors: {
-    nearbyLandmarks: LocationFactor[];
+  locationInfo: {
     googleMapLink?: string;
-    coachingCenters: LocationFactor[];
+    latitude?: number;
+    longitude?: number;
+    nearbyLandmarks: Array<{
+      name: string;
+      distance: string;
+      type: 'hospital' | 'school' | 'market' | 'transport' | 'other';
+    }>;
+    transportConnectivity: Array<{
+      mode: 'bus' | 'metro' | 'train' | 'auto';
+      distance: string;
+      details: string;
+    }>;
   };
+  media: {
+    photos: HostelPhoto[];
+    virtualTourLink?: string;
+  };
+  amenities: Array<{
+    name: string;
+    available: boolean;
+    description?: string;
+    floor?: string;
+  }>;
+  safetyFeatures: Array<{
+    feature: string;
+    available: boolean;
+    details?: string;
+  }>;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const facilitySchema = new Schema({
-  name: { type: String, required: true },
-  available: { type: Boolean, default: false },
-  details: { type: String },
-});
-
-const locationFactorSchema = new Schema({
-  name: { type: String, required: true },
-  distance: { type: String, required: true },
+const hostelPhotoSchema = new Schema({
+  url: { type: String, required: true },
+  title: { type: String, required: true },
   description: { type: String },
+  type: {
+    type: String,
+    enum: ['boys', 'girls', 'common', 'exterior', 'interior', 'amenities'],
+    required: true,
+  },
+  isMain: { type: Boolean, default: false },
 });
 
 const hostelProfileSchema = new Schema<IHostelProfile>(
@@ -69,49 +82,70 @@ const hostelProfileSchema = new Schema<IHostelProfile>(
       required: true,
       unique: true,
     },
-    isOnlinePresenceEnabled: {
-      type: Boolean,
-      default: false,
-    },
     basicInfo: {
       name: { type: String, required: true },
+      description: { type: String, default: '' },
       address: { type: String, required: true },
-      landmark: { type: String },
+      landmark: { type: String, default: '' },
       city: { type: String, required: true },
+      state: { type: String, required: true },
       pincode: { type: String, required: true },
       contactNumber: { type: String, required: true },
       email: { type: String, required: true },
     },
     propertyDetails: {
-      type: {
+      totalFloors: { type: Number, required: true, min: 1 },
+      totalRooms: { type: Number, required: true, min: 1 },
+      accommodationType: {
         type: String,
         enum: ['boys', 'girls', 'coed', 'separate'],
         required: true,
       },
-      facilities: [facilitySchema],
-      foodService: {
-        available: { type: Boolean, default: false },
-        type: {
-          type: String,
-          enum: ['veg', 'nonveg', 'both'],
-        },
-        details: { type: String },
+      establishedYear: { type: Number },
+      buildingType: {
+        type: String,
+        enum: ['independent', 'apartment', 'commercial'],
+        required: true,
       },
     },
-    rulesAndPolicies: {
-      type: String,
-      default: '',
+    locationInfo: {
+      googleMapLink: { type: String },
+      latitude: { type: Number },
+      longitude: { type: Number },
+      nearbyLandmarks: [{
+        name: { type: String, required: true },
+        distance: { type: String, required: true },
+        type: {
+          type: String,
+          enum: ['hospital', 'school', 'market', 'transport', 'other'],
+          required: true,
+        },
+      }],
+      transportConnectivity: [{
+        mode: {
+          type: String,
+          enum: ['bus', 'metro', 'train', 'auto'],
+          required: true,
+        },
+        distance: { type: String, required: true },
+        details: { type: String, required: true },
+      }],
     },
     media: {
-      bannerImage: { type: String },
-      profileImage: { type: String },
-      galleryImages: [{ type: String }],
+      photos: [hostelPhotoSchema],
+      virtualTourLink: { type: String },
     },
-    locationFactors: {
-      nearbyLandmarks: [locationFactorSchema],
-      googleMapLink: { type: String },
-      coachingCenters: [locationFactorSchema],
-    },
+    amenities: [{
+      name: { type: String, required: true },
+      available: { type: Boolean, default: true },
+      description: { type: String },
+      floor: { type: String },
+    }],
+    safetyFeatures: [{
+      feature: { type: String, required: true },
+      available: { type: Boolean, default: true },
+      details: { type: String },
+    }],
   },
   {
     timestamps: true,

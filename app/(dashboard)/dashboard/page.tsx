@@ -4,7 +4,7 @@ import { useUser } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import { Plus, Building2, Users, Home, ArrowRight, Bell, Globe, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
-import { CreateBlockDialog } from "@/components/create-block-dialog";
+import { CreateHostelDialog } from "@/components/create-hostel-dialog"
 import { useRouter } from "next/navigation";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,20 +13,20 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { CreateRoomTypeDialog } from "@/components/room-types/create-room-type-dialog";
 
-interface BlockCardProps {
+interface HostelCardProps {
   index: number;
   name: string;
   description?: string;
   id: string;
 }
 
-interface Block {
+interface Hostel {
   _id: string;
   name: string;
   description?: string;
 }
 
-function CreateBlockCard({ onClick }: { onClick: () => void }) {
+function CreateHostelCard({ onClick }: { onClick: () => void }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -42,9 +42,9 @@ function CreateBlockCard({ onClick }: { onClick: () => void }) {
           <Plus className="h-8 w-8 text-primary group-hover:scale-110 transition-transform duration-300" />
         </div>
       </div>
-      <h3 className="font-semibold text-lg text-center group-hover:text-primary transition-colors duration-300">Create New Block</h3>
+      <h3 className="font-semibold text-lg text-center group-hover:text-primary transition-colors duration-300">Create New Hostel</h3>
       <p className="text-sm text-muted-foreground mt-2 text-center max-w-[200px] group-hover:text-primary/80 transition-colors duration-300">
-        Add a new block to your hostel
+        Add a new hostel to your organisation
       </p>
       <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-primary/0 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
     </motion.div>
@@ -76,7 +76,7 @@ function CreateRoomTypeCard({ onClick }: { onClick: () => void }) {
   );
 }
 
-function BlockCard({ index, name, description, id }: BlockCardProps) {
+function HostelCard({ index, name, description, id }: HostelCardProps) {
   const router = useRouter();
 
   return (
@@ -120,34 +120,34 @@ export default function DashboardPage() {
   const { user } = useUser();
   const router = useRouter();
   const { toast } = useToast();
-  const [hostelName, setHostelName] = useState<string>("");
+  const [organisationName, setOrganisationName] = useState<string>("");
   const [userRole, setUserRole] = useState<string>("");
-  const [blocks, setBlocks] = useState<Block[]>([]);
+  const [hostels, setHostels] = useState<Hostel[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isCreateRoomTypeDialogOpen, setIsCreateRoomTypeDialogOpen] = useState(false);
   const [pendingUsersCount, setPendingUsersCount] = useState(0);
-  const [hasHostelProfile, setHasHostelProfile] = useState(false);
-  const [hasBlockProfiles, setHasBlockProfiles] = useState(false);
+  const [hasOrganisationProfile, setHasOrganisationProfile] = useState(false);
+  const [hasHostelProfiles, setHasHostelProfiles] = useState(false);
 
-  const fetchBlocks = async () => {
+  const fetchHostels = async () => {
     try {
-      const response = await fetch(`/api/users/${user?.id}/blocks`);
+      const response = await fetch(`/api/users/${user?.id}/hostels`);
       const data = await response.json();
-      setBlocks(data);
+      setHostels(data);
     } catch (error) {
-      console.error("Error fetching blocks:", error);
+      console.error("Error fetching hostels:", error);
     }
   };
 
   const fetchPendingUsers = async () => {
     if (!user?.id) return;
     try {
-      const hostelResponse = await fetch(`/api/users/${user.id}/hostel-info`);
-      const hostelData = await hostelResponse.json();
+      const organisationResponse = await fetch(`/api/users/${user.id}/organisation-info`);
+      const organisationData = await organisationResponse.json();
       
-      if (!hostelData.error && hostelData.hostelId) {
-        const response = await fetch(`/api/hostels/${hostelData.hostelId}/pending-users`);
+      if (!organisationData.error && organisationData.organisationId) {
+        const response = await fetch(`/api/organisations/${organisationData.organisationId}/pending-users`);
         const data = await response.json();
         setPendingUsersCount(data.count || 0);
       }
@@ -157,9 +157,9 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
-    const fetchHostelInfo = async () => {
+    const fetchOrganisationInfo = async () => {
       try {
-        const response = await fetch(`/api/users/${user?.id}/hostel-info`);
+        const response = await fetch(`/api/users/${user?.id}/organisation-info`);
         const data = await response.json();
         
         if (data.error) {
@@ -171,19 +171,19 @@ export default function DashboardPage() {
           return;
         }
         
-        setHostelName(data.hostelName);
+        setOrganisationName(data.organisationName);
         setUserRole(data.userRole);
-        await fetchBlocks();
+        await fetchHostels();
         await fetchPendingUsers();
       } catch (error) {
-        console.error("Error fetching hostel info:", error);
+        console.error("Error fetching organisation info:", error);
       } finally {
         setLoading(false);
       }
     };
 
     if (user?.id) {
-      fetchHostelInfo();
+      fetchOrganisationInfo();
     }
   }, [user?.id]);
 
@@ -214,7 +214,7 @@ export default function DashboardPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-4xl font-bold"
           >
-            {hostelName}
+            {organisationName}
           </motion.h1>
           
           {userRole === 'admin' && pendingUsersCount > 0 && (
@@ -238,88 +238,38 @@ export default function DashboardPage() {
           transition={{ delay: 0.1 }}
           className="text-muted-foreground text-lg"
         >
-          Manage your hostel blocks and rooms • Role: {userRole}
+          Manage your organisation hostels and rooms • Role: {userRole}
         </motion.p>
       </div>
 
-      {/* Setup Prompts for Admin */}
-      {userRole === 'admin' && (!hasHostelProfile || !hasBlockProfiles) && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <Card className="border-primary/20 bg-primary/5">
-            <CardContent className="pt-6">
-              <div className="flex items-start gap-4">
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Building2 className="h-5 w-5 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold mb-2">Complete Your Setup</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Enhance your hostel management by setting up profiles and showcasing your property online.
-                  </p>
-                  <div className="flex flex-wrap gap-3">
-                    {!hasHostelProfile && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => router.push('/settings/hostel-profile')}
-                        className="flex items-center gap-2"
-                      >
-                        <Globe className="h-4 w-4" />
-                        Setup Hostel Profile
-                      </Button>
-                    )}
-                    {!hasBlockProfiles && blocks.length > 0 && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => router.push('/settings/block-profiles')}
-                        className="flex items-center gap-2"
-                      >
-                        <Settings className="h-4 w-4" />
-                        Setup Block Profiles
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
+
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {userRole === 'admin' && (
-          <CreateBlockCard onClick={() => setIsCreateDialogOpen(true)} />
+          <CreateHostelCard onClick={() => setIsCreateDialogOpen(true)} />
         )}
-        {userRole === 'admin' && blocks.length > 0 && (
-          <CreateRoomTypeCard onClick={() => setIsCreateRoomTypeDialogOpen(true)} />
-        )}
-        {blocks.length >= 1 && blocks.map((block, i) => (
-          <BlockCard
-            key={block._id}
+        {hostels.length >= 1 && hostels.map((hostel, i) => (
+          <HostelCard
+            key={hostel._id}
             index={i}
-            name={block.name}
-            description={block.description}
-            id={block._id}
+            name={hostel.name}
+            description={hostel.description}
+            id={hostel._id}
           />
         ))}
       </div>
 
       {userRole === 'admin' && (
-        <CreateBlockDialog
+        <CreateHostelDialog
           isOpen={isCreateDialogOpen}
           onClose={() => setIsCreateDialogOpen(false)}
-          onSuccess={fetchBlocks}
+          onSuccess={fetchHostels}
           userId={user?.id || ""}
-          hostelId={hostelName}
+          organisationId={organisationName}
         />
       )}
 
-      {userRole === 'admin' && blocks.length > 0 && (
+      {userRole === 'admin' && hostels.length > 0 && (
         <CreateRoomTypeDialog
           isOpen={isCreateRoomTypeDialogOpen}
           onClose={() => setIsCreateRoomTypeDialogOpen(false)}
@@ -327,10 +277,10 @@ export default function DashboardPage() {
             setIsCreateRoomTypeDialogOpen(false);
             toast({
               title: "Success",
-              description: "Room type created successfully! You can manage more room types in block settings.",
+              description: "Room type created successfully! You can manage more room types in hostel settings.",
             });
           }}
-          blockId={blocks[0]._id}
+          hostelId={hostels[0]._id}
         />
       )}
     </div>

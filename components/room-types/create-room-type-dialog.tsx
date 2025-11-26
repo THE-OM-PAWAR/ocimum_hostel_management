@@ -28,14 +28,14 @@ interface CreateRoomTypeDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  blockId: string;
+  hostelId: string;
 }
 
 export function CreateRoomTypeDialog({
   isOpen,
   onClose,
   onSuccess,
-  blockId,
+  hostelId,
 }: CreateRoomTypeDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -57,7 +57,7 @@ export function CreateRoomTypeDialog({
     if (isOpen) {
       fetchComponents();
     }
-  }, [isOpen, blockId]);
+  }, [isOpen, hostelId]);
 
   // Reset form when dialog closes
   useEffect(() => {
@@ -76,7 +76,7 @@ export function CreateRoomTypeDialog({
 
   const fetchComponents = async () => {
     try {
-      const response = await fetch(`/api/blocks/${blockId}/components`);
+      const response = await fetch(`/api/hostels/${hostelId}/components`);
       if (!response.ok) {
         throw new Error("Failed to fetch components");
       }
@@ -153,7 +153,7 @@ export function CreateRoomTypeDialog({
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`/api/blocks/${blockId}/room-types`, {
+      const response = await fetch(`/api/hostels/${hostelId}/room-types`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -164,7 +164,7 @@ export function CreateRoomTypeDialog({
           components: formData.components,
           rent: parseFloat(formData.rent),
           images: formData.images,
-          blockId,
+          hostelId,
         }),
       });
 
@@ -342,7 +342,7 @@ export function CreateRoomTypeDialog({
                         className="w-full mt-2 text-primary"
                         onClick={(e) => {
                           e.stopPropagation();
-                          router.push(`/dashboard/${blockId}/settings/room-components`);
+                          router.push(`/dashboard/${hostelId}/settings/room-components`);
                         }}
                       >
                         <Plus className="mr-2 h-4 w-4" />

@@ -8,7 +8,7 @@ export interface IRoom extends Document {
   price: number;
   status: 'vacant' | 'occupied' | 'maintenance' | 'reserved';
   amenities: string[];
-  hostel: mongoose.Types.ObjectId;
+  organisation: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -24,10 +24,10 @@ const roomsSchema = new Schema<IRoom>(
       type: Number,
       required: [true, 'Please provide room price'],
     },
-    hostel: {
+    organisation: {
       type: Schema.Types.ObjectId,
-      ref: 'Hostel',
-      required: [true, 'Please provide the hostel ID'],
+      ref: 'Organisation',
+      required: [true, 'Please provide the organisation ID'],
     },
   },
   {

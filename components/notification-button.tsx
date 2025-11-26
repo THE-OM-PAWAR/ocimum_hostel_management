@@ -30,7 +30,7 @@ export function NotificationButton() {
   const router = useRouter();
   const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
   const [userRole, setUserRole] = useState<string>("");
-  const [hostelId, setHostelId] = useState<string>("");
+  const [organisationId, setOrganisationId] = useState<string>("");
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -41,19 +41,19 @@ export function NotificationButton() {
     if (!user?.id) return;
     
     try {
-      // First get user's hostel info and role
-      const hostelResponse = await fetch(`/api/users/${user.id}/hostel-info`);
-      const hostelData = await hostelResponse.json();
+      // First get user's organisation info and role
+      const organisationResponse = await fetch(`/api/users/${user.id}/organisation-info`);
+      const organisationData = await organisationResponse.json();
       
-      if (hostelData.error || hostelData.userRole !== 'admin') {
+      if (organisationData.error || organisationData.userRole !== 'admin') {
         return; // Only admins see notifications
       }
       
-      setUserRole(hostelData.userRole);
-      setHostelId(hostelData.hostelId);
+      setUserRole(organisationData.userRole);
+      setOrganisationId(organisationData.organisationId);
       
       // Then fetch pending users
-      const response = await fetch(`/api/hostels/${hostelData.hostelId}/pending-users`);
+      const response = await fetch(`/api/organisations/${organisationData.organisationId}/pending-users`);
       const data = await response.json();
       setPendingUsers(data.users || []);
     } catch (error) {
@@ -62,10 +62,10 @@ export function NotificationButton() {
   };
 
   const updateUser = async (userId: string, updates: any) => {
-    if (!hostelId) return;
+    if (!organisationId) return;
     
     try {
-      const response = await fetch(`/api/hostels/${hostelId}/users/${userId}`, {
+      const response = await fetch(`/api/organisations/${organisationId}/users/${userId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

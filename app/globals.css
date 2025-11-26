@@ -228,7 +228,7 @@ button,
   user-select: text;
 }
 
-/* Allow selection in code blocks and pre elements */
+/* Allow selection in code hostels and pre elements */
 pre,
 code {
   -webkit-user-select: text;

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { RentPayment } from "@/lib/mongoose/models/rentPayment.model";
-import { Block } from "@/lib/mongoose/models/block.model";
+import { Hostel } from "@/lib/mongoose/models/hostel.model";
 import { Tenant } from "@/lib/mongoose/models/tenant.model";
 import { RoomType } from "@/lib/mongoose/models/room-type.model";
 import connectDB from "@/lib/mongodb/client";
@@ -8,20 +8,20 @@ import connectDB from "@/lib/mongodb/client";
 export async function POST(req: Request) {
   try {
     await connectDB();
-    const { blockId } = await req.json();
+    const { hostelId } = await req.json();
 
-    if (!blockId) {
+    if (!hostelId) {
       return NextResponse.json(
-        { error: "Block ID is required" },
+        { error: "Hostel ID is required" },
         { status: 400 }
       );
     }
 
-    // Get block settings
-    const block = await Block.findById(blockId);
-    if (!block) {
+    // Get hostel settings
+    const hostel = await Hostel.findById(hostelId);
+    if (!hostel) {
       return NextResponse.json(
-        { error: "Block not found" },
+        { error: "Hostel not found" },
         { status: 404 }
       );
     }
@@ -29,12 +29,12 @@ export async function POST(req: Request) {
     const currentDate = new Date();
     const currentMonth = currentDate.toLocaleString('default', { month: 'long' });
     const currentYear = currentDate.getFullYear();
-    const generationDay = parseInt(block.rentGenerationDay) || 1;
-    const paymentGenerationType = (block as any).paymentGenerationType || 'join_date_based';
+    const generationDay = parseInt(hostel.rentGenerationDay) || 1;
+    const paymentGenerationType = (hostel as any).paymentGenerationType || 'join_date_based';
 
     // Get only active tenants
     const tenants = await Tenant.find({
-      block: blockId,
+      hostel: hostelId,
       status: 'active'
     });
 
@@ -67,14 +67,14 @@ export async function POST(req: Request) {
 
         if (!existingCurrentEntry) {
           const roomType = await RoomType.findOne({
-            blockId,
+            hostelId,
             name: tenant.roomType
           });
 
           if (roomType) {
             await RentPayment.create({
               tenant: tenant._id,
-              block: blockId,
+              hostel: hostelId,
               roomNumber: tenant.roomNumber,
               roomType: tenant.roomType,
               amount: roomType.rent,
@@ -113,14 +113,14 @@ export async function POST(req: Request) {
 
           if (!existingNextEntry) {
             const roomType = await RoomType.findOne({
-              blockId,
+              hostelId,
               name: tenant.roomType
             });
 
             if (roomType) {
               await RentPayment.create({
                 tenant: tenant._id,
-                block: blockId,
+                hostel: hostelId,
                 roomNumber: tenant.roomNumber,
                 roomType: tenant.roomType,
                 amount: roomType.rent,

@@ -21,9 +21,9 @@ export default function PrivacyPage() {
             <p className="font-medium">Effective Date: July 1, 2023</p>
             
             <p className="mt-4">
-              At HostelHub ("we", "us", or "our"), we are committed to protecting your privacy. 
+              At OrganisationHub ("we", "us", or "our"), we are committed to protecting your privacy. 
               This Privacy Policy explains how we collect, use, and share your personal data when 
-              you use our Hostel Management Software Service ("Service").
+              you use our Organisation Management Software Service ("Service").
             </p>
             
             <p className="mt-2 mb-6">
@@ -35,7 +35,7 @@ export default function PrivacyPage() {
               <p>We collect the following types of personal data:</p>
               <ul className="list-disc pl-6 space-y-2">
                 <li><strong>Account Information:</strong> When you register, we collect information such as your name, email address, and phone number.</li>
-                <li><strong>Hostel Data:</strong> Information about students, rooms, fees, attendance, complaints, and other hostel-related data entered by you.</li>
+                <li><strong>Organisation Data:</strong> Information about students, rooms, fees, attendance, complaints, and other organisation-related data entered by you.</li>
                 <li><strong>Payment Information:</strong> We collect payment details such as credit card information or other payment methods to process your subscription.</li>
                 <li><strong>Usage Data:</strong> Information about how you use our platform, including IP address, browser type, operating system, and other usage metrics.</li>
               </ul>
@@ -45,7 +45,7 @@ export default function PrivacyPage() {
               <h2 className="text-2xl font-semibold mb-4">2. How We Use Your Data</h2>
               <p>We use your personal data for the following purposes:</p>
               <ul className="list-disc pl-6 space-y-2">
-                <li><strong>To Provide Services:</strong> To process your subscription, manage your account, and provide features of our hostel management platform.</li>
+                <li><strong>To Provide Services:</strong> To process your subscription, manage your account, and provide features of our organisation management platform.</li>
                 <li><strong>For Communication:</strong> To send updates, maintenance notifications, and customer support communication.</li>
                 <li><strong>For Legal and Compliance:</strong> To comply with applicable laws and regulations, including data protection laws in India.</li>
                 <li><strong>To Improve Our Services:</strong> To analyze usage patterns and improve our platform's performance.</li>
