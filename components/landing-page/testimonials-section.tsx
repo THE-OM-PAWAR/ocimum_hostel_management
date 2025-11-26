@@ -61,9 +61,9 @@ export function TestimonialsSection() {
                   />
                 ))}
               </div>
-              <hostelquote className="text-lg mb-4 italic">
+              <blockquote className="text-lg mb-4 italic">
                 "{testimonial.testimonial}"
-              </hostelquote>
+              </blockquote>
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
                   <span className="text-sm font-medium">

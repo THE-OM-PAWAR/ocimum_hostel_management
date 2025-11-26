@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { HostelProfile } from "@/lib/mongoose/models/organisation-profile.model";
+import { HostelProfile } from "@/lib/mongoose/models/hostel-profile.model";
+import "@/lib/mongoose/models/hostel.model";
 import { OrganisationProfile } from "@/lib/mongoose/models/organisation-profile.model";
 import { Hostel } from "@/lib/mongoose/models/hostel.model";
 import connectDB from "@/lib/mongodb/client";
