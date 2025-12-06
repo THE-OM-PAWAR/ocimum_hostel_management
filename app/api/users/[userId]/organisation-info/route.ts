@@ -3,7 +3,6 @@ import connectDB from "@/lib/mongodb/client";
 // Import models to ensure they are registered with mongoose
 import "@/lib/mongoose/models/hostel.model";
 import "@/lib/mongoose/models/organisation.model";
-import "@/lib/mongoose/models/organisation-profile.model";
 import { User } from "@/lib/mongoose/models/user.model";
 
 export async function GET(
@@ -33,6 +32,7 @@ export async function GET(
       organisationName: organisation.name,
       organisationId: organisation._id,
       joinCode: organisation.joinCode,
+      isOnlinePresenceEnabled: organisation.isOnlinePresenceEnabled || true,
       userRole: user.role,
     });
   } catch (error) {

@@ -127,7 +127,6 @@ export default function DashboardPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isCreateRoomTypeDialogOpen, setIsCreateRoomTypeDialogOpen] = useState(false);
   const [pendingUsersCount, setPendingUsersCount] = useState(0);
-  const [hasOrganisationProfile, setHasOrganisationProfile] = useState(false);
   const [hasHostelProfiles, setHasHostelProfiles] = useState(false);
 
   const fetchHostels = async () => {

@@ -7,7 +7,15 @@ import { Hostel } from "@/lib/mongoose/models/hostel.model";
 
 export async function POST(req: Request) {
   try {
-    const { organisationName, ownerName, phoneNumber, userId, email } = await req.json();
+    const { 
+      organisationName, 
+      ownerName, 
+      phoneNumber, 
+      userId, 
+      email,
+      hostelName,
+      description 
+    } = await req.json();
     
     if (!userId || !organisationName || !email || !ownerName || !phoneNumber) {
       return NextResponse.json(
@@ -15,6 +23,9 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    // Use hostelName if provided, otherwise use organisationName
+    const finalHostelName = hostelName || organisationName;
 
     await connectDB();
     
@@ -27,7 +38,8 @@ export async function POST(req: Request) {
       );
     }
 
-    // Create or update user
+    // Create or update user with all information
+    // IMPORTANT: isOnboarded remains false - more onboarding steps will be added later
     let user;
     if (existingUser) {
       user = await User.findByIdAndUpdate(existingUser._id, {
@@ -35,7 +47,7 @@ export async function POST(req: Request) {
         phoneNumber,
         email,
         role: 'admin',
-        isOnboarded: false,
+        isOnboarded: false, // Keep false - onboarding not complete yet
       }, { new: true });
     } else {
       user = await User.create({
@@ -44,7 +56,7 @@ export async function POST(req: Request) {
         ownerName,
         phoneNumber,
         role: 'admin',
-        isOnboarded: false,
+        isOnboarded: false, // Keep false - onboarding not complete yet
       });
     }
 
@@ -79,21 +91,22 @@ export async function POST(req: Request) {
       }],
     });
 
-    // Update user with organisation reference and mark as onboarded
+    // Update user with organisation reference
+    // IMPORTANT: isOnboarded remains false - there are 2-3 more onboarding forms remaining
     await User.findByIdAndUpdate(user._id, {
       organisation: organisation._id,
       role: 'admin',
-      isOnboarded: true,
+      isOnboarded: false, // Keep false - onboarding not complete yet (2-3 more steps remaining)
     });
 
-    // Create default hostel for the organisation
+    // Create hostel for the organisation (saved to database)
     const hostel = await Hostel.create({
-      name: organisationName,
-      description: `Main hostel for ${organisationName}`,
+      name: finalHostelName,
+      description: description || `Main hostel for ${organisationName}`,
       organisation: organisation._id,
     });
 
-    // Add the hostel to admin's assignedHostels array
+    // Add the hostel to admin's assignedHostels array (saved to database)
     await User.findByIdAndUpdate(user._id, {
       $addToSet: { assignedHostels: hostel._id }
     });
@@ -127,8 +140,10 @@ export async function POST(req: Request) {
       )
     );
     
+    // All data has been saved: User, Organisation, Hostel, Room Components
+    // But isOnboarded remains false - more onboarding steps will follow
     return NextResponse.json({
-      message: "Organisation created successfully",
+      message: "Organisation and hostel created successfully. Onboarding continues...",
       organisation: {
         id: organisation._id,
         name: organisation.name,
@@ -139,6 +154,7 @@ export async function POST(req: Request) {
         name: hostel.name,
       },
       componentsCreated: createdComponents.length,
+      isOnboarded: false, // Explicitly return false to confirm onboarding is not complete
     });
   } catch (error) {
     console.error("Error in organisation creation:", error);

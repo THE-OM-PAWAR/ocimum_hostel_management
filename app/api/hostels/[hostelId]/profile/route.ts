@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { HostelProfile } from "@/lib/mongoose/models/hostel-profile.model";
 import "@/lib/mongoose/models/hostel.model";
-import { OrganisationProfile } from "@/lib/mongoose/models/organisation-profile.model";
 import { Hostel } from "@/lib/mongoose/models/hostel.model";
 import connectDB from "@/lib/mongodb/client";
 
@@ -42,43 +41,33 @@ export async function PUT(
     let profile = await HostelProfile.findOne({ hostel: params.hostelId });
 
     if (!profile) {
-      // If profile doesn't exist, create new one with organisation data as fallback
-      const hostel = await Hostel.findById(params.hostelId).populate('organisation');
-      let organisationProfile = null;
+      // If profile doesn't exist, create new one
+      const hostel = await Hostel.findById(params.hostelId);
       
-      if (hostel && hostel.organisation) {
-        try {
-          organisationProfile = await OrganisationProfile.findOne({ organisation: hostel.organisation });
-        } catch (error) {
-          console.log("No organisation profile found");
-        }
-      }
-      
-      // Merge organisation profile data with hostel profile data
       const mergedData = {
         ...profileData,
         hostel: params.hostelId,
         basicInfo: {
           name: profileData.basicInfo?.name || hostel?.name || "",
           description: profileData.basicInfo?.description || "",
-          address: profileData.basicInfo?.address || organisationProfile?.basicInfo?.address || "",
-          landmark: profileData.basicInfo?.landmark || organisationProfile?.basicInfo?.landmark || "",
-          city: profileData.basicInfo?.city || organisationProfile?.basicInfo?.city || "",
-          state: profileData.basicInfo?.state || organisationProfile?.basicInfo?.state || "",
-          pincode: profileData.basicInfo?.pincode || organisationProfile?.basicInfo?.pincode || "",
-          contactNumber: profileData.basicInfo?.contactNumber || organisationProfile?.basicInfo?.contactNumber || "",
-          email: profileData.basicInfo?.email || organisationProfile?.basicInfo?.email || "",
+          address: profileData.basicInfo?.address || "",
+          landmark: profileData.basicInfo?.landmark || "",
+          city: profileData.basicInfo?.city || "",
+          state: profileData.basicInfo?.state || "",
+          pincode: profileData.basicInfo?.pincode || "",
+          contactNumber: profileData.basicInfo?.contactNumber || "",
+          email: profileData.basicInfo?.email || "",
         },
         propertyDetails: {
           totalFloors: profileData.propertyDetails?.totalFloors || 1,
           totalRooms: profileData.propertyDetails?.totalRooms || 1,
-          accommodationType: profileData.propertyDetails?.accommodationType || organisationProfile?.propertyDetails?.type || 'boys',
+          accommodationType: profileData.propertyDetails?.accommodationType || 'boys',
           establishedYear: profileData.propertyDetails?.establishedYear || new Date().getFullYear(),
           buildingType: profileData.propertyDetails?.buildingType || 'independent',
         },
         locationInfo: {
-          googleMapLink: profileData.locationInfo?.googleMapLink || organisationProfile?.locationFactors?.googleMapLink || "",
-          nearbyLandmarks: profileData.locationInfo?.nearbyLandmarks || organisationProfile?.locationFactors?.nearbyLandmarks || [],
+          googleMapLink: profileData.locationInfo?.googleMapLink || "",
+          nearbyLandmarks: profileData.locationInfo?.nearbyLandmarks || [],
           transportConnectivity: profileData.locationInfo?.transportConnectivity || [],
         },
         amenities: profileData.amenities || [],
@@ -129,43 +118,33 @@ export async function POST(
       );
     }
 
-    // Get organisation data to pre-populate hostel profile
-    const hostel = await Hostel.findById(params.hostelId).populate('organisation');
-    let organisationProfile = null;
+    // Create hostel profile
+    const hostel = await Hostel.findById(params.hostelId);
     
-    if (hostel && hostel.organisation) {
-      try {
-        organisationProfile = await OrganisationProfile.findOne({ organisation: hostel.organisation });
-      } catch (error) {
-        console.log("No organisation profile found");
-      }
-    }
-    
-    // Merge organisation profile data with hostel profile data
     const mergedData = {
       ...profileData,
       hostel: params.hostelId,
       basicInfo: {
         name: profileData.basicInfo?.name || hostel?.name || "",
         description: profileData.basicInfo?.description || "",
-        address: profileData.basicInfo?.address || organisationProfile?.basicInfo?.address || "",
-        landmark: profileData.basicInfo?.landmark || organisationProfile?.basicInfo?.landmark || "",
-        city: profileData.basicInfo?.city || organisationProfile?.basicInfo?.city || "",
-        state: profileData.basicInfo?.state || organisationProfile?.basicInfo?.state || "",
-        pincode: profileData.basicInfo?.pincode || organisationProfile?.basicInfo?.pincode || "",
-        contactNumber: profileData.basicInfo?.contactNumber || organisationProfile?.basicInfo?.contactNumber || "",
-        email: profileData.basicInfo?.email || organisationProfile?.basicInfo?.email || "",
+        address: profileData.basicInfo?.address || "",
+        landmark: profileData.basicInfo?.landmark || "",
+        city: profileData.basicInfo?.city || "",
+        state: profileData.basicInfo?.state || "",
+        pincode: profileData.basicInfo?.pincode || "",
+        contactNumber: profileData.basicInfo?.contactNumber || "",
+        email: profileData.basicInfo?.email || "",
       },
       propertyDetails: {
         totalFloors: profileData.propertyDetails?.totalFloors || 1,
         totalRooms: profileData.propertyDetails?.totalRooms || 1,
-        accommodationType: profileData.propertyDetails?.accommodationType || organisationProfile?.propertyDetails?.type || 'boys',
+        accommodationType: profileData.propertyDetails?.accommodationType || 'boys',
         establishedYear: profileData.propertyDetails?.establishedYear || new Date().getFullYear(),
         buildingType: profileData.propertyDetails?.buildingType || 'independent',
       },
       locationInfo: {
-        googleMapLink: profileData.locationInfo?.googleMapLink || organisationProfile?.locationFactors?.googleMapLink || "",
-        nearbyLandmarks: profileData.locationInfo?.nearbyLandmarks || organisationProfile?.locationFactors?.nearbyLandmarks || [],
+        googleMapLink: profileData.locationInfo?.googleMapLink || "",
+        nearbyLandmarks: profileData.locationInfo?.nearbyLandmarks || [],
         transportConnectivity: profileData.locationInfo?.transportConnectivity || [],
       },
       amenities: profileData.amenities || [],

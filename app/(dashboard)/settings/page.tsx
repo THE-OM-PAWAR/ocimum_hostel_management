@@ -388,14 +388,7 @@ export default function SettingsPage() {
               <h3 className="font-medium">Online Presence</h3>
               <p className="text-sm text-muted-foreground">Manage your organisation's online profile and visibility</p>
             </div>
-            <Button
-              onClick={() => router.push('/settings/organisation-profile')}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <Globe className="h-4 w-4" />
-              Manage Profile
-            </Button>
+            {/* Organisation Profile feature removed - isOnlinePresenceEnabled is now in Organisation model */}
           </div>
           
           <div className="flex items-center justify-between">
