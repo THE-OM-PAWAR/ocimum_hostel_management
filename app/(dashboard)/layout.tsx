@@ -24,7 +24,6 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
-import { OnboardingDialog } from "@/components/onboarding-dialog";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { PWAInstallPrompt } from "@/components/pwa-install-prompt";
 import { NotificationButton } from "@/components/notification-button";
@@ -206,6 +205,28 @@ export default function DashboardLayout({
     fetchTitle();
   }, [pathname, user?.id]);
 
+  // Check onboarding status and redirect if needed
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      if (!user?.id || pathname === '/onboarding') return;
+      
+      try {
+        const response = await fetch(`/api/users/${user.id}/onboarding-status`);
+        const data = await response.json();
+        
+        if (!data.isOnboarded) {
+          router.push('/onboarding');
+        }
+      } catch (error) {
+        console.error('Error checking onboarding status:', error);
+      }
+    };
+
+    if (user?.id) {
+      checkOnboarding();
+    }
+  }, [user?.id, pathname, router]);
+
   const handleLogout = () => {
     signOut(() => {
       router.push(`/`);
@@ -359,7 +380,6 @@ export default function DashboardLayout({
         </DrawerContent>
       </Drawer>
 
-      <OnboardingDialog />
       <PWAInstallPrompt />
     </div>
   );

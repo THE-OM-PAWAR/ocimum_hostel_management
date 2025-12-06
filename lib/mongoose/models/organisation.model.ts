@@ -12,6 +12,7 @@ export interface IOrganisation extends Document {
   owner: mongoose.Types.ObjectId;
   users: OrganisationUser[];
   joinCode: string;
+  isOnlinePresenceEnabled: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -55,6 +56,10 @@ const organisationSchema = new Schema<IOrganisation>(
       type: String,
       unique: true,
       required: true,
+    },
+    isOnlinePresenceEnabled: {
+      type: Boolean,
+      default: true,
     },
   },
   {

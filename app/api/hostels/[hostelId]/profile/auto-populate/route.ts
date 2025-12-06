@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { OrganisationProfile } from "@/lib/mongoose/models/organisation-profile.model";
 import { Hostel } from "@/lib/mongoose/models/hostel.model";
 import connectDB from "@/lib/mongodb/client";
 
@@ -10,63 +9,45 @@ export async function GET(
   try {
     await connectDB();
 
-    // Get hostel and its organisation
-    const hostel = await Hostel.findById(params.hostelId).populate('organisation');
-    if (!hostel || !hostel.organisation) {
+    // Get hostel
+    const hostel = await Hostel.findById(params.hostelId);
+    if (!hostel) {
       return NextResponse.json(
-        { error: "Hostel or organisation not found" },
+        { error: "Hostel not found" },
         { status: 404 }
       );
     }
 
-    // Get organisation profile
-    const organisationProfile = await OrganisationProfile.findOne({ organisation: hostel.organisation });
-    if (!organisationProfile) {
-      return NextResponse.json(
-        { error: "Organisation profile not found" },
-        { status: 404 }
-      );
-    }
-
-    // Create hostel profile structure with organisation data
+    // Create default hostel profile structure
     const hostelProfileData = {
       basicInfo: {
         name: hostel.name,
         description: "",
-        address: organisationProfile.basicInfo.address,
-        landmark: organisationProfile.basicInfo.landmark,
-        city: organisationProfile.basicInfo.city,
-        state: organisationProfile.basicInfo.state || "",
-        pincode: organisationProfile.basicInfo.pincode,
-        contactNumber: organisationProfile.basicInfo.contactNumber,
-        email: organisationProfile.basicInfo.email,
+        address: "",
+        landmark: "",
+        city: "",
+        state: "",
+        pincode: "",
+        contactNumber: "",
+        email: "",
       },
       propertyDetails: {
         totalFloors: 1,
         totalRooms: 1,
-        accommodationType: organisationProfile.propertyDetails.type,
+        accommodationType: 'boys' as const,
         establishedYear: new Date().getFullYear(),
         buildingType: 'independent' as const,
       },
       locationInfo: {
-        googleMapLink: organisationProfile.locationFactors.googleMapLink || "",
-        nearbyLandmarks: organisationProfile.locationFactors.nearbyLandmarks.map(landmark => ({
-          name: landmark.name,
-          distance: landmark.distance,
-          type: 'other' as const,
-        })),
+        googleMapLink: "",
+        nearbyLandmarks: [],
         transportConnectivity: [],
       },
       media: {
         photos: [],
         virtualTourLink: "",
       },
-      amenities: organisationProfile.propertyDetails.facilities.map(facility => ({
-        name: facility.name,
-        available: facility.available,
-        description: facility.details || "",
-        floor: "",
-      })),
+      amenities: [],
       safetyFeatures: [
         { feature: "CCTV Surveillance", available: false, details: "" },
         { feature: "Security Guard", available: false, details: "" },
