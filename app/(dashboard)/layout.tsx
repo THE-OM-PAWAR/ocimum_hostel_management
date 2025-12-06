@@ -299,7 +299,7 @@ export default function DashboardLayout({
                 )}
               />
             </Button> 
-            <div className="px-4 hidden md:hostel">
+            <div className="px-4 hidden md:flex">
               <Breadcrumbs />
             </div>
             {/* Mobile Header */}
